@@ -641,6 +641,36 @@ html.pko-lock,html.pko-lock body{overflow:hidden}
 .pko-ok{flex:none;opacity:0;pointer-events:none;margin-top:6px;height:44px;padding:0 30px;border-radius:999px;border:0;background:var(--cyan);color:#04141a;font:700 15px/1 var(--b);letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 0 18px -4px var(--cyan)}
 .pko-ok:active{transform:scale(.97)}
 @media(prefers-reduced-motion:reduce){.pko-t,.pko.live .pko-shine{animation:none}}
+
+/* ===== Efectos por rareza del cromo (los comunes quedan tal cual) ===== */
+.pko-edge,.pko-nr,.pko-holo{position:absolute;left:0;top:0;pointer-events:none;opacity:0}
+.pko-edge,.pko-holo{right:0;bottom:0}
+.pko-edge{border-radius:6%/4.3%;box-shadow:inset 0 0 0 1.5px var(--rc),inset 0 0 16px 2px color-mix(in srgb,var(--rc) 75%,transparent)}
+.pko-nr{width:100%;height:100%;overflow:visible}
+.pko-nr rect{fill:none;stroke-linecap:round;stroke-dasharray:20 80;animation:pkoDash 2.8s linear infinite}
+.pko-nr .g{stroke:var(--rc);stroke-width:2.6;opacity:.55}
+.pko-nr .c{stroke:var(--rc2);stroke-width:1.1}
+.pko.r-leg .pko-nr rect{stroke-dasharray:26 74}
+.pko.r-leg .pko-nr .g{stroke-width:3.4}
+.pko.r-leg .pko-nr .c{stroke:#fff;stroke-width:1.4}
+@keyframes pkoDash{to{stroke-dashoffset:-100}}
+.pko.live .pko-edge{opacity:1;animation:pkoPulse 1.8s ease-in-out infinite}
+.pko.live .pko-nr{opacity:1}
+@keyframes pkoPulse{0%,100%{opacity:.5}50%{opacity:1}}
+.pko.live.r-rar .pko-front,.pko.live.r-epi .pko-front{animation:pkoGlowN 2s ease-in-out infinite}
+@keyframes pkoGlowN{0%,100%{box-shadow:0 0 20px -2px var(--rc)}50%{box-shadow:0 0 46px 3px var(--rc)}}
+.pko-fxo{position:absolute;inset:-12%;pointer-events:none;-webkit-backface-visibility:hidden;backface-visibility:hidden;transform:translateZ(1px);-webkit-transform:translateZ(1px)}
+.pko-fxo canvas{width:100%;height:100%;display:block}
+/* legendario: foil holográfico que sigue al dedo, doble brillo dorado y borde más grueso */
+.pko-holo{mix-blend-mode:overlay;
+  background:linear-gradient(115deg,transparent 16%,rgba(255,60,170,.8) 29%,rgba(255,210,60,.85) 40%,rgba(60,255,200,.8) 51%,rgba(90,130,255,.85) 62%,transparent 76%);
+  background-size:260% 260%;background-position:var(--gx,50%) var(--gy,50%)}
+.pko.live .pko-holo{opacity:.7;animation:pkoHolo 5s ease-in-out infinite}
+.pko-tilt.drag .pko-holo{animation:none}
+@keyframes pkoHolo{0%,100%{background-position:0% 20%}50%{background-position:100% 80%}}
+.pko.live.r-leg .pko-front{animation:pkoGlowL 1.7s ease-in-out infinite}
+@keyframes pkoGlowL{0%,100%{box-shadow:0 0 30px 0 var(--rc),0 0 70px 4px color-mix(in srgb,var(--rc) 40%,transparent)}50%{box-shadow:0 0 52px 6px var(--rc),0 0 120px 18px color-mix(in srgb,var(--rc) 55%,transparent)}}
+@media(prefers-reduced-motion:reduce){.pko-edge,.pko-nr,.pko-holo,.pko .pko-front{animation:none!important}}
 /* ===== Vitrina de trofeos (expositor 3D de cristal, sin marcos por trofeo) ===== */
 .vt{position:relative;width:100%;aspect-ratio:88/105;margin:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 .vt-w{position:absolute;inset:0}
@@ -2721,7 +2751,8 @@ const SFX = (() => {
         const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
         ac = new AC();
         const comp = ac.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 6;
-        out = ac.createGain(); out.gain.value = .85; out.connect(comp); comp.connect(ac.destination);
+        out = ac.createGain(); out.gain.value = .85; out.connect(comp);
+        const master = ac.createGain(); master.gain.value = .5; comp.connect(master); master.connect(ac.destination);   // volumen general al 50 %
       }
       if (ac.state === "suspended") ac.resume();
       return true;
@@ -2767,10 +2798,14 @@ const SFX = (() => {
       tone(95, 0, .55, { to: 38, v: .6, a: .004 });
       sparkles(.05, 8, .6, .06);
     },
-    emerge() {   // el cromo sube flotando
-      tone(190, 0, 2.5, { to: 620, v: .07, a: 1.6 });
-      noise(0, 2.5, { f0: 400, f1: 2600, q: 2, v: .05, a: 1.5 });
-      sparkles(.4, 10, 2, .04);
+    emerge(d) {   // el cromo sube de espaldas: ambiente de misterio que crece y se corta justo al girar
+      d = d || 3.5;
+      tone(55, 0, d, { v: .13, a: d * .8 }); tone(55.8, 0, d, { v: .1, a: d * .8 });          // zumbido grave, ligeramente desafinado
+      tone(110, .3, d - .3, { v: .05, a: d * .75 }); tone(116.5, .3, d - .3, { v: .04, a: d * .75 });   // segunda menor: inquietante
+      tone(330, .6, d - .6, { to: 392, v: .035, a: d * .8 });                                   // tono fantasmal que sube despacio
+      noise(0, d, { f0: 180, f1: 750, q: 3, v: .07, a: d * .8 });                               // respiración grave
+      let t = .55, gap = .95;   // latido sordo que se acelera
+      while (t < d - .35) { tone(72, t, .2, { to: 40, v: .3, a: .005 }); tone(64, t + .18, .22, { to: 38, v: .2, a: .005 }); t += gap; gap = Math.max(.55, gap - .06); }
     },
     reveal(k, soft) {   // giro del cromo: la fanfarria depende de la rareza
       const m = soft ? .55 : 1;
@@ -2790,9 +2825,99 @@ const SFX = (() => {
         sparkles(t, 22, 2, .06 * m);
       }
     },
-    view(k) { SFX.reveal(k, true); }
+    view() {   // sonido de carta: roce de papel + chasquido seco + golpecito al posarse (al 50 % de volumen)
+      const m = .5;
+      noise(0, .16, { f0: 2200, f1: 6500, q: 1.2, v: .22 * m, a: .02 });                 // deslizamiento
+      noise(.12, .05, { type: "highpass", f0: 3500, v: .3 * m, a: .002 });                // chasquido
+      tone(150, .13, .09, { to: 85, v: .25 * m, a: .003 });                                // se posa
+      noise(.14, .07, { f0: 900, f1: 500, q: 1, v: .12 * m, a: .003 });
+    }
   };
 })();
+
+// ===== Marco animado del cromo: rayos (épico) y cometas, brasas y estrellas (legendario) =====
+const ring = k => {   // luz que recorre el borde (SVG: se ve igual en todos los navegadores)
+  let r = ""; for (let i = 0; i < (k === "rar" ? 1 : 2); i++) r += ["g", "c"].map(cl => `<rect class="${cl}" x=".6" y=".6" width="98.8" height="140.8" rx="6" ry="6.1" pathLength="100" style="animation-delay:-${i * 1.4}s"/>`).join("");
+  return `<svg class="pko-nr" viewBox="0 0 100 142" aria-hidden="true">${r}</svg>`;
+};
+const PKF = {
+  front: k => k === "com" ? "" : `<div class="pko-edge"></div>` + ring(k) + (k === "leg" ? `<div class="pko-holo"></div>` : ""),
+  outer: k => (k === "epi" || k === "leg") ? `<div class="pko-fxo"><canvas></canvas></div>` : ""
+};
+function pkoFrame(cv, k, R) {
+  if (!cv || (k !== "epi" && k !== "leg")) return { stop() {} };
+  const ctx = cv.getContext("2d"), dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let W = 0, H = 0, cw = 0, ch = 0, x0 = 0, y0 = 0, run = true, last = performance.now();
+  const fit = () => { W = cv.clientWidth; H = cv.clientHeight; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); cw = W / 1.24; ch = H / 1.24; x0 = (W - cw) / 2; y0 = (H - ch) / 2; };
+  fit(); window.addEventListener("resize", fit);
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const per = t => {   // punto del borde del cromo (t de 0 a 1 da la vuelta) y su normal hacia fuera
+    const P = 2 * (cw + ch); let d = (((t % 1) + 1) % 1) * P;
+    if (d < cw) return { x: x0 + d, y: y0, nx: 0, ny: -1 };
+    d -= cw; if (d < ch) return { x: x0 + cw, y: y0 + d, nx: 1, ny: 0 };
+    d -= ch; if (d < cw) return { x: x0 + cw - d, y: y0 + ch, nx: 0, ny: 1 };
+    d -= cw; return { x: x0, y: y0 + ch - d, nx: -1, ny: 0 };
+  };
+  const bolts = [], emb = [], stars = [];
+  const bolt = () => {   // rayo: sale del marco hacia fuera, o recorre el borde
+    const pts = [], along = Math.random() < .45, t = Math.random(), p = per(t);
+    if (along) {
+      const len = rnd(.08, .2), n = 14;
+      for (let i = 0; i <= n; i++) { const q = per(t + len * i / n), o = rnd(2, 15) * (i % 2 ? 1 : .4); pts.push([q.x + q.nx * o, q.y + q.ny * o]); }
+    } else {
+      const L = rnd(.09, .2) * cw, n = 8; let x = p.x - p.nx * 2, y = p.y - p.ny * 2;
+      pts.push([x, y]);
+      for (let i = 1; i <= n; i++) { const j = rnd(-1, 1) * L * .22; x += p.nx * L / n + p.ny * j; y += p.ny * L / n + p.nx * j; pts.push([x, y]); }
+    }
+    bolts.push({ pts, age: 0, life: rnd(.14, .32), w: rnd(1, 1.7) });
+  };
+  const star = () => { stars.push({ x: x0 + rnd(.1, .9) * cw, y: y0 + rnd(.08, .92) * ch, age: 0, life: rnd(.6, 1.1), s: rnd(7, 15) }); };
+  let acB = 0, acE = 0, acS = 0, ph = 0;
+  (function loop(now) {
+    if (!run) return;
+    const dt = Math.min((now - last) / 1000, .05); last = now;
+    ctx.clearRect(0, 0, W, H); ctx.globalCompositeOperation = "lighter"; ctx.lineJoin = "round"; ctx.lineCap = "round";
+    if (k === "epi") {
+      acB += dt * 11; while (acB >= 1) { acB--; bolt(); if (Math.random() < .5) bolt(); }
+      for (let i = bolts.length - 1; i >= 0; i--) {
+        const b = bolts[i]; b.age += dt; if (b.age >= b.life) { bolts.splice(i, 1); continue; }
+        const a = (1 - b.age / b.life) * (Math.random() < .25 ? .35 : 1);
+        ctx.beginPath(); b.pts.forEach((q, j) => j ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]));
+        ctx.strokeStyle = R.c1; ctx.globalAlpha = a * .6; ctx.lineWidth = 8 * b.w; ctx.stroke();
+        ctx.strokeStyle = R.c2; ctx.globalAlpha = a; ctx.lineWidth = 2.2 * b.w; ctx.stroke();
+      }
+    } else {
+      ph += dt * .26;
+      for (const off of [0, .5]) {   // dos cometas dorados dando vueltas al marco
+        for (let i = 0; i < 26; i++) {
+          const q = per(ph + off - i * .0055), f = 1 - i / 26;
+          ctx.globalAlpha = f * .9; ctx.fillStyle = i < 2 ? "#fff" : i < 8 ? R.c2 : R.c1;
+          ctx.beginPath(); ctx.arc(q.x + q.nx * 2, q.y + q.ny * 2, 1.2 + 3.6 * f, 0, 6.2832); ctx.fill();
+        }
+        const h = per(ph + off); ctx.globalAlpha = .35; ctx.fillStyle = R.c1; ctx.beginPath(); ctx.arc(h.x, h.y, 11, 0, 6.2832); ctx.fill();
+      }
+      acE += dt * 46; while (acE >= 1) { acE--; const q = per(Math.random()); emb.push({ x: q.x + q.nx * rnd(0, 8), y: q.y + q.ny * rnd(0, 8), vx: rnd(-14, 14), vy: -rnd(26, 90), age: 0, life: rnd(1.2, 2.3), r: rnd(.9, 2.5) }); }
+      for (let i = emb.length - 1; i >= 0; i--) {
+        const e = emb[i]; e.age += dt; if (e.age >= e.life) { emb.splice(i, 1); continue; }
+        e.x += e.vx * dt; e.y += e.vy * dt; const f = e.age / e.life;
+        ctx.globalAlpha = Math.sin(Math.PI * f) * .9; ctx.fillStyle = f < .4 ? "#fff" : R.c1;
+        ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, 6.2832); ctx.fill();
+      }
+      acS += dt * 3.2; while (acS >= 1) { acS--; star(); }
+      for (let i = stars.length - 1; i >= 0; i--) {   // destellos de cuatro puntas sobre el cromo
+        const s = stars[i]; s.age += dt; if (s.age >= s.life) { stars.splice(i, 1); continue; }
+        const f = Math.sin(Math.PI * s.age / s.life), r = s.s * f;
+        ctx.globalAlpha = f; ctx.fillStyle = "#fff";
+        ctx.beginPath(); ctx.moveTo(s.x, s.y - r); ctx.lineTo(s.x + r * .13, s.y - r * .13); ctx.lineTo(s.x + r, s.y); ctx.lineTo(s.x + r * .13, s.y + r * .13);
+        ctx.lineTo(s.x, s.y + r); ctx.lineTo(s.x - r * .13, s.y + r * .13); ctx.lineTo(s.x - r, s.y); ctx.lineTo(s.x - r * .13, s.y - r * .13); ctx.closePath(); ctx.fill();
+        ctx.globalAlpha = f * .35; ctx.fillStyle = R.c1; ctx.beginPath(); ctx.arc(s.x, s.y, r * .8, 0, 6.2832); ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
+    requestAnimationFrame(loop);
+  })(last);
+  return { stop() { run = false; window.removeEventListener("resize", fit); ctx.clearRect(0, 0, W, H); } };
+}
 
 const pkoSleep = ms => new Promise(r => setTimeout(r, ms));
 let abriendo = false;
@@ -2808,7 +2933,7 @@ async function abrirSobre() {
   const R = RAREZA[c.k];
   const reduce = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
   const o = document.createElement("div");
-  o.id = "pko"; o.className = "pko"; o.setAttribute("role", "dialog"); o.setAttribute("aria-modal", "true"); o.setAttribute("aria-label", "Apertura de sobre");
+  o.id = "pko"; o.className = "pko r-" + c.k; o.setAttribute("role", "dialog"); o.setAttribute("aria-modal", "true"); o.setAttribute("aria-label", "Apertura de sobre");
   const ESC = ["com", "rar", "epi", "leg"], pasos = ESC.slice(0, ESC.indexOf(c.k) + 1).map(k => RAREZA[k]);   // gris → azul → morado → dorado, hasta la rareza que toca
   o.style.setProperty("--rc", pasos[0].c1); o.style.setProperty("--rc2", pasos[0].c2);
   o.innerHTML = `<div class="pko-stage">
@@ -2818,7 +2943,7 @@ async function abrirSobre() {
       <div class="pko-pack"><div class="pko-pk"><img class="pb" src="${PACK_IMG}" alt=""><img class="pt" src="${PACK_IMG}" alt=""></div></div>
       <div class="pko-card"><div class="pko-float"><div class="pko-tilt"><div class="pko-flip">
         <div class="pko-f pko-back"><img src="${CROMO_DORSO}" alt="Dorso del cromo"></div>
-        <div class="pko-f pko-front"><img src="${cromoImg(c)}" alt="Cromo ${c.n}: ${c.nombre}, ${R.n}"><div class="pko-shine"></div><div class="pko-glare"></div></div>
+        <div class="pko-f pko-front"><img src="${cromoImg(c)}" alt="Cromo ${c.n}: ${c.nombre}, ${R.n}"><div class="pko-shine"></div><div class="pko-glare"></div>${PKF.front(c.k)}</div>${PKF.outer(c.k)}
       </div></div></div></div>
       <div class="pko-flash"></div>
     </div>
@@ -2838,7 +2963,7 @@ async function abrirSobre() {
   const timers = [];
   const setCol = X => { o.style.setProperty("--rc", X.c1); o.style.setProperty("--rc2", X.c2); fx.colors(X.c1, X.c2); };
   fx.colors(pasos[0].c1, pasos[0].c2);
-  let alive = true, ready = false;
+  let alive = true, ready = false, fr = null;
   const mid = () => { const r = stage.getBoundingClientRect(); fx.center(r.left + r.width / 2, r.top + r.height / 2); };
   const anim = (el, kf, ms, opt) => el.animate(kf, Object.assign({ duration: ms, fill: "both", easing: "ease-out" }, opt || {}));
   const vib = p => { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} };
@@ -2846,7 +2971,7 @@ async function abrirSobre() {
   const cerrar = () => {
     if (!alive) return; alive = false;
     timers.forEach(t => { clearTimeout(t); clearInterval(t); });
-    fx.stop(); o.classList.add("out");
+    fx.stop(); if (fr) fr.stop(); o.classList.add("out");
     window.removeEventListener("keydown", onKey);
     setTimeout(() => { o.remove(); document.documentElement.classList.remove("pko-lock"); abriendo = false; renderSobres(); }, 320);
   };
@@ -2862,13 +2987,14 @@ async function abrirSobre() {
     const ny = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (r.height * .75)));
     tilt.classList.add("drag");
     tilt.style.transform = `rotateX(${(-ny * 16).toFixed(1)}deg) rotateY(${(nx * 18).toFixed(1)}deg)`;
-    glare.style.setProperty("--gx", ((nx + 1) * 50).toFixed(0) + "%"); glare.style.setProperty("--gy", ((ny + 1) * 50).toFixed(0) + "%");
+    glare.style.setProperty("--gx", ((nx + 1) * 50).toFixed(0) + "%"); glare.style.setProperty("--gy", ((ny + 1) * 50).toFixed(0) + "%"); tilt.style.setProperty("--gx", ((nx + 1) * 50).toFixed(0) + "%"); tilt.style.setProperty("--gy", ((ny + 1) * 50).toFixed(0) + "%");
   };
   const soltar = () => { tilt.classList.remove("drag"); tilt.style.transform = ""; };
   ["pointermove", "pointerdown"].forEach(ev => o.addEventListener(ev, mover));
   ["pointerup", "pointercancel", "pointerleave"].forEach(ev => o.addEventListener(ev, soltar));
 
   const final = () => {   // estado final: título, texto, botón, brillo y flotación
+    if (!fr && !reduce) fr = pkoFrame(q(".pko-fxo canvas"), c.k, R);
     anim(tt, [{ opacity: 0, transform: "translateY(-14px) scale(1.4)" }, { opacity: 1, transform: "none" }], 650, { easing: "cubic-bezier(.2,1.4,.4,1)" });
     anim(ts, [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], 600, { delay: 220 });
     o.classList.add("live");
@@ -2924,7 +3050,7 @@ async function abrirSobre() {
     await pkoSleep(120);
 
     // 4) el cromo sale del sobre, boca abajo, con el aura de su rareza
-    SFX.emerge();
+    SFX.emerge(3.5);
     anim(card, [{ opacity: 0, transform: "translateY(6%) scale(.45)" }, { opacity: 1, transform: "translateY(-2%) scale(1.02)", offset: .7 }, { opacity: 1, transform: "none" }], 2500, { easing: "cubic-bezier(.2,.8,.25,1)" });
     // el cromo (aún de espaldas) se balancea en 3D mientras sube y espera
     const sway = tilt.animate([{ transform: "rotateY(-9deg) rotateX(3deg)" }, { transform: "rotateY(9deg) rotateX(-3deg)" }, { transform: "rotateY(-9deg) rotateX(3deg)" }], { duration: 3400, iterations: Infinity, easing: "ease-in-out" });
@@ -2940,6 +3066,13 @@ async function abrirSobre() {
     const giro = anim(flip, [{ transform: "rotateY(180deg)" }, { transform: "rotateY(0deg)" }], 950, { easing: "cubic-bezier(.35,.05,.2,1)" });
     timers.push(setTimeout(() => {
       mid(); fx.burst(110, 620, 70);
+      if (c.k === "leg") {   // entrada legendaria: más chispas, onda extra y temblor de pantalla
+        fx.burst(170, 820, 120);
+        const sk = []; for (let n = 0; n <= 16; n++) { const d = 1 - n / 16; sk.push({ transform: `translate(${((Math.random() * 2 - 1) * 9 * d).toFixed(1)}px,${((Math.random() * 2 - 1) * 9 * d).toFixed(1)}px)` }); }
+        anim(stage, sk, 620, { easing: "linear" });
+        anim(ring, [{ opacity: .9, transform: "scale(.3)" }, { opacity: 0, transform: "scale(4.4)" }], 1300, { easing: "cubic-bezier(.1,.7,.2,1)", delay: 160 });
+        vib([60, 40, 140]);
+      }
       anim(ring, [{ opacity: .9, transform: "scale(.4)" }, { opacity: 0, transform: "scale(3)" }], 900, { easing: "cubic-bezier(.1,.7,.2,1)" });
       anim(flash, [{ opacity: 0 }, { opacity: .55, offset: .15 }, { opacity: 0 }], 700);
     }, 430));
@@ -2960,14 +3093,14 @@ function verCromo(n) {
   const R = RAREZA[c.k];
   const reduce = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
   const o = document.createElement("div");
-  o.id = "pko"; o.className = "pko live"; o.setAttribute("role", "dialog"); o.setAttribute("aria-modal", "true"); o.setAttribute("aria-label", `Cromo ${c.n}: ${c.nombre}`);
+  o.id = "pko"; o.className = "pko live r-" + c.k; o.setAttribute("role", "dialog"); o.setAttribute("aria-modal", "true"); o.setAttribute("aria-label", `Cromo ${c.n}: ${c.nombre}`);
   o.style.setProperty("--rc", R.c1); o.style.setProperty("--rc2", R.c2);
   o.innerHTML = `<div class="pko-stage">
       <div class="pko-aura"></div>
       <div class="pko-rays"><i></i></div>
       <div class="pko-card"><div class="pko-float"><div class="pko-tilt"><div class="pko-flip">
         <div class="pko-f pko-back"><img src="${CROMO_DORSO}" alt="Dorso del cromo"></div>
-        <div class="pko-f pko-front"><img src="${cromoImg(c)}" alt="Cromo ${c.n}: ${esc(c.nombre)}, ${R.n}"><div class="pko-shine"></div><div class="pko-glare"></div></div>
+        <div class="pko-f pko-front"><img src="${cromoImg(c)}" alt="Cromo ${c.n}: ${esc(c.nombre)}, ${R.n}"><div class="pko-shine"></div><div class="pko-glare"></div>${PKF.front(c.k)}</div>${PKF.outer(c.k)}
       </div></div></div></div>
     </div>
     <canvas class="pko-cv"></canvas>
@@ -2984,12 +3117,13 @@ function verCromo(n) {
   const fx = reduce ? noop : pkoFx(q(".pko-cv"), R);
   const timers = [];
   let alive = true;
+  const fr = reduce ? null : pkoFrame(q(".pko-fxo canvas"), c.k, R);
   const anim = (el, kf, ms, opt) => el.animate(kf, Object.assign({ duration: ms, fill: "both", easing: "ease-out" }, opt || {}));
 
   const cerrar = () => {
     if (!alive) return; alive = false;
     timers.forEach(t => clearInterval(t));
-    fx.stop(); o.classList.add("out");
+    fx.stop(); if (fr) fr.stop(); o.classList.add("out");
     window.removeEventListener("keydown", onKey);
     setTimeout(() => { o.remove(); document.documentElement.classList.remove("pko-lock"); }, 320);
   };
@@ -3005,7 +3139,7 @@ function verCromo(n) {
     const ny = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (r.height * .75)));
     tilt.classList.add("drag");
     tilt.style.transform = `rotateX(${(-ny * 16).toFixed(1)}deg) rotateY(${(nx * 18).toFixed(1)}deg)`;
-    glare.style.setProperty("--gx", ((nx + 1) * 50).toFixed(0) + "%"); glare.style.setProperty("--gy", ((ny + 1) * 50).toFixed(0) + "%");
+    glare.style.setProperty("--gx", ((nx + 1) * 50).toFixed(0) + "%"); glare.style.setProperty("--gy", ((ny + 1) * 50).toFixed(0) + "%"); tilt.style.setProperty("--gx", ((nx + 1) * 50).toFixed(0) + "%"); tilt.style.setProperty("--gy", ((ny + 1) * 50).toFixed(0) + "%");
   };
   const soltar = () => { tilt.classList.remove("drag"); tilt.style.transform = ""; };
   ["pointermove", "pointerdown"].forEach(ev => o.addEventListener(ev, mover));
@@ -3026,7 +3160,7 @@ function verCromo(n) {
   anim(ok, [{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], reduce ? 1 : 400, { delay: reduce ? 0 : 200 });
   if (!reduce) {
     flot.animate([{ transform: "translateY(0)" }, { transform: "translateY(-7px)" }, { transform: "translateY(0)" }], { duration: 3600, iterations: Infinity, easing: "ease-in-out" });
-    fx.burst(40, 380, 14);
+    fx.burst(c.k === "leg" ? 90 : 40, c.k === "leg" ? 520 : 380, c.k === "leg" ? 40 : 14);
     timers.push(setInterval(() => fx.ambient(), 90));
   }
   try { ok.focus({ preventScroll: true }); } catch (e) {}
