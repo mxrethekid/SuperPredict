@@ -563,7 +563,9 @@ td .crest{width:30px;height:30px}
 .alb-g{display:grid;grid-template-columns:repeat(var(--c),1fr);gap:10px}
 .alb-s{aspect-ratio:733/1041;border-radius:10px;border:1.5px dashed color-mix(in srgb,var(--rc) 55%,transparent);background:linear-gradient(160deg,color-mix(in srgb,var(--rc) 14%,transparent),color-mix(in srgb,var(--rc) 3%,transparent));display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--h);color:color-mix(in srgb,var(--rc) 50%,transparent)}
 .alb-s.on{border:0;padding:0;overflow:visible;background:none;box-shadow:none!important}
-.alb-s.on img{width:100%;height:100%;object-fit:contain;display:block}
+.alb-s.on img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
+.alb-s.on{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s}
+.alb-s.on:active{transform:scale(.96)}
 .alb-leg .alb-s{border-style:solid;box-shadow:0 0 18px -6px var(--rc),inset 0 0 18px -10px var(--rc)}
 .alb-epi .alb-s{box-shadow:inset 0 0 16px -10px var(--rc)}
 .alb-leg .alb-s.on img{filter:drop-shadow(0 0 7px color-mix(in srgb,var(--rc) 55%,transparent))}
@@ -1006,7 +1008,36 @@ let S = norm(null), base = norm(null), busy = false, again = false;
 try { const r = localStorage.getItem(KEY); if (r) S = norm(JSON.parse(r)); } catch (e) {}
 try { const r = localStorage.getItem(KEY + "_base"); base = r ? norm(JSON.parse(r)) : clone(S); } catch (e) { base = clone(S); }
 const cacheSave = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); localStorage.setItem(KEY + "_base", JSON.stringify(base)); } catch (e) {} };
-const save = () => { cacheSave(); flush(); };
+let wseq = 0;   // contador de escrituras: una lectura del servidor lanzada antes de una escritura queda obsoleta
+const save = () => { wseq++; cacheSave(); flush(); };
+
+// ---- Registro local de cromos (a prueba de pérdidas) ----
+// Cada dispositivo anota los cromos que ha conseguido cada jugador. Si el servidor devuelve un estado
+// anticuado o pisa un cambio, los cromos que falten se recuperan y se vuelven a enviar. Un reinicio
+// del admin (p.cr) vacía el registro.
+const LKEY = KEY + "_cromos";
+const ledgerLoad = () => { try { return JSON.parse(localStorage.getItem(LKEY)) || {}; } catch (e) { return {}; } };
+const ledgerSave = L => { try { localStorage.setItem(LKEY, JSON.stringify(L)); } catch (e) {} };
+function ledgerAdd(p, n) {
+  const L = ledgerLoad(), cr = p.cr || 0;
+  const e = L[p.id] && (L[p.id].cr || 0) >= cr ? L[p.id] : (L[p.id] = { cr, n: [] });
+  if (!e.n.includes(n)) e.n.push(n);
+  ledgerSave(L);
+}
+function mergeCromos() {   // devuelve true si ha recuperado algún cromo que el servidor no tenía
+  const L = ledgerLoad(); let chL = false, rec = false;
+  S.players.forEach(p => {
+    const sc = Array.isArray(p.cromos) ? p.cromos : [], cr = p.cr || 0;
+    let e = L[p.id];
+    if (!e || (e.cr || 0) < cr) { e = L[p.id] = { cr, n: sc.slice() }; chL = true; }   // sin registro, o hubo un reinicio posterior
+    const have = new Set(sc), miss = e.n.filter(n => !have.has(n));
+    if (miss.length) { p.cromos = [...sc, ...miss]; rec = true; }
+    const all = new Set([...e.n, ...(p.cromos || [])]);
+    if (all.size !== e.n.length) { e.n = [...all]; chL = true; }
+  });
+  if (chL) ledgerSave(L);
+  return rec;
+}
 
 // ---- Sincronización con el servidor (Netlify Functions + Blobs) ----
 // ---- Modo local de prueba: sin servidor, todo se guarda en este navegador ----
@@ -1074,6 +1105,7 @@ async function flush() {
       again = false;
       const snap = clone(S), ops = diff(base, snap);
       if (!ops.length) { break; }
+      wseq++;
       r = await api({ ops });
       base = snap; cacheSave();
     } while (again);
@@ -1084,17 +1116,20 @@ async function flush() {
 }
 const typing = () => { const e = document.activeElement; return !!e && /^(INPUT|TEXTAREA|SELECT)$/.test(e.tagName); };
 function adopt(st, silent) {
-  const ns = norm(st), same = JSON.stringify(ns) === JSON.stringify(S);
-  S = ns; base = clone(S); cacheSave();
+  const ns = norm(st); let same = JSON.stringify(ns) === JSON.stringify(S);
+  S = ns; base = clone(S);   // base = copia del servidor; lo recuperado abajo se enviará como cambio
+  const rec = mergeCromos(); if (rec) same = false;
+  cacheSave(); if (rec) flush();
   if (me && !meP()) { setMe(""); if (!silent) { go("cuenta"); toast("No se pudo completar el registro. Inténtalo de nuevo."); } return; }
   if (!same && !silent && !typing()) { setMe(me); render(); }
   migrate();
 }
 async function pull(silent) {
   if (busy) return true;
+  const w0 = wseq;
   try {
     const r = await api();
-    if (busy || diff(base, S).length) return true;
+    if (busy || wseq !== w0 || diff(base, S).length) return true;   // hubo una escritura mientras llegaba: la lectura es vieja
     adopt(r.state, silent);
     return true;
   } catch (e) { return false; }
@@ -1110,14 +1145,17 @@ async function boot() {
   try {
     const r = await api(), srv = norm(r.state);
     if (first && (S.players.length || S.matches.length) && !srv.players.length && !srv.matches.length) { base = srv; flush(); }
+    else if (diff(base, S).length) flush();   // hay cambios locales sin enviar (p. ej. un cromo): se envían antes de adoptar el servidor
     else adopt(srv);
   } catch (e) { toast("Sin conexión con el servidor."); }
   setInterval(() => { if (!document.hidden) pull(); }, 15000);
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) pull(); });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) pull(); else flush(); });
+  window.addEventListener("pagehide", () => { flush(); });
 }
 // regAt = momento en que el jugador se registró (define el orden de la clasificación en caso de empate)
 function migrate() { let t = Date.now() - 1e7, ch = false; S.players.forEach(p => { if (p.pin && !p.regAt) { p.regAt = t++; ch = true; } }); if (ch) save(); }
 migrate();
+if (mergeCromos()) save();
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const sn = s => esc(Array.from(String(s)).slice(0, 7).join(""));   // modo usuario: solo 7 caracteres del nombre
@@ -2406,7 +2444,7 @@ function adJornada(el) {
   $("#resetCromos").onclick = async () => {
     const n = S.players.reduce((a, p) => a + ((p.cromos || []).length), 0);
     if (!(await ask(`¿Borrar los ${n} cromo${n === 1 ? "" : "s"} del álbum de todos los usuarios? No se puede deshacer.`, "Borrar cromos"))) return;
-    S.players.forEach(p => { p.cromos = []; p.sobres = 0; });
+    const cr0 = Date.now(); S.players.forEach(p => { p.cromos = []; p.sobres = 0; p.cr = cr0; });
     save(); render();
   };
   $("#togJ").onclick = () => { AD.open = !AD.open; AD.msg = ""; if (AD.open) loadDraft(defaultRound()); renderAdmin(); };
@@ -2671,10 +2709,11 @@ let abriendo = false;
 async function abrirSobre() {
   if (document.getElementById("pko") || abriendo) return;
   const me0 = meP(); if (!me0) return;
+  mergeCromos();   // por si el servidor había pisado algún cromo: no se repite ni se pierde ninguno
   if (!PACK_PRUEBA && coinsDe(me0) < PACK_PRECIO) return;
   const c = sortearCromo(me0); if (!c) return;   // colección completa
   abriendo = true;
-  me0.cromos = [...(me0.cromos || []), c.n]; me0.sobres = (me0.sobres || 0) + 1; save();   // se guarda ya: cerrar la pestaña no pierde el cromo
+  me0.cromos = [...(me0.cromos || []), c.n]; me0.sobres = (me0.sobres || 0) + 1; ledgerAdd(me0, c.n); save();   // se guarda ya: cerrar la pestaña no pierde el cromo
   const R = RAREZA[c.k];
   const reduce = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
   const o = document.createElement("div");
@@ -2822,6 +2861,88 @@ async function abrirSobre() {
   }
 }
 
+// ===== Ver un cromo del álbum (mismo visor que al salir del sobre) =====
+function verCromo(n) {
+  if (document.getElementById("pko") || abriendo) return;
+  const c = CROMOS.find(x => x.n === n); if (!c) return;
+  const R = RAREZA[c.k];
+  const reduce = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const o = document.createElement("div");
+  o.id = "pko"; o.className = "pko live"; o.setAttribute("role", "dialog"); o.setAttribute("aria-modal", "true"); o.setAttribute("aria-label", `Cromo ${c.n}: ${c.nombre}`);
+  o.style.setProperty("--rc", R.c1); o.style.setProperty("--rc2", R.c2);
+  o.innerHTML = `<div class="pko-stage">
+      <div class="pko-aura"></div>
+      <div class="pko-rays"><i></i></div>
+      <div class="pko-card"><div class="pko-float"><div class="pko-tilt"><div class="pko-flip">
+        <div class="pko-f pko-back"><img src="${CROMO_DORSO}" alt="Dorso del cromo"></div>
+        <div class="pko-f pko-front"><img src="${cromoImg(c)}" alt="Cromo ${c.n}: ${esc(c.nombre)}, ${R.n}"><div class="pko-shine"></div><div class="pko-glare"></div></div>
+      </div></div></div></div>
+    </div>
+    <canvas class="pko-cv"></canvas>
+    <div class="pko-t">${R.n.toUpperCase()}</div>
+    <div class="pko-s"><b>${esc(c.nombre)}</b> · Cromo nº ${c.n}</div>
+    <button type="button" class="pko-ok">Cerrar</button>`;
+  document.body.appendChild(o);
+  document.documentElement.classList.add("pko-lock");
+
+  const q = s => o.querySelector(s);
+  const stage = q(".pko-stage"), aura = q(".pko-aura"), rays = q(".pko-rays"), card = q(".pko-card"), flot = q(".pko-float"),
+    tilt = q(".pko-tilt"), flip = q(".pko-flip"), glare = q(".pko-glare"), tt = q(".pko-t"), ts = q(".pko-s"), ok = q(".pko-ok");
+  const noop = { center() {}, colors() {}, burst() {}, ambient() {}, stop() {} };
+  const fx = reduce ? noop : pkoFx(q(".pko-cv"), R);
+  const timers = [];
+  let alive = true;
+  const anim = (el, kf, ms, opt) => el.animate(kf, Object.assign({ duration: ms, fill: "both", easing: "ease-out" }, opt || {}));
+
+  const cerrar = () => {
+    if (!alive) return; alive = false;
+    timers.forEach(t => clearInterval(t));
+    fx.stop(); o.classList.add("out");
+    window.removeEventListener("keydown", onKey);
+    setTimeout(() => { o.remove(); document.documentElement.classList.remove("pko-lock"); }, 320);
+  };
+  const onKey = e => { if (e.key === "Escape") cerrar(); };
+  window.addEventListener("keydown", onKey);
+  ok.onclick = cerrar;
+
+  // inclinar el cromo con el dedo / ratón, con brillo que sigue al toque
+  const mover = e => {
+    if (!alive) return;
+    const r = stage.getBoundingClientRect();
+    const nx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width * .75)));
+    const ny = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (r.height * .75)));
+    tilt.classList.add("drag");
+    tilt.style.transform = `rotateX(${(-ny * 16).toFixed(1)}deg) rotateY(${(nx * 18).toFixed(1)}deg)`;
+    glare.style.setProperty("--gx", ((nx + 1) * 50).toFixed(0) + "%"); glare.style.setProperty("--gy", ((ny + 1) * 50).toFixed(0) + "%");
+  };
+  const soltar = () => { tilt.classList.remove("drag"); tilt.style.transform = ""; };
+  ["pointermove", "pointerdown"].forEach(ev => o.addEventListener(ev, mover));
+  ["pointerup", "pointercancel", "pointerleave"].forEach(ev => o.addEventListener(ev, soltar));
+
+  // el cromo ya sale de cara (sin sobre ni giro)
+  flip.style.transform = "none";
+  const r0 = stage.getBoundingClientRect(); fx.center(r0.left + r0.width / 2, r0.top + r0.height / 2);
+  fx.colors(R.c1, R.c2);
+  anim(card, [{ opacity: 0, transform: "scale(.7)" }, { opacity: 1, transform: "scale(1.03)", offset: .7 }, { opacity: 1, transform: "none" }], reduce ? 1 : 520, { easing: "cubic-bezier(.2,1.2,.4,1)" });
+  anim(aura, [{ opacity: 0, transform: "scale(.7)" }, { opacity: .85, transform: "scale(1)" }], reduce ? 1 : 600);
+  anim(rays, [{ opacity: 0 }, { opacity: .55 }], reduce ? 1 : 700);
+  if (!reduce) q(".pko-rays i").animate([{ transform: "rotate(0)" }, { transform: "rotate(360deg)" }], { duration: 26000, iterations: Infinity });
+  anim(tt, [{ opacity: 0, transform: "translateY(-10px) scale(1.25)" }, { opacity: 1, transform: "none" }], reduce ? 1 : 500, { easing: "cubic-bezier(.2,1.4,.4,1)" });
+  anim(ts, [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], reduce ? 1 : 500, { delay: reduce ? 0 : 150 });
+  ok.style.pointerEvents = "auto";
+  anim(ok, [{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], reduce ? 1 : 400, { delay: reduce ? 0 : 200 });
+  if (!reduce) {
+    flot.animate([{ transform: "translateY(0)" }, { transform: "translateY(-7px)" }, { transform: "translateY(0)" }], { duration: 3600, iterations: Infinity, easing: "ease-in-out" });
+    fx.burst(40, 380, 14);
+    timers.push(setInterval(() => fx.ambient(), 90));
+  }
+  try { ok.focus({ preventScroll: true }); } catch (e) {}
+}
+document.addEventListener("click", ev => {
+  const b = ev.target.closest && ev.target.closest("#albumBox .alb-s.on[data-n]");
+  if (b) verCromo(+b.dataset.n);
+});
+
 const PACK_PRECIO = 1;   // PredictCoin
 function renderPack() {
   const box = $("#packBox"); if (!box) return;
@@ -2844,7 +2965,7 @@ function renderAlbum() {
   const t = tieneSet(meP());
   box.innerHTML = `<div class="alb">${ALBUM.map(g => {
     const cs = CROMOS.filter(c => c.k === g.k), n = cs.filter(c => t.has(c.n)).length;
-    return `<div class="alb-sec alb-${g.k}" style="--rc:${g.col};--c:${g.c}"><div class="alb-h"><b>${g.n}</b><span>${n}/${g.t}</span></div><div class="alb-g">${cs.map(c => t.has(c.n) ? `<div class="alb-s on" title="${c.nombre}"><img src="${cromoImg(c)}" alt="Cromo ${c.n}: ${c.nombre}"></div>` : `<div class="alb-s">${c.n}</div>`).join("")}</div></div>`;
+    return `<div class="alb-sec alb-${g.k}" style="--rc:${g.col};--c:${g.c}"><div class="alb-h"><b>${g.n}</b><span>${n}/${g.t}</span></div><div class="alb-g">${cs.map(c => t.has(c.n) ? `<button type="button" class="alb-s on" data-n="${c.n}" title="${c.nombre}" aria-label="Ver cromo ${c.n}: ${c.nombre}"><img src="${cromoImg(c)}" alt="Cromo ${c.n}: ${c.nombre}"></button>` : `<div class="alb-s">${c.n}</div>`).join("")}</div></div>`;
   }).join("")}</div>`;
 }
 let lastCoins = null;
