@@ -568,7 +568,10 @@ td .crest{width:30px;height:30px}
 .alb-s.on:active{transform:scale(.96)}
 .alb-leg .alb-s{border-style:solid;box-shadow:0 0 18px -6px var(--rc),inset 0 0 18px -10px var(--rc)}
 .alb-epi .alb-s{box-shadow:inset 0 0 16px -10px var(--rc)}
-.alb-leg .alb-s.on img{filter:drop-shadow(0 0 7px color-mix(in srgb,var(--rc) 55%,transparent))}
+.alb-s.on img{border-radius:6%/4.3%}
+/* Legendarios: brillo con box-shadow (sigue las esquinas del cromo y no parpadea); sin filter:drop-shadow, que en iOS provoca parpadeos y un recuadro raro */
+.alb-leg .alb-s.on{border-radius:6%/4.3%;box-shadow:0 0 16px -3px color-mix(in srgb,var(--rc) 70%,transparent)!important;transform:translateZ(0);-webkit-transform:translateZ(0)}
+.alb-leg .alb-s.on:active{transform:translateZ(0) scale(.97)}
 .pk{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:26px;perspective:800px}
 .pk img.pk-i{transform-style:preserve-3d;animation:pkTilt 6s ease-in-out infinite;width:min(190px,52vw);height:auto;display:block;border-radius:8px;filter:drop-shadow(0 10px 22px rgba(40,190,230,.35));user-select:none;-webkit-user-drag:none}
 .pk-p{display:flex;align-items:center;gap:8px;padding:7px 16px 7px 10px;border-radius:999px;background:var(--panel);border:1px solid #c9a14a66;box-shadow:0 0 16px -6px rgba(240,190,70,.55)}
@@ -1019,20 +1022,24 @@ const LKEY = KEY + "_cromos";
 const ledgerLoad = () => { try { return JSON.parse(localStorage.getItem(LKEY)) || {}; } catch (e) { return {}; } };
 const ledgerSave = L => { try { localStorage.setItem(LKEY, JSON.stringify(L)); } catch (e) {} };
 function ledgerAdd(p, n) {
-  const L = ledgerLoad(), cr = p.cr || 0;
+  const L = ledgerLoad(), cr = epochOf(p);
   const e = L[p.id] && (L[p.id].cr || 0) >= cr ? L[p.id] : (L[p.id] = { cr, n: [] });
   if (!e.n.includes(n)) e.n.push(n);
   ledgerSave(L);
 }
-function mergeCromos() {   // devuelve true si ha recuperado algún cromo que el servidor no tenía
+// Reinicio del admin: p.cromos lleva un número negativo (-sello) que el servidor conserva; la mayor marca manda.
+const epochOf = p => Math.max(p.cr || 0, ...(Array.isArray(p.cromos) ? p.cromos : []).filter(n => n < 0).map(n => -n), 0);
+const cardsOf = p => (Array.isArray(p.cromos) ? p.cromos : []).filter(n => n > 0);
+function mergeCromos() {   // devuelve true si ha corregido algo que el servidor no tenía
   const L = ledgerLoad(); let chL = false, rec = false;
   S.players.forEach(p => {
-    const sc = Array.isArray(p.cromos) ? p.cromos : [], cr = p.cr || 0;
+    const sc = cardsOf(p), ep = epochOf(p);
     let e = L[p.id];
-    if (!e || (e.cr || 0) < cr) { e = L[p.id] = { cr, n: sc.slice() }; chL = true; }   // sin registro, o hubo un reinicio posterior
+    if (!e || (e.cr || 0) < ep) { e = L[p.id] = { cr: ep, n: sc.slice() }; chL = true; }   // sin registro, o hubo un reinicio posterior
+    if (ep < (e.cr || 0)) { p.cromos = [...e.n, -e.cr]; p.cr = e.cr; return; }   // el servidor aún no tiene el reinicio: se reenvía
     const have = new Set(sc), miss = e.n.filter(n => !have.has(n));
-    if (miss.length) { p.cromos = [...sc, ...miss]; rec = true; }
-    const all = new Set([...e.n, ...(p.cromos || [])]);
+    if (miss.length) { p.cromos = [...(p.cromos || []), ...miss]; rec = true; }
+    const all = new Set([...e.n, ...sc, ...miss]);
     if (all.size !== e.n.length) { e.n = [...all]; chL = true; }
   });
   if (chL) ledgerSave(L);
@@ -2442,10 +2449,11 @@ function adJornada(el) {
 
   $("#newSeason").onclick = nuevaTemporada;
   $("#resetCromos").onclick = async () => {
-    const n = S.players.reduce((a, p) => a + ((p.cromos || []).length), 0);
+    const n = S.players.reduce((a, p) => a + cardsOf(p).length, 0);
     if (!(await ask(`¿Borrar los ${n} cromo${n === 1 ? "" : "s"} del álbum de todos los usuarios? No se puede deshacer.`, "Borrar cromos"))) return;
-    const cr0 = Date.now(); S.players.forEach(p => { p.cromos = []; p.sobres = 0; p.cr = cr0; });
-    save(); render();
+    const cr0 = Date.now(); S.players.forEach(p => { p.cromos = [-cr0]; p.sobres = 0; p.cr = cr0; });
+    ledgerSave(Object.fromEntries(S.players.map(p => [p.id, { cr: cr0, n: [] }])));   // vacía también el registro local
+    save(); render(); toast("Álbum reiniciado: todos empiezan de cero.");
   };
   $("#togJ").onclick = () => { AD.open = !AD.open; AD.msg = ""; if (AD.open) loadDraft(defaultRound()); renderAdmin(); };
   if (AD.open) {
@@ -2704,10 +2712,93 @@ function pkoFx(cv, R) {
   return api;
 }
 
+// ===== Sonidos (sintetizados con Web Audio: sin archivos) =====
+const SFX = (() => {
+  let ac = null, out = null, nb = null;
+  const init = () => {
+    try {
+      if (!ac) {
+        const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
+        ac = new AC();
+        const comp = ac.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 6;
+        out = ac.createGain(); out.gain.value = .85; out.connect(comp); comp.connect(ac.destination);
+      }
+      if (ac.state === "suspended") ac.resume();
+      return true;
+    } catch (e) { return false; }
+  };
+  const env = (g, t, v, a, d) => { g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(v, .0002), t + Math.max(a, .003)); g.gain.exponentialRampToValueAtTime(.0001, t + d); };
+  const tone = (f, t0, d, o) => {
+    if (!ac) return; o = o || {};
+    try {
+      const t = ac.currentTime + t0, osc = ac.createOscillator(), g = ac.createGain();
+      osc.type = o.type || "sine"; osc.frequency.setValueAtTime(f, t);
+      if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t + d);
+      env(g, t, o.v == null ? .2 : o.v, o.a == null ? .01 : o.a, d);
+      osc.connect(g); g.connect(out); osc.start(t); osc.stop(t + d + .05);
+    } catch (e) {}
+  };
+  const noise = (t0, d, o) => {
+    if (!ac) return; o = o || {};
+    try {
+      if (!nb) { nb = ac.createBuffer(1, ac.sampleRate, ac.sampleRate); const x = nb.getChannelData(0); for (let i = 0; i < x.length; i++) x[i] = Math.random() * 2 - 1; }
+      const t = ac.currentTime + t0, src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+      src.buffer = nb; src.loop = true; f.type = o.type || "bandpass"; f.Q.value = o.q == null ? 1 : o.q;
+      f.frequency.setValueAtTime(o.f0 || 1000, t); if (o.f1) f.frequency.exponentialRampToValueAtTime(o.f1, t + d);
+      env(g, t, o.v == null ? .3 : o.v, o.a == null ? .005 : o.a, d);
+      src.connect(f); f.connect(g); g.connect(out); src.start(t); src.stop(t + d + .05);
+    } catch (e) {}
+  };
+  const chime = (f, t, d, v) => { tone(f, t, d, { type: "triangle", v, a: .008 }); tone(f * 2, t, d * .7, { v: v * .3, a: .008 }); };
+  const sparkles = (t0, n, span, v) => { for (let i = 0; i < n; i++) tone(1300 + Math.random() * 2600, t0 + Math.random() * span, .35 + Math.random() * .3, { v, a: .004 }); };
+  const NOTAS = [261.6, 329.6, 392, 523.3];   // do mi sol do: un tono más agudo en cada pulso del sobre
+  return {
+    init,
+    pulse(n) { chime(NOTAS[Math.min(n, 3)], 0, .5, .16); noise(0, .08, { type: "highpass", f0: 5000, v: .06 }); },
+    charge(d) {   // retumbo que crece + tono que sube + chasquidos cada vez más seguidos
+      tone(60, 0, d, { type: "sawtooth", to: 210, v: .1, a: d * .85 });
+      tone(280, 0, d, { to: 1500, v: .05, a: d * .9 });
+      const N = 34;
+      for (let k = 1; k <= N; k++) noise(d * (1 - Math.pow(1 - k / N, 1.8)), .03, { type: "highpass", f0: 4200, v: .05 + .12 * k / N });
+    },
+    tear() {   // rasgado del sobre
+      noise(0, .55, { f0: 3200, f1: 700, q: .8, v: .55, a: .004 });
+      noise(0, .25, { type: "highpass", f0: 6000, v: .25 });
+      tone(95, 0, .55, { to: 38, v: .6, a: .004 });
+      sparkles(.05, 8, .6, .06);
+    },
+    emerge() {   // el cromo sube flotando
+      tone(190, 0, 2.5, { to: 620, v: .07, a: 1.6 });
+      noise(0, 2.5, { f0: 400, f1: 2600, q: 2, v: .05, a: 1.5 });
+      sparkles(.4, 10, 2, .04);
+    },
+    reveal(k, soft) {   // giro del cromo: la fanfarria depende de la rareza
+      const m = soft ? .55 : 1;
+      noise(0, .45, { f0: 500, f1: 4200, q: .9, v: .25 * m, a: .05 });
+      const t = soft ? .12 : .43;
+      if (k === "com") { chime(523.3, t, .9, .22 * m); chime(784, t + .09, .8, .14 * m); }
+      else if (k === "rar") { [523.3, 659.3, 784].forEach((f, i) => chime(f, t + i * .07, 1.1, .2 * m)); sparkles(t, 5, .6, .05 * m); }
+      else if (k === "epi") {
+        [523.3, 659.3, 784, 1046.5].forEach((f, i) => chime(f, t + i * .07, 1.4, .2 * m));
+        tone(130.8, t, 1.2, { type: "sawtooth", v: .09 * m, a: .02 });
+        sparkles(t, 10, 1, .06 * m);
+      } else {
+        tone(55, t, 1.6, { to: 38, v: .65 * m, a: .004 });
+        noise(t, 1.2, { f0: 2500, f1: 500, q: .7, v: .3 * m, a: .004 });
+        [261.6, 329.6, 392, 523.3, 659.3, 784, 1046.5].forEach((f, i) => { chime(f, t + i * .075, 2.2, .2 * m); tone(f, t + i * .075, 1.6, { type: "sawtooth", v: .035 * m, a: .03 }); });
+        [1568, 2093, 2637, 3136].forEach((f, i) => chime(f, t + .5 + i * .11, 1.2, .07 * m));
+        sparkles(t, 22, 2, .06 * m);
+      }
+    },
+    view(k) { SFX.reveal(k, true); }
+  };
+})();
+
 const pkoSleep = ms => new Promise(r => setTimeout(r, ms));
 let abriendo = false;
 async function abrirSobre() {
   if (document.getElementById("pko") || abriendo) return;
+  SFX.init();   // dentro del toque del usuario: el navegador permite el audio
   const me0 = meP(); if (!me0) return;
   mergeCromos();   // por si el servidor había pisado algún cromo: no se repite ni se pierde ninguno
   if (!PACK_PRUEBA && coinsDe(me0) < PACK_PRECIO) return;
@@ -2793,7 +2884,7 @@ async function abrirSobre() {
   try {
     mid();
     if (reduce) {   // sin movimiento: aparece el cromo directamente
-      setCol(R); pk.style.display = "none"; flip.style.transform = "none";
+      setCol(R); pk.style.display = "none"; flip.style.transform = "none"; SFX.reveal(c.k);
       anim(card, [{ opacity: 0 }, { opacity: 1 }], 500);
       final(); await pkoSleep(500); botonListo();
       return;
@@ -2806,7 +2897,7 @@ async function abrirSobre() {
     //    (una común solo pulsa gris; una rara, gris y azul; etc.). El sobre tiembla cada vez más fuerte y brilla con el color del pulso.
     const stepMs = Math.max(1100 / pasos.length, 720) + 500, carga = stepMs * pasos.length;
     pasos.forEach((X, n) => timers.push(setTimeout(() => {
-      setCol(X); vib(20 + n * 20);
+      setCol(X); vib(20 + n * 20); SFX.pulse(n);
       anim(aura, [{ opacity: .1, transform: "scale(.7)" }, { opacity: 1, transform: "scale(1.1)", offset: .4 }, { opacity: .6, transform: "scale(.96)" }], stepMs, { easing: "ease-out" });
     }, n * stepMs)));
     const N = 40, kf = [], j = () => Math.random() * 2 - 1;
@@ -2817,12 +2908,12 @@ async function abrirSobre() {
         filter: `drop-shadow(0 0 ${(6 + 34 * k).toFixed(0)}px ${X.c1}) brightness(${(1 + .6 * k).toFixed(2)})`, offset: k
       });
     }
-    const shake = anim(pk, kf, carga, { easing: "linear" });
+    const shake = anim(pk, kf, carga, { easing: "linear" }); SFX.charge(carga / 1000);
     const inflow = setInterval(() => fx.inflow(2), 38); timers.push(inflow);
     await shake.finished; clearInterval(inflow);
 
     // 3) se rasga: destello, onda expansiva, tira superior volando y lluvia de chispas
-    mid(); vib(80);
+    mid(); vib(80); SFX.tear();
     anim(flash, [{ opacity: 0, transform: "scale(.2)" }, { opacity: 1, transform: "scale(.6)", offset: .12 }, { opacity: 0, transform: "scale(1)" }], 900);
     anim(ring, [{ opacity: .95, transform: "scale(.25)" }, { opacity: 0, transform: "scale(3.6)" }], 1000, { easing: "cubic-bezier(.1,.7,.2,1)" });
     anim(pt, [{ transform: "none", opacity: 1 }, { transform: "translate(-18%,-170%) rotate(-34deg)", opacity: 0 }], 800, { easing: "cubic-bezier(.4,0,.9,.6)" });
@@ -2833,6 +2924,7 @@ async function abrirSobre() {
     await pkoSleep(120);
 
     // 4) el cromo sale del sobre, boca abajo, con el aura de su rareza
+    SFX.emerge();
     anim(card, [{ opacity: 0, transform: "translateY(6%) scale(.45)" }, { opacity: 1, transform: "translateY(-2%) scale(1.02)", offset: .7 }, { opacity: 1, transform: "none" }], 2500, { easing: "cubic-bezier(.2,.8,.25,1)" });
     // el cromo (aún de espaldas) se balancea en 3D mientras sube y espera
     const sway = tilt.animate([{ transform: "rotateY(-9deg) rotateX(3deg)" }, { transform: "rotateY(9deg) rotateX(-3deg)" }, { transform: "rotateY(-9deg) rotateX(3deg)" }], { duration: 3400, iterations: Infinity, easing: "ease-in-out" });
@@ -2843,7 +2935,7 @@ async function abrirSobre() {
     const endo = anim(tilt, [{ transform: m0 }, { transform: "none" }], 260, { easing: "ease-out" }); await endo.finished; endo.cancel();
 
     // 5) ¡giro! el cromo se da la vuelta y estalla la luz
-    vib([30, 30, 90]);
+    vib([30, 30, 90]); SFX.reveal(c.k);
     anim(card, [{ transform: "none" }, { transform: "scale(1.09)", offset: .45 }, { transform: "none" }], 950);
     const giro = anim(flip, [{ transform: "rotateY(180deg)" }, { transform: "rotateY(0deg)" }], 950, { easing: "cubic-bezier(.35,.05,.2,1)" });
     timers.push(setTimeout(() => {
@@ -2919,6 +3011,7 @@ function verCromo(n) {
   ["pointermove", "pointerdown"].forEach(ev => o.addEventListener(ev, mover));
   ["pointerup", "pointercancel", "pointerleave"].forEach(ev => o.addEventListener(ev, soltar));
 
+  SFX.init(); SFX.view(c.k);
   // el cromo ya sale de cara (sin sobre ni giro)
   flip.style.transform = "none";
   const r0 = stage.getBoundingClientRect(); fx.center(r0.left + r0.width / 2, r0.top + r0.height / 2);
