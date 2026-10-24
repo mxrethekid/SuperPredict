@@ -520,6 +520,8 @@ td .crest{width:30px;height:30px}
 #historial .pf-back{display:inline-flex;align-items:center;gap:6px;padding:9px 16px 9px 12px;border-radius:99px;border:1px solid rgba(0,180,216,.45);background:linear-gradient(135deg,rgba(0,180,216,.16),rgba(14,22,28,.7));color:var(--cyan);font:700 15px var(--b);cursor:pointer;box-shadow:0 0 18px -8px rgba(0,180,216,.8)}
 #historial .pf-back:active{background:rgba(0,180,216,.3)}
 #historial .pf-hero{position:relative;overflow:hidden;text-align:center;padding:28px 16px 22px;margin-bottom:24px;border-radius:20px;border:1px solid rgba(0,180,216,.55);background:radial-gradient(120% 90% at 50% 0%,rgba(0,180,216,.32),transparent 65%),linear-gradient(180deg,#18212a,#12181e);box-shadow:0 0 34px -10px rgba(0,180,216,.85),inset 0 1px 0 rgba(255,255,255,.06)}
+#historial .pf-hero.z-ucl::before,#historial .pf-hero.z-uel::before,#historial .pf-hero.z-uecl::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.5;background-color:transparent;background-image:linear-gradient(rgba(8,13,17,.3),rgba(8,13,17,.3)),var(--bgimg);background-position:0 0,var(--bgpos);background-size:100% 100%,cover;background-repeat:no-repeat}
+#historial .pf-hero>*{position:relative;z-index:1}
 #historial .pf-hero::after{content:"";position:absolute;left:28%;right:28%;top:0;height:3px;border-radius:0 0 4px 4px;background:var(--cyan);box-shadow:0 0 14px var(--cyan)}
 #historial .pf-crest{position:relative;width:148px;height:148px;margin:0 auto;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle,rgba(0,180,216,.38),rgba(0,180,216,.08) 58%,transparent 72%)}
 #historial .pf-crest::before{content:"";position:absolute;inset:6px;border-radius:50%;border:1px solid rgba(0,180,216,.4);box-shadow:0 0 22px -4px rgba(0,180,216,.7),inset 0 0 22px -8px rgba(0,180,216,.6)}
@@ -747,6 +749,11 @@ html.pko-lock,html.pko-lock body{overflow:hidden}
 .mtl.cu{margin:4px 0 0 2px}
 .plw{display:flex;flex-direction:column;min-width:0;line-height:1.15}
 .ti-g{display:flex;flex-direction:column;gap:8px}
+.ti-r,.card.match{position:relative}
+#tiendaTit.nw::after{content:"";display:inline-block;width:10px;height:10px;margin-left:10px;border-radius:50%;background:#ff3b4a;box-shadow:0 0 8px #ff3b4a;vertical-align:middle;-webkit-text-fill-color:initial}
+nav button.nw::after,.ti-r.nw::after,.card.match.nw::after{content:"";position:absolute;width:11px;height:11px;border-radius:50%;background:#ff3b4a;box-shadow:0 0 0 2px #0c1115,0 0 8px #ff3b4a}
+nav button.nw::after{top:7px;left:calc(50% + 10px)}
+.ti-r.nw::after,.card.match.nw::after{top:-4px;right:-3px}
 .ti-r{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#18212a,#12181e);opacity:.78}
 .ti-r.ok{opacity:1;border-color:#ffc83d55}
 .ti-r.on{border-color:#ffc83d;box-shadow:0 0 16px -6px #ffc83d}
@@ -760,19 +767,18 @@ html.pko-lock,html.pko-lock body{overflow:hidden}
 .ti-b{flex:none;border:1px solid #ffc83d;background:none;color:#ffc83d;border-radius:10px;padding:8px 12px;font:700 12px var(--b);letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
 .ti-r.on .ti-b{background:#ffc83d;color:#1a1204}
 .ti-l{flex:none;font-size:18px}
-.mtl.sh{color:#7fd4ff;text-shadow:0 0 8px rgba(0,180,216,.4)}
 .pl>.plw{flex:1 1 0;min-width:0}
 .mtl.tb{width:0;min-width:100%;box-sizing:border-box;font-size:7px;line-height:1.2;letter-spacing:.02em;text-transform:none;white-space:nowrap;margin-top:1px}
 .ti-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:22px 2px 10px;font:700 13px/1.2 var(--b);letter-spacing:.14em;text-transform:uppercase;color:var(--text)}
 .ti-h:first-of-type{margin-top:6px}
 .ti-h span{font-weight:600;letter-spacing:.06em;text-transform:none;font-size:12px;color:var(--mute)}
-.ti-r.sh.ok{border-color:#7fd4ff55}
-.ti-r.sh.on{border-color:#7fd4ff;box-shadow:0 0 16px -6px #7fd4ff}
-.ti-r.sh .ti-i b{color:#7fd4ff}
+.ti-r.sh.ok{border-color:#ffc83d55}
+.ti-r.sh .ti-i b{color:#ffc83d}
 .ti-r.sh{opacity:1}
-.ti-r.sh .ti-b{border-color:#7fd4ff;color:#7fd4ff}
-.ti-r.sh.on .ti-b{background:#7fd4ff;color:#06222b}
 .ti-b:disabled{opacity:.4;cursor:default}
+.ti-more{display:block;margin:12px auto 0;border:1px solid #ffc83d;background:none;color:#ffc83d;border-radius:10px;padding:10px 22px;font:700 12px var(--b);letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.ti-i .ti-k{font:700 10px/1 var(--b);font-style:normal;letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+.ti-r.sh .ti-i .ti-k{color:#ffc83d}
 .ti-buy{display:flex;align-items:center;gap:6px;padding:6px 12px 6px 8px}
 .ti-r.on,.ti-r.sh.on{border-color:#34d399;box-shadow:0 0 16px -6px #34d399}
 .ti-r.on .ti-i b,.ti-r.sh.on .ti-i b{color:#34d399}
@@ -960,7 +966,7 @@ html.pko-lock,html.pko-lock body{overflow:hidden}
   <div id="sobresBox"></div>
   <h2>Sobres</h2>
   <div id="packBox"></div>
-  <h2 style="margin-top:34px">Tienda de títulos</h2>
+  <h2 id="tiendaTit" style="margin-top:34px">Tienda de títulos</h2>
   </div>
   <div id="titulosBox"></div>
   <h2 style="margin-top:34px">Álbum</h2>
@@ -1590,7 +1596,7 @@ function renderJugar() {
   }
   const end = new Date(ms[0].kickoff).getTime(), mine = m => (S.preds[m.id] || {})[me], free = ms.filter(m => !mine(m));
   box.innerHTML = cdRow(false, ms[0].kickoff) +
-    ms.map(m => { const cur = mine(m); return `<div class="card match"><div class="jt" style="margin-bottom:4px">Jornada ${m.round}</div><div class="mdate">${fmt(m.kickoff)}</div>${scoreRow(m, cur ? cur.h : "", cur ? cur.a : "", "data-ph", "data-pa", cur ? "disabled" : "")}</div>`; }).join("") +
+    ms.map(m => { const cur = mine(m); return `<div class="card match" data-mid="${m.id}"><div class="jt" style="margin-bottom:4px">Jornada ${m.round}</div><div class="mdate">${fmt(m.kickoff)}</div>${scoreRow(m, cur ? cur.h : "", cur ? cur.a : "", "data-ph", "data-pa", cur ? "disabled" : "")}</div>`; }).join("") +
     (free.length
       ? `<button class="btn" id="send" style="width:100%">Enviar predicción</button><p class="msg" id="jmsg"></p><p class="muted" style="text-align:center;margin-top:10px">Una vez enviado no podrás cambiarlo.</p><div class="muted" style="margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);text-align:center;line-height:1.4">🔒 Podrás ver las predicciones de los demás participantes cuando envíes la tuya.</div>`
       : `<button class="btn" style="width:100%" disabled>Predicción enviada ✓</button><p class="muted" style="text-align:center;margin-top:10px">Tu pronóstico está guardado y ya no se puede cambiar.</p>` + othersCard(ms));
@@ -2352,7 +2358,7 @@ function renderHistorial() {
   let rk = 0, rc = 0;   // mayor racha de partidos seguidos puntuando (para la cabecera)
   S.matches.filter(m => m.result).sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff)).forEach(m => { if (pts((S.preds[m.id] || {})[pid], m.result) > 0) { rc++; if (rc > rk) rk = rc; } else rc = 0; });
   const head = (other ? `<div class="pf-top"><button class="pf-back" id="pfBack" aria-label="Volver">‹ Volver</button></div>` : "") + `
-    <div class="pf-hero"><div class="pf-crest">${crest(who.team)}</div><div class="pf-name" role="heading" aria-level="2">${esc(who.name)}</div>${ttlHtml(who, "pf")}
+    <div class="pf-hero${ix < 0 ? "" : ix < 4 ? " z-ucl" : ix < 6 ? " z-uel" : ix < 8 ? " z-uecl" : ""}"><div class="pf-crest">${crest(who.team)}</div><div class="pf-name" role="heading" aria-level="2">${esc(who.name)}</div>${ttlHtml(who, "pf")}
     <div class="pf-badges"><span class="gd">${ix >= 0 ? ix + 1 + "º" : "—"}</span><span>${ix >= 0 ? tt[ix].pt : 0}<small>PT</small></span><span class="fr" title="Mayor racha" aria-label="Mayor racha: ${rk}">${rk}<i aria-hidden="true">🔥</i></span></div></div>` + (other ? `
     <p class="pf-sec">Sus predicciones</p>` : `
     <h2>Historial</h2>`);
@@ -2404,9 +2410,12 @@ function loadDraft(r) {
   AD.d = m ? { id: m.id, home: m.home, away: m.away } : { home: "", away: "" };
   AD.closing = m ? toLocal(m.kickoff) : "";
 }
+// Equipos de las 5 grandes ligas, agrupados por liga (solo se pueden elegir los de la lista)
+const todosEquipos = () => CONFIG.ligas.flatMap(l => l.equipos);
 const teamOpts = sel => {
-  const list = !sel || CONFIG.equipos.includes(sel) ? CONFIG.equipos : [sel, ...CONFIG.equipos];
-  return '<option value="">Elige rival</option>' + list.map(t => `<option ${t === sel ? "selected" : ""}>${esc(t)}</option>`).join("");
+  const extra = sel && !todosEquipos().includes(sel) ? `<option selected>${esc(sel)}</option>` : "";   // partido ya creado con un equipo que no está en la lista: se conserva
+  return '<option value="">Elige equipo</option>' + extra +
+    CONFIG.ligas.map(l => `<optgroup label="${esc(l.nombre)}">${l.equipos.map(t => `<option ${t === sel ? "selected" : ""}>${esc(t)}</option>`).join("")}</optgroup>`).join("");
 };
 
 function renderAdmin() {
@@ -2487,7 +2496,9 @@ async function delRound(r) {
   AD.msg = `Jornada ${r} eliminada.`; AD.cls = "ok";
   render();
 }
-const temporada = () => 1 + Math.max(0, ...S.players.map(p => Array.isArray(p.hist) ? p.hist.length : 0));   // temporada en curso (las ya cerradas quedan en p.hist)
+// temporada en curso: las ya cerradas quedan en p.hist y p.tb es el número de temporada con el que empieza la cuenta (lo fija el admin; por defecto 1)
+const histLen = p => Array.isArray(p.hist) ? p.hist.length : 0;
+const temporada = () => Math.max(1, ...S.players.map(p => (Number.isInteger(p.tb) && p.tb > 0 ? p.tb : 1) + histLen(p)));
 async function nuevaTemporada() {
   const n = temporada(), played = calcRounds().length > 0, nr = new Set(S.matches.map(m => m.round)).size, np = Object.values(S.preds).reduce((a, m) => a + Object.keys(m).length, 0);
   const txt = `¿Empezar la temporada ${n + 1}? Se borrarán ${nr} jornada${nr === 1 ? "" : "s"} y ${np} predicción${np === 1 ? "" : "es"}, la clasificación volverá a cero y todos pasarán a "Sin pagar". Se mantienen los participantes, sus escudos y sus trofeos${played ? `, y se guarda la posición final de cada uno en la temporada ${n}` : ""}. Si quieres una copia de seguridad, expórtala antes desde Participantes. No se puede deshacer.`;
@@ -2563,12 +2574,24 @@ function adJornada(el) {
     ${rs.length ? "" : `<p class="muted" style="text-align:center;margin-top:18px">Aún no hay jornadas. Crea la primera con el botón de arriba.</p>`}
     <div class="card" style="margin-top:22px"><h3>Temporada ${temporada()}</h3>
       <p class="muted">Cuando acabe la temporada, empieza una nueva: jornadas y clasificación a cero, y se conservan participantes y trofeos.</p>
-      <button class="btn del" id="newSeason" style="width:100%">Nueva temporada</button></div>
+      <button class="btn del" id="newSeason" style="width:100%">Nueva temporada</button>
+      <label for="seasonN">Número de temporada actual</label>
+      <div class="row" style="align-items:center"><input id="seasonN" type="number" inputmode="numeric" min="1" max="99" value="${temporada()}" aria-label="Número de temporada" style="flex:1;min-width:0"><button class="btn ghost" id="setSeason" style="margin:0">Cambiar número</button></div></div>
     <div class="card" style="margin-top:22px"><h3>Pruebas · Álbum de cromos</h3>
       <p class="muted">Solo para probar: borra todos los cromos del álbum de todos los usuarios y reinicia su contador de sobres.</p>
       <button class="btn del" id="resetCromos" style="width:100%">Borrar cromos de todos</button></div>`;
 
   $("#newSeason").onclick = nuevaTemporada;
+  $("#setSeason").onclick = async () => {
+    const n = parseInt($("#seasonN").value), mh = Math.max(0, ...S.players.map(histLen)), fail = t => { AD.msg = t; AD.cls = "err"; renderAdmin(); };
+    if (!S.players.length) return fail("Necesitas al menos un participante para guardar el número de temporada.");
+    if (isNaN(n) || n < 1 || n > 99) return fail("Pon un número de temporada entre 1 y 99.");
+    if (n < mh + 1) return fail(`Ya hay ${mh} temporada${mh === 1 ? "" : "s"} guardada${mh === 1 ? "" : "s"} en el historial: el número mínimo es ${mh + 1}.`);
+    if (n === temporada()) return;
+    if (!(await ask(`¿Poner la temporada actual como la ${n}? Solo cambia el número: no se borra nada.`, "Cambiar"))) return;
+    S.players.forEach(p => { p.tb = n - mh; });
+    save(); AD.msg = `Ahora estás en la temporada ${n}.`; AD.cls = "ok"; renderAdmin(); window.scrollTo({ top: 0, behavior: "smooth" });
+  };
   $("#resetCromos").onclick = async () => {
     const n = S.players.reduce((a, p) => a + cardsOf(p).length, 0);
     if (!(await ask(`¿Borrar los ${n} cromo${n === 1 ? "" : "s"} del álbum de todos los usuarios? No se puede deshacer.`, "Borrar cromos"))) return;
@@ -2880,6 +2903,11 @@ const SFX = (() => {
   return {
     init,
     ac: () => ac, master: () => master,
+    clock(alt) {   // tic-tac de reloj, muy suave: un toque corto de madera por segundo, alternando dos tonos
+      tone(alt ? 700 : 940, 0, .09, { to: alt ? 540 : 720, v: .025, a: .004 });
+      tone(alt ? 1400 : 1880, 0, .04, { v: .005, a: .002 });
+      noise(0, .03, { f0: 2600, q: 1.5, v: .005, a: .002 });
+    },
     pulse(n) { chime(NOTAS[Math.min(n, 3)], 0, .5, .16); noise(0, .08, { type: "highpass", f0: 5000, v: .06 }); },
     charge(d) {   // retumbo que crece + tono que sube + chasquidos cada vez más seguidos
       tone(60, 0, d, { type: "sawtooth", to: 210, v: .1, a: d * .85 });
@@ -3396,7 +3424,7 @@ function tiendaSemana() {
   let sd = (ciclo * 7919 + 12345) | 0;
   const rnd = () => { sd = (sd + 0x6D2B79F5) | 0; let t = Math.imul(sd ^ (sd >>> 15), 1 | sd); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
   const a = TIENDA.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
-  return { items: a.slice(pos * TIENDA_N, (pos + 1) * TIENDA_N), dias: (sem + 1) * 7 - dias };
+  return { items: a.slice(pos * TIENDA_N, (pos + 1) * TIENDA_N), dias: (sem + 1) * 7 - dias, id: sem };
 }
 function statsDe(p) {
   const s = { ex: 0, pelo: 0, cat: 0, cha: 0, ll: 0, it: 0, md: 0, rm: 0, z: 0, vi: 0, fr: 0, boc: 0, vet: 0, dsp: 0, vm: 0, emp: 0 };
@@ -3454,23 +3482,57 @@ function renderTitulos() {   // tienda (pestaña Sobres, entre abrir sobres y el
     p.comprados = [...(p.comprados || []), id]; save(); toast("¡Título comprado: " + t.n + "!"); render();
   });
 }
-function renderLogros() {   // logros (pestaña de perfil, debajo del palmarés)
+let titulosAbiertos = false;   // lista de títulos del perfil: 5 a la vista y "Ver más" para el resto
+const vistosKey = id => KEY + "_vistos_" + id;   // títulos que el jugador ya ha visto (por dispositivo): solo sirve para el aviso del puntito rojo
+const vistosLoad = id => { try { const v = JSON.parse(localStorage.getItem(vistosKey(id))); return Array.isArray(v) ? v : null; } catch (e) { return null; } };
+const vistosSave = (id, v) => { try { localStorage.setItem(vistosKey(id), JSON.stringify(v)); } catch (e) {} };
+const navDot = (t, on) => { const b = document.querySelector('nav button[data-t="' + t + '"]'); if (b) b.classList.toggle("nw", !!on); };
+let tiIO = null; const tiTimers = new Set();
+function renderLogros() {
+  if (tiIO) { tiIO.disconnect(); tiIO = null; } tiTimers.forEach(clearTimeout); tiTimers.clear();   // logros (pestaña de perfil, debajo del palmarés)
   const box = $("#logrosBox"); if (!box) return;
-  const p = meP(); if (!p) { box.innerHTML = ""; return; }
+  const p = meP(); if (!p) { box.innerHTML = ""; navDot("historial", false); return; }
   const real = p !== pend && S.players.includes(p), s = statsDe(p), have = new Set((p.logros || []).filter(id => TITULOS.some(t => t.id === id)));
+  const had0 = new Set(have);
   if (real && synced) {   // los logros desbloqueados se guardan para siempre en el jugador (solo tras leer el servidor, para no recrear fichas borradas)
     const nu = TITULOS.filter(t => !have.has(t.id) && s[t.k] >= t.v);
     if (nu.length) { nu.forEach(t => have.add(t.id)); p.logros = [...have]; save(); toast("¡Título desbloqueado: " + nu[0].n + "!" + (nu.length > 1 ? " (+" + (nu.length - 1) + ")" : "")); }
   }
+  let nuevos = new Set();   // logros conseguidos que el jugador aún no ha visto (puntito rojo)
+  if (real && synced) {
+    let seen = vistosLoad(p.id);
+    if (!seen) { seen = [...had0]; vistosSave(p.id, seen); }   // primera vez en este dispositivo: lo ya desbloqueado no cuenta como nuevo
+    nuevos = new Set([...have].filter(id => !seen.includes(id)));
+  }
+  navDot("historial", nuevos.size > 0);
   if (viewId && viewId !== me) { box.innerHTML = ""; return; }   // en el perfil de otro jugador no se muestran
-  box.innerHTML = `<h2 style="margin-top:26px">Logros</h2>
-    <p class="muted" style="text-align:center;margin:-4px 8px 12px">Cada logro desbloquea un título para equipar bajo tu nombre. ${have.size}/${TITULOS.length} desbloqueados.</p>
-    <div class="ti-g">${[...TITULOS.filter(t => have.has(t.id)), ...TITULOS.filter(t => !have.has(t.id))].sort((a, b) => (b.id === p.titulo && have.has(b.id)) - (a.id === p.titulo && have.has(a.id))).map(t => {
-      const ok = have.has(t.id), c = Math.min(s[t.k], t.v), on = p.titulo === t.id;
-      return `<div class="ti-r${ok ? " ok" : ""}${on ? " on" : ""}"><div class="ti-i"><b>${esc(t.n)}</b><span>${esc(t.d)}</span>${ok ? "" : `<i class="ti-p"><u style="width:${c / t.v * 100}%"></u></i><em>${c}/${t.v}</em>`}</div>${ok ? `<button type="button" class="ti-b" data-ti="${t.id}">${on ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}</div>`;
-    }).join("")}</div>`;
+  const own = new Set((p.comprados || []).filter(id => TIENDA.some(t => t.id === id)));
+  const lst = [...TITULOS.filter(t => have.has(t.id)), ...TIENDA.filter(t => own.has(t.id)), ...TITULOS.filter(t => !have.has(t.id))]
+    .sort((a, b) => ((b.id === p.titulo) * 2 + nuevos.has(b.id)) - ((a.id === p.titulo) * 2 + nuevos.has(a.id)));   // el equipado, arriba del todo
+  box.innerHTML = `<h2 style="margin-top:26px">Títulos de personalización</h2>
+    <p class="muted" style="text-align:center;margin:-4px 8px 12px">Equipa uno para que salga bajo tu nombre. Logros: ${have.size}/${TITULOS.length} · Comprados: ${own.size}</p>
+    <div class="ti-g">${(titulosAbiertos ? lst : lst.slice(0, 5)).map(t => {
+      const sh = /^s/.test(t.id), ok = sh || have.has(t.id), on = p.titulo === t.id, c = sh ? 0 : Math.min(s[t.k], t.v);
+      return `<div class="ti-r${sh ? " sh" : ""}${ok ? " ok" : ""}${on ? " on" : ""}${nuevos.has(t.id) ? " nw" : ""}" data-id="${t.id}"><div class="ti-i"><em class="ti-k">${sh ? "Comprado" : "Logro"}</em><b>${esc(t.n)}</b><span>${sh ? "Título de Personalización" : esc(t.d)}</span>${ok ? "" : `<i class="ti-p"><u style="width:${c / t.v * 100}%"></u></i><em>${c}/${t.v}</em>`}</div>${ok ? `<button type="button" class="ti-b" data-ti="${t.id}">${on ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}</div>`;
+    }).join("")}</div>${lst.length > 5 ? `<button type="button" class="ti-more" id="tiMore">${titulosAbiertos ? "Ver menos" : "Ver más (" + (lst.length - 5) + ")"}</button>` : ""}`;
+  const visto = id => {   // quita el puntito de ese título y, si ya no queda ninguno nuevo, el de la pestaña
+    const seen = vistosLoad(p.id) || []; if (!seen.includes(id)) { seen.push(id); vistosSave(p.id, seen); }
+    const el = box.querySelector('.ti-r[data-id="' + id + '"]'); if (el) el.classList.remove("nw");
+    navDot("historial", [...have].some(x => !seen.includes(x)));
+  };
+  if (nuevos.size) {
+    box.querySelectorAll(".ti-r.nw").forEach(el => el.addEventListener("click", () => visto(el.dataset.id)));
+    if ("IntersectionObserver" in window) {   // se da por visto cuando lleva un momento en pantalla
+      tiIO = new IntersectionObserver(es => es.forEach(e => {
+        const el = e.target; clearTimeout(el._t); tiTimers.delete(el._t);
+        if (e.isIntersecting && e.intersectionRatio >= .6) { el._t = setTimeout(() => visto(el.dataset.id), 1800); tiTimers.add(el._t); }
+      }), { threshold: [0, .6] });
+      box.querySelectorAll(".ti-r.nw").forEach(el => tiIO.observe(el));
+    }
+  }
+  const mb = box.querySelector("#tiMore"); if (mb) mb.onclick = () => { titulosAbiertos = !titulosAbiertos; renderLogros(); };
   box.querySelectorAll("[data-ti]").forEach(b => b.onclick = () => {
-    const id = b.dataset.ti; if (!real || !synced || !have.has(id)) return;
+    const id = b.dataset.ti; if (!real || !synced || !(have.has(id) || own.has(id))) return;
     p.titulo = p.titulo === id ? "" : id; save(); render();
   });
 }
@@ -3486,7 +3548,60 @@ function fitTitulos(root) {
 window.addEventListener("resize", () => fitTitulos());
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitTitulos());
 
-function render() { renderEquipo(); if (pend) return; renderCuenta(); renderJugar(); renderTabla(); renderHistorial(); renderSobres(); renderLogros(); renderAdmin(); }
+// ===== Avisos (puntito rojo): tienda nueva y partido nuevo para predecir. Lo "ya visto" se guarda en cada dispositivo =====
+const avKey = (n, id) => KEY + "_" + n + "_" + id;
+const avGet = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+const avSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const avWatch = {};
+function seenWatch(name, els, cb) {   // da por visto un elemento cuando lleva un momento en pantalla (o al tocarlo)
+  const w = avWatch[name]; if (w) { if (w.io) w.io.disconnect(); w.t.forEach(clearTimeout); }
+  const nw = avWatch[name] = { io: null, t: new Set() };
+  els.forEach(el => el.addEventListener("click", () => cb(el), { once: true }));
+  if (!els.length || !("IntersectionObserver" in window)) return;
+  nw.io = new IntersectionObserver(es => es.forEach(e => {
+    const el = e.target; clearTimeout(el._t); nw.t.delete(el._t);
+    if (e.isIntersecting && e.intersectionRatio >= .6) { el._t = setTimeout(() => cb(el), 1800); nw.t.add(el._t); }
+  }), { threshold: [0, .6] });
+  els.forEach(el => nw.io.observe(el));
+}
+function renderAvisos() {
+  const p = meP(), ok = !!p && p !== pend && S.players.includes(p) && synced, tit = document.getElementById("tiendaTit");
+  // 1) tienda nueva (cada lunes): puntito en la pestaña Sobres y junto al título de la tienda
+  const sem = String(tiendaSemana().id); let nuevaTienda = false;
+  if (ok) {
+    const k = avKey("tienda", p.id), vis = avGet(k);
+    if (vis === null) avSet(k, sem); else nuevaTienda = String(vis) !== sem;
+    if (nuevaTienda) seenWatch("tienda", tit ? [tit] : [], () => { avSet(k, sem); if (tit) tit.classList.remove("nw"); navDot("sobres", false); });
+  }
+  if (!nuevaTienda) seenWatch("tienda", [], () => {});
+  navDot("sobres", nuevaTienda); if (tit) tit.classList.toggle("nw", nuevaTienda);
+  // 2) partido nuevo para predecir: puntito en la pestaña de inicio (Jugar) y en el partido
+  let nuevos = [];
+  if (ok) {
+    const k = avKey("partidos", p.id); let vis = avGet(k);
+    if (!Array.isArray(vis)) { vis = S.matches.map(m => m.id); avSet(k, vis); }
+    nuevos = openMatches().filter(m => !vis.includes(m.id) && !(S.preds[m.id] || {})[p.id]).map(m => m.id);
+  }
+  navDot("jugar", nuevos.length > 0);
+  const cards = [...document.querySelectorAll("#jugarBox .card.match[data-mid]")].filter(c => nuevos.includes(c.dataset.mid));
+  cards.forEach(c => c.classList.add("nw"));
+  if (nuevos.length) seenWatch("partidos", cards, el => {
+    const k = avKey("partidos", p.id), vis = avGet(k) || []; if (!vis.includes(el.dataset.mid)) { vis.push(el.dataset.mid); avSet(k, vis); }
+    el.classList.remove("nw"); navDot("jugar", nuevos.some(id => !vis.includes(id)));
+  }); else seenWatch("partidos", [], () => {});
+}
+// Tic-tac del reloj: solo suena en la pestaña de inicio mientras hay cuenta atrás y la predicción aún no se ha enviado
+let clockAlt = false;
+setInterval(() => {
+  try {
+    const ac = SFX.ac();
+    if (document.hidden || !ac || ac.state !== "running") return;
+    const j = document.getElementById("jugar");
+    if (!j || !j.classList.contains("on") || !document.getElementById("cdv") || !document.getElementById("send")) return;
+    SFX.clock(clockAlt = !clockAlt);
+  } catch (e) {}
+}, 1000);
+function render() { renderEquipo(); if (pend) return; renderCuenta(); renderJugar(); renderTabla(); renderHistorial(); renderSobres(); renderLogros(); renderAvisos(); renderAdmin(); }
 setMe(me);
 go(meP() ? "inicio" : "cuenta");
 boot();
