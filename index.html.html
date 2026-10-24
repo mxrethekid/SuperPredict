@@ -1309,6 +1309,27 @@ function diff(a, b) {
   });
   return ops;
 }
+// Escrituras recientes (pronósticos y partidos): si el servidor responde con un estado anticuado (aún sin lo que acabo de enviar),
+// se vuelven a poner en pantalla y a enviar en vez de dejar que desaparezcan hasta la siguiente lectura.
+const RECENT = new Map(), RECENT_MS = 90000;
+function recentAdd(ops) {
+  const now = Date.now();
+  ops.forEach(o => {
+    if (o.c === "preds") { const k = "p|" + o.m + "|" + o.p; RECENT.set(k, { o, t: now }); }   // v === null: pronóstico borrado (que no vuelva)
+    else if (o.c === "players") {   // título equipado, compras, logros, escudo y lo que cambia el admin (pagado, trofeos)
+      const k = "u|" + o.id;
+      if (o.rm) { RECENT.delete(k); return; }
+      const st = {}; ["titulo", "comprados", "logros", "team", "paid", "trofeos"].forEach(f => { if (o.set && f in o.set) st[f] = o.set[f]; });
+      if (!Object.keys(st).length) return;
+      const e = RECENT.get(k); RECENT.set(k, { o: { c: "players", id: o.id, set: { ...(e ? e.o.set : {}), ...st } }, t: now });
+    }
+    else if (o.c === "matches") {
+      const k = "m|" + o.id;
+      if (o.rm) RECENT.set(k, { o: { c: "matches", id: o.id, rm: 1 }, t: now });   // partido borrado (que no vuelva)
+      else { const e = RECENT.get(k); RECENT.set(k, { o: { c: "matches", id: o.id, set: { ...(e && !e.o.rm ? e.o.set : {}), ...(o.set || {}) } }, t: now }); }
+    }
+  });
+}
 async function flush() {
   if (busy) { again = true; return; }
   busy = true;
@@ -1320,6 +1341,7 @@ async function flush() {
       if (!ops.length) { break; }
       wseq++;
       r = await api({ ops });
+      recentAdd(ops);
       base = snap; cacheSave();
     } while (again);
     if (r) adopt(r.state);
@@ -1346,6 +1368,39 @@ function adopt(st, silent) {
       && S.players.length < MAX_PLAYERS && !S.players.some(p => p.name.toLowerCase() === prevMe.name.toLowerCase() || (prevMe.team && p.team === prevMe.team))) {
     S.players.push(clone(prevMe)); healed = true;   // el servidor devolvió un estado viejo o pisó el alta: se reenvía
   }
+  const t0 = Date.now();
+  RECENT.forEach((e, k) => {   // lo enviado hace poco y que el servidor aún no devuelve
+    if (t0 - e.t > RECENT_MS) { RECENT.delete(k); return; }
+    const o = e.o;
+    if (o.c === "preds") {
+      if (o.v === null) {   // borrado reciente: si el servidor aún lo devuelve, se vuelve a quitar
+        if ((S.preds[o.m] || {})[o.p]) { delete S.preds[o.m][o.p]; if (!Object.keys(S.preds[o.m]).length) delete S.preds[o.m]; healed = true; }
+        return;
+      }
+      if (gone[o.p] || !S.matches.some(x => x.id === o.m)) return;
+      if (!(S.preds[o.m] || {})[o.p]) { (S.preds[o.m] = S.preds[o.m] || {})[o.p] = clone(o.v); healed = true; }
+    } else if (o.c === "players") {
+      const p = S.players.find(x => x.id === o.id); if (!p || gone[p.id]) return;
+      const st = o.set;
+      if ("titulo" in st && (p.titulo || "") !== (st.titulo || "")) { p.titulo = st.titulo; healed = true; }
+      if (st.team && p.team !== st.team && !S.players.some(x => x.id !== p.id && x.team === st.team)) { p.team = st.team; healed = true; }
+      if ("paid" in st && !!p.paid !== !!st.paid) { p.paid = !!st.paid; healed = true; }
+      if ("trofeos" in st && JSON.stringify(p.trofeos || []) !== JSON.stringify(st.trofeos || [])) { p.trofeos = clone(st.trofeos || []); healed = true; }
+      ["comprados", "logros"].forEach(f => {
+        if (!Array.isArray(st[f])) return;
+        const cur = Array.isArray(p[f]) ? p[f] : [], miss = st[f].filter(x => !cur.includes(x));
+        if (miss.length) { p[f] = [...cur, ...miss]; healed = true; }
+      });
+    } else {
+      const m = S.matches.find(x => x.id === o.id);
+      if (o.rm) {   // partido borrado hace poco: si el servidor aún lo devuelve, se vuelve a quitar con sus pronósticos
+        if (m) { S.matches = S.matches.filter(x => x.id !== o.id); delete S.preds[o.id]; healed = true; }
+        return;
+      }
+      if (!m) { S.matches.push({ id: o.id, ...clone(o.set) }); healed = true; return; }
+      Object.keys(o.set || {}).forEach(f => { if (JSON.stringify(m[f]) !== JSON.stringify(o.set[f])) { m[f] = clone(o.set[f]); healed = true; } });
+    }
+  });
   const rec = mergeCromos() || healed; if (rec) same = false;
   cacheSave(); if (rec) flush();
   if (me && !meP()) { setMe(""); if (!silent) { go("cuenta"); toast("No se pudo completar el registro. Inténtalo de nuevo."); } return; }
@@ -1589,11 +1644,13 @@ function standings(r) {
     return L;
   };
   const cur = build(x => x <= r), prev = build(x => x < r).map(p => p.id);
-  cur.forEach((p, i) => { p.mv = r ? prev.indexOf(p.id) - i : 0; });   // >0 sube, <0 baja
+  const jx = rs.indexOf(r);   // sin flechas hasta la 2ª jornada: antes no hay posición previa con la que comparar
+  cur.forEach((p, i) => { p.mv = jx >= 1 ? prev.indexOf(p.id) - i : null; });   // >0 sube, <0 baja
   return cur;
 }
 // Flecha de cambio de posición respecto a antes de la última jornada
 const mvIcon = mv => {
+  if (mv == null) return "";
   const k = mv > 0 ? "up" : mv < 0 ? "down" : "eq", t = { up: "Sube posiciones", down: "Baja posiciones", eq: "Misma posición" }[k];
   const d = { up: "M5 11 12 4 19 11M5 19 12 12 19 19", down: "M5 13 12 20 19 13M5 5 12 12 19 5", eq: "M5 9H19M5 15H19" }[k];
   return `<svg class="mv mv-${k}" viewBox="0 0 24 24" role="img" aria-label="${t}"><path d="${d}"/></svg>`;
@@ -1802,8 +1859,10 @@ function renderEquipo() {
       real.pin = pend.pin; real.regAt = pend.regAt; if (pend.pinEnc) real.pinEnc = pend.pinEnc; real.team = pick;
       pend = null; pick = ""; me = real.id; justReg = { id: real.id, until: Date.now() + 240000 }; save(); setMe(me); go("jugar"); return;
     }
-    if (S.players.some(x => x.team === pick && x.id !== p.id)) { pick = ""; renderEquipo(); return; }
-    p.team = pick; pick = ""; save(); setMe(me); go("jugar");
+    const q = meP();   // el jugador actual: el estado pudo recargarse mientras el diálogo estaba abierto
+    if (!q || !S.players.includes(q)) return;
+    if (S.players.some(x => x.team === pick && x.id !== q.id)) { pick = ""; renderEquipo(); return; }
+    q.team = pick; pick = ""; save(); setMe(me); go("jugar");
   };
 }
 
@@ -3617,15 +3676,18 @@ function renderTitulos() {   // tienda (pestaña Sobres, entre abrir sobres y el
     ${prev.length ? `<h3 class="ti-h">Tus compras</h3><div class="ti-g">${prev.map(shopRow).join("")}</div>` : ""}`;
   box.querySelectorAll("[data-ti]").forEach(b => b.onclick = () => {
     const id = b.dataset.ti; if (!real || !synced || !own.has(id)) return;
-    p.titulo = p.titulo === id ? "" : id; save(); render();
+    const q = meP(); if (!q || !S.players.includes(q)) return;   // el jugador actual: una lectura del servidor pudo sustituir al que había al dibujar
+    q.titulo = q.titulo === id ? "" : id; save(); render();
   });
   box.querySelectorAll("[data-buy]").forEach(b => b.onclick = async () => {
     const id = b.dataset.buy, t = TIENDA.find(x => x.id === id);
-    if (!real || !synced || !t || own.has(id) || !sem.items.includes(t)) return;
-    if (coinsDe(p) < TITULO_PRECIO) { toast("No tienes PredictCoins suficientes"); return; }
+    let q = meP();   // siempre el jugador actual: una lectura del servidor pudo sustituir al que había al dibujar la tienda
+    if (!real || !synced || !t || !q || !S.players.includes(q) || (q.comprados || []).includes(id) || !sem.items.includes(t)) return;
+    if (coinsDe(q) < TITULO_PRECIO) { toast("No tienes PredictCoins suficientes"); return; }
     if (!(await ask(`¿Comprar «${t.n}» por ${TITULO_PRECIO} PredictCoins?`, "Comprar"))) return;
-    if (coinsDe(p) < TITULO_PRECIO || (p.comprados || []).includes(id)) return;
-    p.comprados = [...(p.comprados || []), id]; save(); toast("¡Título comprado: " + t.n + "!"); render();
+    q = meP();   // mientras el diálogo estaba abierto, el estado pudo recargarse
+    if (!q || !S.players.includes(q) || coinsDe(q) < TITULO_PRECIO || (q.comprados || []).includes(id)) return;
+    q.comprados = [...(q.comprados || []), id]; save(); toast("¡Título comprado: " + t.n + "!"); render();
   });
 }
 let titulosAbiertos = false;   // lista de títulos del perfil: 5 a la vista y "Ver más" para el resto
@@ -3679,7 +3741,8 @@ function renderLogros() {
   const mb = box.querySelector("#tiMore"); if (mb) mb.onclick = () => { titulosAbiertos = !titulosAbiertos; renderLogros(); };
   box.querySelectorAll("[data-ti]").forEach(b => b.onclick = () => {
     const id = b.dataset.ti; if (!real || !synced || !(have.has(id) || own.has(id))) return;
-    p.titulo = p.titulo === id ? "" : id; save(); render();
+    const q = meP(); if (!q || !S.players.includes(q)) return;   // el jugador actual: una lectura del servidor pudo sustituir al que había al dibujar
+    q.titulo = q.titulo === id ? "" : id; save(); render();
   });
 }
 
