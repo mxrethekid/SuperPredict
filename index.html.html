@@ -78,10 +78,16 @@ section.on{display:block}
 .pts .s3{background:linear-gradient(160deg,#6fdc8a,#2fa84f);color:#04200d;box-shadow:0 0 22px -4px #2fa84f}
 .pts .s1{background:linear-gradient(160deg,#ffe36e,#f2c200);color:#1f1700;box-shadow:0 0 22px -4px #f2c200}
 .pts .s0{background:linear-gradient(160deg,#ff7a7a,#d62d2d);color:#2a0404;box-shadow:0 0 22px -4px #d62d2d}
-#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:none;z-index:99;max-width:min(90%,420px);padding:12px 20px;border-radius:16px;text-align:center;font-size:14px;font-weight:600;letter-spacing:.01em;line-height:1.35;color:#eafcff;text-shadow:0 0 8px rgba(0,200,240,.6);pointer-events:none;background:linear-gradient(180deg,rgba(14,34,46,.9),rgba(7,17,25,.94));-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(90,209,242,.8);box-shadow:0 0 0 1px rgba(0,180,216,.14),0 0 14px rgba(0,180,216,.55),0 0 34px rgba(0,180,216,.25),0 10px 26px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08)}
-#toast.on{display:block;animation:toastIn .32s cubic-bezier(.2,.9,.3,1.15)}
-@keyframes toastIn{from{opacity:0;transform:translate(-50%,16px) scale(.94)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
-@media(prefers-reduced-motion:reduce){#toast.on{animation:none}}
+#maint{position:fixed;inset:0;z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;background:radial-gradient(120% 80% at 50% 0%,rgba(0,180,216,.22),transparent 60%),#0a0f13}
+#maint[hidden]{display:none}
+#maint .mt-b{max-width:340px}
+#maint .mt-i{width:84px;height:84px;margin:0 auto 18px;border-radius:50%;display:grid;place-items:center;font-size:40px;background:rgba(0,180,216,.14);border:1px solid rgba(0,180,216,.6);box-shadow:0 0 30px rgba(0,180,216,.5)}
+#maint h2{font-size:30px;line-height:1.1;margin:0 0 10px;color:#eafcff;text-shadow:0 0 14px rgba(0,200,240,.6)}
+#maint p{color:var(--mute);font-size:15px;line-height:1.5;margin:0}
+#maint .mt-a{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(22px + env(safe-area-inset-bottom,0px));background:none;border:1px solid var(--line);color:var(--mute);border-radius:99px;padding:8px 18px;font:600 13px var(--b);letter-spacing:.08em;opacity:.7}
+#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translate3d(-50%,16px,0) scale(.94);opacity:0;visibility:hidden;will-change:opacity,transform;transition:opacity .28s ease,transform .32s cubic-bezier(.2,.9,.3,1.15),visibility 0s linear .32s;z-index:99;max-width:min(90%,420px);padding:12px 20px;border-radius:16px;text-align:center;font-size:14px;font-weight:600;letter-spacing:.01em;line-height:1.35;color:#eafcff;text-shadow:0 0 8px rgba(0,200,240,.6);pointer-events:none;background:linear-gradient(180deg,rgba(14,34,46,.97),rgba(7,17,25,.98));border:1px solid rgba(90,209,242,.8);box-shadow:0 0 0 1px rgba(0,180,216,.14),0 0 14px rgba(0,180,216,.55),0 0 34px rgba(0,180,216,.25),0 10px 26px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08)}
+#toast.on{opacity:1;visibility:visible;transform:translate3d(-50%,0,0) scale(1);transition:opacity .28s ease,transform .32s cubic-bezier(.2,.9,.3,1.15),visibility 0s}
+@media(prefers-reduced-motion:reduce){#toast,#toast.on{transition:none}}
 .note{margin:0 0 14px;padding:10px 12px;border-radius:10px;border-left:4px solid var(--cyan);background:rgba(0,180,216,.09);font-size:13px;color:var(--text)}
 .eu .m.rg{font:400 22px var(--h);min-width:76px;color:#fff;text-shadow:0 0 12px var(--c)}
 .zl{font-size:14px;color:var(--mute);margin-bottom:4px;text-align:justify;hyphens:auto;-webkit-hyphens:auto}
@@ -311,30 +317,33 @@ td .crest{width:30px;height:30px}
 /* ===== Racha: llamas =====
    Clasificación: llamas pequeñas y muy suaves; no llegan a la casilla de posición.
    Perfil: llamas grandes alrededor de todo el borde del recuadro.
-   --fo = opacidad de las llamas (0.25 = 75% de transparencia). */
-:root{--fo:.25;--fR-u:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 80' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23b71c00'/%3E%3Cstop offset='0.35' stop-color='%23ff3d00'/%3E%3Cstop offset='0.7' stop-color='%23ff8f00' stop-opacity='0.75'/%3E%3Cstop offset='1' stop-color='%23ffb74d' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='1.5 1.1'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)'%3E%3Cpath d='M6 80C2 66 11 58 13 45C15 34 12 26 19 6C21 17 28 23 29 35C30 43 27 47 31 55C34 61 36 71 33 80Z'/%3E%3Cpath d='M31 80C29 70 36 64 36 56C36 50 34 46 38 38C40 47 44 52 43 62C42 70 40 74 41 80Z'/%3E%3Cpath d='M46 80C42 64 50 56 53 40C55 28 52 18 58 1C61 14 68 24 67 38C66 48 64 52 68 60C71 66 72 74 69 80Z'/%3E%3Cpath d='M69 80C68 72 73 68 73 62C73 57 71 54 74 48C76 55 80 60 79 68C78 74 79 77 79 80Z'/%3E%3Cpath d='M78 80C76 68 83 62 84 52C85 44 83 38 88 22C90 32 95 40 95 52C95 62 92 70 92 80Z'/%3E%3C/g%3E%3C/svg%3E");--fR-d:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 80' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23b71c00'/%3E%3Cstop offset='0.35' stop-color='%23ff3d00'/%3E%3Cstop offset='0.7' stop-color='%23ff8f00' stop-opacity='0.75'/%3E%3Cstop offset='1' stop-color='%23ffb74d' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='1.5 1.1'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)' transform='rotate(180 48 40)'%3E%3Cpath d='M6 80C2 66 11 58 13 45C15 34 12 26 19 6C21 17 28 23 29 35C30 43 27 47 31 55C34 61 36 71 33 80Z'/%3E%3Cpath d='M31 80C29 70 36 64 36 56C36 50 34 46 38 38C40 47 44 52 43 62C42 70 40 74 41 80Z'/%3E%3Cpath d='M46 80C42 64 50 56 53 40C55 28 52 18 58 1C61 14 68 24 67 38C66 48 64 52 68 60C71 66 72 74 69 80Z'/%3E%3Cpath d='M69 80C68 72 73 68 73 62C73 57 71 54 74 48C76 55 80 60 79 68C78 74 79 77 79 80Z'/%3E%3Cpath d='M78 80C76 68 83 62 84 52C85 44 83 38 88 22C90 32 95 40 95 52C95 62 92 70 92 80Z'/%3E%3C/g%3E%3C/svg%3E");--fR-l:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 96' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23b71c00'/%3E%3Cstop offset='0.35' stop-color='%23ff3d00'/%3E%3Cstop offset='0.7' stop-color='%23ff8f00' stop-opacity='0.75'/%3E%3Cstop offset='1' stop-color='%23ffb74d' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='1.5 1.1'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)' transform='translate(0 96) rotate(-90)'%3E%3Cpath d='M6 80C2 66 11 58 13 45C15 34 12 26 19 6C21 17 28 23 29 35C30 43 27 47 31 55C34 61 36 71 33 80Z'/%3E%3Cpath d='M31 80C29 70 36 64 36 56C36 50 34 46 38 38C40 47 44 52 43 62C42 70 40 74 41 80Z'/%3E%3Cpath d='M46 80C42 64 50 56 53 40C55 28 52 18 58 1C61 14 68 24 67 38C66 48 64 52 68 60C71 66 72 74 69 80Z'/%3E%3Cpath d='M69 80C68 72 73 68 73 62C73 57 71 54 74 48C76 55 80 60 79 68C78 74 79 77 79 80Z'/%3E%3Cpath d='M78 80C76 68 83 62 84 52C85 44 83 38 88 22C90 32 95 40 95 52C95 62 92 70 92 80Z'/%3E%3C/g%3E%3C/svg%3E");--fR-r:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 96' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23b71c00'/%3E%3Cstop offset='0.35' stop-color='%23ff3d00'/%3E%3Cstop offset='0.7' stop-color='%23ff8f00' stop-opacity='0.75'/%3E%3Cstop offset='1' stop-color='%23ffb74d' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='1.5 1.1'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)' transform='translate(80 0) rotate(90)'%3E%3Cpath d='M6 80C2 66 11 58 13 45C15 34 12 26 19 6C21 17 28 23 29 35C30 43 27 47 31 55C34 61 36 71 33 80Z'/%3E%3Cpath d='M31 80C29 70 36 64 36 56C36 50 34 46 38 38C40 47 44 52 43 62C42 70 40 74 41 80Z'/%3E%3Cpath d='M46 80C42 64 50 56 53 40C55 28 52 18 58 1C61 14 68 24 67 38C66 48 64 52 68 60C71 66 72 74 69 80Z'/%3E%3Cpath d='M69 80C68 72 73 68 73 62C73 57 71 54 74 48C76 55 80 60 79 68C78 74 79 77 79 80Z'/%3E%3Cpath d='M78 80C76 68 83 62 84 52C85 44 83 38 88 22C90 32 95 40 95 52C95 62 92 70 92 80Z'/%3E%3C/g%3E%3C/svg%3E");--fO-u:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 80' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23ff5a00'/%3E%3Cstop offset='0.4' stop-color='%23ff9100'/%3E%3Cstop offset='0.8' stop-color='%23ffc933' stop-opacity='0.7'/%3E%3Cstop offset='1' stop-color='%23ffe082' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='1.2 .9'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)'%3E%3Cpath d='M8 80C5 70 12 63 14 53C15 45 13 39 18 24C20 33 25 38 25 47C26 53 24 57 27 63C29 69 30 74 28 80Z'/%3E%3Cpath d='M26 80C25 72 30 68 30 61C31 56 29 53 32 47C34 54 38 58 37 66C36 72 36 76 36 80Z'/%3E%3Cpath d='M38 80C35 70 42 63 44 54C45 46 43 38 49 16C52 28 58 38 57 48C57 56 55 60 58 66C60 72 61 76 59 80Z'/%3E%3Cpath d='M58 80C58 74 62 71 62 65C62 61 60 58 63 52C65 58 69 62 68 70C67 75 68 78 68 80Z'/%3E%3C/g%3E%3C/svg%3E");--fO-d:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 80' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23ff5a00'/%3E%3Cstop offset='0.4' stop-color='%23ff9100'/%3E%3Cstop offset='0.8' stop-color='%23ffc933' stop-opacity='0.7'/%3E%3Cstop offset='1' stop-color='%23ffe082' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='1.2 .9'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)' transform='rotate(180 36 40)'%3E%3Cpath d='M8 80C5 70 12 63 14 53C15 45 13 39 18 24C20 33 25 38 25 47C26 53 24 57 27 63C29 69 30 74 28 80Z'/%3E%3Cpath d='M26 80C25 72 30 68 30 61C31 56 29 53 32 47C34 54 38 58 37 66C36 72 36 76 36 80Z'/%3E%3Cpath d='M38 80C35 70 42 63 44 54C45 46 43 38 49 16C52 28 58 38 57 48C57 56 55 60 58 66C60 72 61 76 59 80Z'/%3E%3Cpath d='M58 80C58 74 62 71 62 65C62 61 60 58 63 52C65 58 69 62 68 70C67 75 68 78 68 80Z'/%3E%3C/g%3E%3C/svg%3E");--fO-l:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 72' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23ff5a00'/%3E%3Cstop offset='0.4' stop-color='%23ff9100'/%3E%3Cstop offset='0.8' stop-color='%23ffc933' stop-opacity='0.7'/%3E%3Cstop offset='1' stop-color='%23ffe082' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='1.2 .9'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)' transform='translate(0 72) rotate(-90)'%3E%3Cpath d='M8 80C5 70 12 63 14 53C15 45 13 39 18 24C20 33 25 38 25 47C26 53 24 57 27 63C29 69 30 74 28 80Z'/%3E%3Cpath d='M26 80C25 72 30 68 30 61C31 56 29 53 32 47C34 54 38 58 37 66C36 72 36 76 36 80Z'/%3E%3Cpath d='M38 80C35 70 42 63 44 54C45 46 43 38 49 16C52 28 58 38 57 48C57 56 55 60 58 66C60 72 61 76 59 80Z'/%3E%3Cpath d='M58 80C58 74 62 71 62 65C62 61 60 58 63 52C65 58 69 62 68 70C67 75 68 78 68 80Z'/%3E%3C/g%3E%3C/svg%3E");--fO-r:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 72' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23ff5a00'/%3E%3Cstop offset='0.4' stop-color='%23ff9100'/%3E%3Cstop offset='0.8' stop-color='%23ffc933' stop-opacity='0.7'/%3E%3Cstop offset='1' stop-color='%23ffe082' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='1.2 .9'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)' transform='translate(80 0) rotate(90)'%3E%3Cpath d='M8 80C5 70 12 63 14 53C15 45 13 39 18 24C20 33 25 38 25 47C26 53 24 57 27 63C29 69 30 74 28 80Z'/%3E%3Cpath d='M26 80C25 72 30 68 30 61C31 56 29 53 32 47C34 54 38 58 37 66C36 72 36 76 36 80Z'/%3E%3Cpath d='M38 80C35 70 42 63 44 54C45 46 43 38 49 16C52 28 58 38 57 48C57 56 55 60 58 66C60 72 61 76 59 80Z'/%3E%3Cpath d='M58 80C58 74 62 71 62 65C62 61 60 58 63 52C65 58 69 62 68 70C67 75 68 78 68 80Z'/%3E%3C/g%3E%3C/svg%3E");--fY-u:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 80' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23ff9800'/%3E%3Cstop offset='0.35' stop-color='%23ffd740'/%3E%3Cstop offset='0.75' stop-color='%23fff3b0' stop-opacity='0.7'/%3E%3Cstop offset='1' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='.9 .7'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)'%3E%3Cpath d='M10 80C8 72 13 66 14 58C15 52 14 48 17 40C19 47 22 51 22 58C23 64 21 68 23 72C24 75 24 78 23 80Z'/%3E%3Cpath d='M26 80C24 70 32 62 33 52C34 44 32 36 37 20C39 30 44 38 43 48C43 56 41 60 44 66C46 72 46 76 45 80Z'/%3E%3Cpath d='M46 80C45 75 49 72 49 68C50 64 49 62 51 58C53 63 55 66 54 71C53 75 54 77 54 80Z'/%3E%3C/g%3E%3C/svg%3E");--fY-d:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 80' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23ff9800'/%3E%3Cstop offset='0.35' stop-color='%23ffd740'/%3E%3Cstop offset='0.75' stop-color='%23fff3b0' stop-opacity='0.7'/%3E%3Cstop offset='1' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='.9 .7'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)' transform='rotate(180 30 40)'%3E%3Cpath d='M10 80C8 72 13 66 14 58C15 52 14 48 17 40C19 47 22 51 22 58C23 64 21 68 23 72C24 75 24 78 23 80Z'/%3E%3Cpath d='M26 80C24 70 32 62 33 52C34 44 32 36 37 20C39 30 44 38 43 48C43 56 41 60 44 66C46 72 46 76 45 80Z'/%3E%3Cpath d='M46 80C45 75 49 72 49 68C50 64 49 62 51 58C53 63 55 66 54 71C53 75 54 77 54 80Z'/%3E%3C/g%3E%3C/svg%3E");--fY-l:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 60' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23ff9800'/%3E%3Cstop offset='0.35' stop-color='%23ffd740'/%3E%3Cstop offset='0.75' stop-color='%23fff3b0' stop-opacity='0.7'/%3E%3Cstop offset='1' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='.9 .7'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)' transform='translate(0 60) rotate(-90)'%3E%3Cpath d='M10 80C8 72 13 66 14 58C15 52 14 48 17 40C19 47 22 51 22 58C23 64 21 68 23 72C24 75 24 78 23 80Z'/%3E%3Cpath d='M26 80C24 70 32 62 33 52C34 44 32 36 37 20C39 30 44 38 43 48C43 56 41 60 44 66C46 72 46 76 45 80Z'/%3E%3Cpath d='M46 80C45 75 49 72 49 68C50 64 49 62 51 58C53 63 55 66 54 71C53 75 54 77 54 80Z'/%3E%3C/g%3E%3C/svg%3E");--fY-r:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 60' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23ff9800'/%3E%3Cstop offset='0.35' stop-color='%23ffd740'/%3E%3Cstop offset='0.75' stop-color='%23fff3b0' stop-opacity='0.7'/%3E%3Cstop offset='1' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='.9 .7'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)' transform='translate(80 0) rotate(90)'%3E%3Cpath d='M10 80C8 72 13 66 14 58C15 52 14 48 17 40C19 47 22 51 22 58C23 64 21 68 23 72C24 75 24 78 23 80Z'/%3E%3Cpath d='M26 80C24 70 32 62 33 52C34 44 32 36 37 20C39 30 44 38 43 48C43 56 41 60 44 66C46 72 46 76 45 80Z'/%3E%3Cpath d='M46 80C45 75 49 72 49 68C50 64 49 62 51 58C53 63 55 66 54 71C53 75 54 77 54 80Z'/%3E%3C/g%3E%3C/svg%3E")}
+   --fo = opacidad de las llamas (0.35 = 65% de transparencia). */
+:root{--fo:.35;--fR-u:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 80' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23b71c00'/%3E%3Cstop offset='0.35' stop-color='%23ff3d00'/%3E%3Cstop offset='0.7' stop-color='%23ff8f00' stop-opacity='0.75'/%3E%3Cstop offset='1' stop-color='%23ffb74d' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='1.5 1.1'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)'%3E%3Cpath d='M6 80C2 66 11 58 13 45C15 34 12 26 19 6C21 17 28 23 29 35C30 43 27 47 31 55C34 61 36 71 33 80Z'/%3E%3Cpath d='M31 80C29 70 36 64 36 56C36 50 34 46 38 38C40 47 44 52 43 62C42 70 40 74 41 80Z'/%3E%3Cpath d='M46 80C42 64 50 56 53 40C55 28 52 18 58 1C61 14 68 24 67 38C66 48 64 52 68 60C71 66 72 74 69 80Z'/%3E%3Cpath d='M69 80C68 72 73 68 73 62C73 57 71 54 74 48C76 55 80 60 79 68C78 74 79 77 79 80Z'/%3E%3Cpath d='M78 80C76 68 83 62 84 52C85 44 83 38 88 22C90 32 95 40 95 52C95 62 92 70 92 80Z'/%3E%3C/g%3E%3C/svg%3E");--fR-d:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 80' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23b71c00'/%3E%3Cstop offset='0.35' stop-color='%23ff3d00'/%3E%3Cstop offset='0.7' stop-color='%23ff8f00' stop-opacity='0.75'/%3E%3Cstop offset='1' stop-color='%23ffb74d' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='1.5 1.1'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)' transform='rotate(180 48 40)'%3E%3Cpath d='M6 80C2 66 11 58 13 45C15 34 12 26 19 6C21 17 28 23 29 35C30 43 27 47 31 55C34 61 36 71 33 80Z'/%3E%3Cpath d='M31 80C29 70 36 64 36 56C36 50 34 46 38 38C40 47 44 52 43 62C42 70 40 74 41 80Z'/%3E%3Cpath d='M46 80C42 64 50 56 53 40C55 28 52 18 58 1C61 14 68 24 67 38C66 48 64 52 68 60C71 66 72 74 69 80Z'/%3E%3Cpath d='M69 80C68 72 73 68 73 62C73 57 71 54 74 48C76 55 80 60 79 68C78 74 79 77 79 80Z'/%3E%3Cpath d='M78 80C76 68 83 62 84 52C85 44 83 38 88 22C90 32 95 40 95 52C95 62 92 70 92 80Z'/%3E%3C/g%3E%3C/svg%3E");--fR-l:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 96' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23b71c00'/%3E%3Cstop offset='0.35' stop-color='%23ff3d00'/%3E%3Cstop offset='0.7' stop-color='%23ff8f00' stop-opacity='0.75'/%3E%3Cstop offset='1' stop-color='%23ffb74d' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='1.5 1.1'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)' transform='translate(0 96) rotate(-90)'%3E%3Cpath d='M6 80C2 66 11 58 13 45C15 34 12 26 19 6C21 17 28 23 29 35C30 43 27 47 31 55C34 61 36 71 33 80Z'/%3E%3Cpath d='M31 80C29 70 36 64 36 56C36 50 34 46 38 38C40 47 44 52 43 62C42 70 40 74 41 80Z'/%3E%3Cpath d='M46 80C42 64 50 56 53 40C55 28 52 18 58 1C61 14 68 24 67 38C66 48 64 52 68 60C71 66 72 74 69 80Z'/%3E%3Cpath d='M69 80C68 72 73 68 73 62C73 57 71 54 74 48C76 55 80 60 79 68C78 74 79 77 79 80Z'/%3E%3Cpath d='M78 80C76 68 83 62 84 52C85 44 83 38 88 22C90 32 95 40 95 52C95 62 92 70 92 80Z'/%3E%3C/g%3E%3C/svg%3E");--fR-r:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 96' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23b71c00'/%3E%3Cstop offset='0.35' stop-color='%23ff3d00'/%3E%3Cstop offset='0.7' stop-color='%23ff8f00' stop-opacity='0.75'/%3E%3Cstop offset='1' stop-color='%23ffb74d' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='1.5 1.1'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)' transform='translate(80 0) rotate(90)'%3E%3Cpath d='M6 80C2 66 11 58 13 45C15 34 12 26 19 6C21 17 28 23 29 35C30 43 27 47 31 55C34 61 36 71 33 80Z'/%3E%3Cpath d='M31 80C29 70 36 64 36 56C36 50 34 46 38 38C40 47 44 52 43 62C42 70 40 74 41 80Z'/%3E%3Cpath d='M46 80C42 64 50 56 53 40C55 28 52 18 58 1C61 14 68 24 67 38C66 48 64 52 68 60C71 66 72 74 69 80Z'/%3E%3Cpath d='M69 80C68 72 73 68 73 62C73 57 71 54 74 48C76 55 80 60 79 68C78 74 79 77 79 80Z'/%3E%3Cpath d='M78 80C76 68 83 62 84 52C85 44 83 38 88 22C90 32 95 40 95 52C95 62 92 70 92 80Z'/%3E%3C/g%3E%3C/svg%3E");--fO-u:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 80' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23ff5a00'/%3E%3Cstop offset='0.4' stop-color='%23ff9100'/%3E%3Cstop offset='0.8' stop-color='%23ffc933' stop-opacity='0.7'/%3E%3Cstop offset='1' stop-color='%23ffe082' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='1.2 .9'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)'%3E%3Cpath d='M8 80C5 70 12 63 14 53C15 45 13 39 18 24C20 33 25 38 25 47C26 53 24 57 27 63C29 69 30 74 28 80Z'/%3E%3Cpath d='M26 80C25 72 30 68 30 61C31 56 29 53 32 47C34 54 38 58 37 66C36 72 36 76 36 80Z'/%3E%3Cpath d='M38 80C35 70 42 63 44 54C45 46 43 38 49 16C52 28 58 38 57 48C57 56 55 60 58 66C60 72 61 76 59 80Z'/%3E%3Cpath d='M58 80C58 74 62 71 62 65C62 61 60 58 63 52C65 58 69 62 68 70C67 75 68 78 68 80Z'/%3E%3C/g%3E%3C/svg%3E");--fO-d:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 80' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23ff5a00'/%3E%3Cstop offset='0.4' stop-color='%23ff9100'/%3E%3Cstop offset='0.8' stop-color='%23ffc933' stop-opacity='0.7'/%3E%3Cstop offset='1' stop-color='%23ffe082' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='1.2 .9'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)' transform='rotate(180 36 40)'%3E%3Cpath d='M8 80C5 70 12 63 14 53C15 45 13 39 18 24C20 33 25 38 25 47C26 53 24 57 27 63C29 69 30 74 28 80Z'/%3E%3Cpath d='M26 80C25 72 30 68 30 61C31 56 29 53 32 47C34 54 38 58 37 66C36 72 36 76 36 80Z'/%3E%3Cpath d='M38 80C35 70 42 63 44 54C45 46 43 38 49 16C52 28 58 38 57 48C57 56 55 60 58 66C60 72 61 76 59 80Z'/%3E%3Cpath d='M58 80C58 74 62 71 62 65C62 61 60 58 63 52C65 58 69 62 68 70C67 75 68 78 68 80Z'/%3E%3C/g%3E%3C/svg%3E");--fO-l:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 72' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23ff5a00'/%3E%3Cstop offset='0.4' stop-color='%23ff9100'/%3E%3Cstop offset='0.8' stop-color='%23ffc933' stop-opacity='0.7'/%3E%3Cstop offset='1' stop-color='%23ffe082' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='1.2 .9'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)' transform='translate(0 72) rotate(-90)'%3E%3Cpath d='M8 80C5 70 12 63 14 53C15 45 13 39 18 24C20 33 25 38 25 47C26 53 24 57 27 63C29 69 30 74 28 80Z'/%3E%3Cpath d='M26 80C25 72 30 68 30 61C31 56 29 53 32 47C34 54 38 58 37 66C36 72 36 76 36 80Z'/%3E%3Cpath d='M38 80C35 70 42 63 44 54C45 46 43 38 49 16C52 28 58 38 57 48C57 56 55 60 58 66C60 72 61 76 59 80Z'/%3E%3Cpath d='M58 80C58 74 62 71 62 65C62 61 60 58 63 52C65 58 69 62 68 70C67 75 68 78 68 80Z'/%3E%3C/g%3E%3C/svg%3E");--fO-r:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 72' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23ff5a00'/%3E%3Cstop offset='0.4' stop-color='%23ff9100'/%3E%3Cstop offset='0.8' stop-color='%23ffc933' stop-opacity='0.7'/%3E%3Cstop offset='1' stop-color='%23ffe082' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='1.2 .9'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)' transform='translate(80 0) rotate(90)'%3E%3Cpath d='M8 80C5 70 12 63 14 53C15 45 13 39 18 24C20 33 25 38 25 47C26 53 24 57 27 63C29 69 30 74 28 80Z'/%3E%3Cpath d='M26 80C25 72 30 68 30 61C31 56 29 53 32 47C34 54 38 58 37 66C36 72 36 76 36 80Z'/%3E%3Cpath d='M38 80C35 70 42 63 44 54C45 46 43 38 49 16C52 28 58 38 57 48C57 56 55 60 58 66C60 72 61 76 59 80Z'/%3E%3Cpath d='M58 80C58 74 62 71 62 65C62 61 60 58 63 52C65 58 69 62 68 70C67 75 68 78 68 80Z'/%3E%3C/g%3E%3C/svg%3E");--fY-u:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 80' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23ff9800'/%3E%3Cstop offset='0.35' stop-color='%23ffd740'/%3E%3Cstop offset='0.75' stop-color='%23fff3b0' stop-opacity='0.7'/%3E%3Cstop offset='1' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='.9 .7'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)'%3E%3Cpath d='M10 80C8 72 13 66 14 58C15 52 14 48 17 40C19 47 22 51 22 58C23 64 21 68 23 72C24 75 24 78 23 80Z'/%3E%3Cpath d='M26 80C24 70 32 62 33 52C34 44 32 36 37 20C39 30 44 38 43 48C43 56 41 60 44 66C46 72 46 76 45 80Z'/%3E%3Cpath d='M46 80C45 75 49 72 49 68C50 64 49 62 51 58C53 63 55 66 54 71C53 75 54 77 54 80Z'/%3E%3C/g%3E%3C/svg%3E");--fY-d:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 80' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23ff9800'/%3E%3Cstop offset='0.35' stop-color='%23ffd740'/%3E%3Cstop offset='0.75' stop-color='%23fff3b0' stop-opacity='0.7'/%3E%3Cstop offset='1' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='.9 .7'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)' transform='rotate(180 30 40)'%3E%3Cpath d='M10 80C8 72 13 66 14 58C15 52 14 48 17 40C19 47 22 51 22 58C23 64 21 68 23 72C24 75 24 78 23 80Z'/%3E%3Cpath d='M26 80C24 70 32 62 33 52C34 44 32 36 37 20C39 30 44 38 43 48C43 56 41 60 44 66C46 72 46 76 45 80Z'/%3E%3Cpath d='M46 80C45 75 49 72 49 68C50 64 49 62 51 58C53 63 55 66 54 71C53 75 54 77 54 80Z'/%3E%3C/g%3E%3C/svg%3E");--fY-l:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 60' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23ff9800'/%3E%3Cstop offset='0.35' stop-color='%23ffd740'/%3E%3Cstop offset='0.75' stop-color='%23fff3b0' stop-opacity='0.7'/%3E%3Cstop offset='1' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='.9 .7'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)' transform='translate(0 60) rotate(-90)'%3E%3Cpath d='M10 80C8 72 13 66 14 58C15 52 14 48 17 40C19 47 22 51 22 58C23 64 21 68 23 72C24 75 24 78 23 80Z'/%3E%3Cpath d='M26 80C24 70 32 62 33 52C34 44 32 36 37 20C39 30 44 38 43 48C43 56 41 60 44 66C46 72 46 76 45 80Z'/%3E%3Cpath d='M46 80C45 75 49 72 49 68C50 64 49 62 51 58C53 63 55 66 54 71C53 75 54 77 54 80Z'/%3E%3C/g%3E%3C/svg%3E");--fY-r:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 60' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23ff9800'/%3E%3Cstop offset='0.35' stop-color='%23ffd740'/%3E%3Cstop offset='0.75' stop-color='%23fff3b0' stop-opacity='0.7'/%3E%3Cstop offset='1' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-25%' y='-5%' width='150%' height='115%'%3E%3CfeGaussianBlur stdDeviation='.9 .7'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='url(%23g)' transform='translate(80 0) rotate(90)'%3E%3Cpath d='M10 80C8 72 13 66 14 58C15 52 14 48 17 40C19 47 22 51 22 58C23 64 21 68 23 72C24 75 24 78 23 80Z'/%3E%3Cpath d='M26 80C24 70 32 62 33 52C34 44 32 36 37 20C39 30 44 38 43 48C43 56 41 60 44 66C46 72 46 76 45 80Z'/%3E%3Cpath d='M46 80C45 75 49 72 49 68C50 64 49 62 51 58C53 63 55 66 54 71C53 75 54 77 54 80Z'/%3E%3C/g%3E%3C/svg%3E")}
 /* Fila de la clasificación */
 #tabla tr.rfire td{position:relative;isolation:isolate;border-top-color:rgba(255,160,50,.85);text-shadow:0 1px 3px rgba(0,0,0,.75);box-shadow:inset 0 1px 0 rgba(255,170,60,.85),inset 0 -1px 0 rgba(255,95,20,.95),inset 0 0 16px rgba(255,100,20,.38)}
 #tabla tr.rfire td:first-child{box-shadow:inset 2px 0 0 rgba(255,170,60,.95),inset 0 1px 0 rgba(255,170,60,.85),inset 0 -1px 0 rgba(255,95,20,.95),inset 0 0 16px rgba(255,100,20,.38)}
 #tabla tr.rfire td:last-child{box-shadow:inset -2px 0 0 rgba(255,170,60,.95),inset 0 1px 0 rgba(255,170,60,.85),inset 0 -1px 0 rgba(255,95,20,.95),inset 0 0 16px rgba(255,100,20,.38)}
 #tabla tr.rfire td:not(.pos){background-image:linear-gradient(0deg,rgba(255,80,15,.42),rgba(255,140,30,.14) 65%,rgba(255,170,60,.06))}
 #tabla tr.rfire td:not(.pos)::before,#tabla tr.rfire td:not(.pos)::after{content:"";position:absolute;left:0;right:0;bottom:0;z-index:-1;pointer-events:none;background-repeat:repeat-x;transform-origin:50% 100%;opacity:var(--fo)}
-#tabla tr.rfire td:not(.pos)::before{height:32%;background-image:var(--fR-u);background-size:40px 100%;background-position:0 100%}
-#tabla tr.rfire td:not(.pos)::after{height:22%;background-image:var(--fY-u),var(--fO-u);background-size:11px 62%,21px 100%;background-position:3px 100%,6px 100%}
+#tabla tr.rfire td:not(.pos)::before{height:54%;background-image:var(--fR-u);background-size:52px 100%;background-position:0 100%}
+#tabla tr.rfire td:not(.pos)::after{height:38%;background-image:var(--fY-u),var(--fO-u);background-size:14px 62%,27px 100%;background-position:3px 100%,6px 100%}
 /* la primera celda tras la casilla de posición: las llamas entran suavemente, sin tocar la casilla */
 #tabla tr.rfire td:nth-child(2)::before,#tabla tr.rfire td:nth-child(2)::after{-webkit-mask-image:linear-gradient(90deg,transparent,#000 26px);mask-image:linear-gradient(90deg,transparent,#000 26px)}
 /* Barra fija "mi posición" (mismas llamas que la fila; empiezan después de la columna de posición) */
 #myPos.fire{overflow:hidden;border-color:#ffb347;background:linear-gradient(0deg,rgba(255,80,15,.42),rgba(255,150,40,.14)),rgba(26,18,14,.96);box-shadow:0 0 14px rgba(255,120,30,.8),0 0 30px rgba(255,80,20,.4),inset 0 0 14px rgba(255,110,20,.35)}
 #myPos.fire::before,#myPos.fire::after{content:"";position:absolute;left:40px;right:0;bottom:0;z-index:-1;pointer-events:none;background-repeat:repeat-x;transform-origin:50% 100%;opacity:var(--fo);-webkit-mask-image:linear-gradient(90deg,transparent,#000 26px);mask-image:linear-gradient(90deg,transparent,#000 26px)}
-#myPos.fire::before{height:26%;background-image:var(--fR-u);background-size:44px 100%;background-position:0 100%}
-#myPos.fire::after{height:18%;background-image:var(--fY-u),var(--fO-u);background-size:12.5px 62%,22.5px 100%;background-position:3px 100%,6px 100%}
+#myPos.fire::before{height:54%;background-image:var(--fR-u);background-size:56px 100%;background-position:0 100%}
+#myPos.fire::after{height:38%;background-image:var(--fY-u),var(--fO-u);background-size:16px 62%,29px 100%;background-position:3px 100%,6px 100%}
 /* Recuadro del perfil: llamas por todo el borde, hacia fuera (3 capas: roja, naranja y núcleo amarillo) */
-#historial .pf-hero.fire{overflow:visible;margin:30px 4px 46px;border-color:rgba(255,160,50,.9);background:radial-gradient(120% 90% at 50% 100%,rgba(255,90,20,.42),transparent 65%),radial-gradient(120% 90% at 50% 0%,rgba(255,150,40,.22),transparent 60%),linear-gradient(180deg,#221913,#14100d);box-shadow:0 0 34px -6px rgba(255,110,25,.9),0 0 60px -14px rgba(255,70,20,.7),inset 0 0 26px rgba(255,100,20,.28)}
+#historial .pf-hero.fire{overflow:hidden;border-color:rgba(255,160,50,.9);background:radial-gradient(120% 90% at 50% 100%,rgba(255,90,20,.42),transparent 65%),radial-gradient(120% 90% at 50% 0%,rgba(255,150,40,.22),transparent 60%),linear-gradient(180deg,#221913,#14100d);box-shadow:0 0 34px -6px rgba(255,110,25,.9),0 0 60px -14px rgba(255,70,20,.7),inset 0 0 26px rgba(255,100,20,.28)}
 #historial .pf-hero.fire::before{border-radius:inherit}
 #historial .pf-hero.fire::after{display:none}
-#historial .pf-hero>.pf-fire{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:var(--fo);mix-blend-mode:screen}
+#historial .pf-hero>.pf-fire{position:absolute;inset:0;overflow:hidden;border-radius:inherit;z-index:0;pointer-events:none;opacity:var(--fo);mix-blend-mode:screen}
 .pf-fire i{position:absolute;display:block;pointer-events:none}
 .pf-fire i::before,.pf-fire i::after{content:"";position:absolute;pointer-events:none}
+.pf-fire .u{left:0;right:0;bottom:0;height:38%;min-height:96px;transform-origin:50% 100%;background:var(--fR-u) repeat-x 0 100%/140px 100%;-webkit-mask-image:linear-gradient(90deg,transparent,#000 22px,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(90deg,transparent,#000 22px,#000 calc(100% - 22px),transparent);animation:flU 1.4s ease-in-out infinite alternate}
+.pf-fire .u::before{left:0;right:0;bottom:0;height:72%;transform-origin:50% 100%;background:var(--fO-u) repeat-x 24px 100%/76px 100%;animation:flU2 .95s ease-in-out infinite alternate}
+.pf-fire .u::after{left:0;right:0;bottom:0;height:46%;transform-origin:50% 100%;background:var(--fY-u) repeat-x 11px 100%/40px 100%;animation:flU .7s ease-in-out infinite alternate}
 .pf-fire .t{left:-2px;right:-2px;bottom:calc(100% - 4px);height:34px;transform-origin:50% 100%;background:var(--fR-u) repeat-x 0 100%/64px 100%}
 .pf-fire .t::before{left:0;right:0;bottom:0;height:72%;transform-origin:50% 100%;background:var(--fO-u) repeat-x 11px 100%/33px 100%}
 .pf-fire .t::after{left:0;right:0;bottom:0;height:46%;transform-origin:50% 100%;background:var(--fY-u) repeat-x 5px 100%/17.5px 100%}
@@ -1326,6 +1335,30 @@ function ledgerAdd(p, n) {
 // Reinicio del admin: p.cromos lleva un número negativo (-sello) que el servidor conserva; la mayor marca manda.
 const epochOf = p => Math.max(p.cr || 0, ...(Array.isArray(p.cromos) ? p.cromos : []).filter(n => n < 0).map(n => -n), 0);
 const cardsOf = p => (Array.isArray(p.cromos) ? p.cromos : []).filter(n => n > 0);
+// ---- Registro local de gastos (sobres abiertos, sobres gratis y títulos comprados) ----
+// Las monedas se calculan restando p.sobres, p.sg y p.comprados. Si el servidor devolvía un estado anticuado,
+// esos contadores retrocedían (mientras el cromo sí se recuperaba con el registro de cromos) y la moneda
+// parecía no gastada: se podía abrir otro sobre y se perdía el gasto. Estos valores solo pueden subir:
+// se anota el máximo visto en este dispositivo y se restaura si el servidor trae menos.
+const GKEY = KEY + "_gastos";
+const gastosLoad = () => { try { const g = JSON.parse(localStorage.getItem(GKEY)); return g && typeof g === "object" ? g : {}; } catch (e) { return {}; } };
+const gastosSave = G => { try { localStorage.setItem(GKEY, JSON.stringify(G)); } catch (e) {} };
+function mergeGastos() {   // devuelve true si ha restaurado algo que el servidor no tenía
+  const G = gastosLoad(); let chG = false, rec = false;
+  S.players.forEach(p => {
+    const e = G[p.id] || (G[p.id] = { s: 0, g: 0, c: [] });
+    if (!Array.isArray(e.c)) e.c = [];
+    const s = p.sobres || 0, g = p.sg || 0, cs = Array.isArray(p.comprados) ? p.comprados : [];
+    if (s < e.s) { p.sobres = e.s; rec = true; } else if (s > e.s) { e.s = s; chG = true; }
+    if (g < e.g) { p.sg = e.g; rec = true; } else if (g > e.g) { e.g = g; chG = true; }
+    const falta = e.c.filter(x => !cs.includes(x));
+    if (falta.length) { p.comprados = [...cs, ...falta]; rec = true; }
+    const nuevo = cs.filter(x => !e.c.includes(x));
+    if (nuevo.length) { e.c = [...e.c, ...nuevo]; chG = true; }
+  });
+  if (chG) gastosSave(G);
+  return rec;
+}
 function mergeCromos() {   // devuelve true si ha corregido algo que el servidor no tenía
   const L = ledgerLoad(); let chL = false, rec = false;
   S.players.forEach(p => {
@@ -1339,6 +1372,7 @@ function mergeCromos() {   // devuelve true si ha corregido algo que el servidor
     if (all.size !== e.n.length) { e.n = [...all]; chL = true; }
   });
   if (chL) ledgerSave(L);
+  if (mergeGastos()) rec = true;   // sobres abiertos / sobres gratis / títulos comprados: nunca retroceden
   return rec;
 }
 
@@ -1467,7 +1501,7 @@ function adopt(st, silent) {
         if ((S.preds[o.m] || {})[o.p]) { delete S.preds[o.m][o.p]; if (!Object.keys(S.preds[o.m]).length) delete S.preds[o.m]; healed = true; }
         return;
       }
-      if (gone[o.p] || !S.matches.some(x => x.id === o.m)) return;
+      if (gone[o.p] || (o.m !== MKEY && !S.matches.some(x => x.id === o.m))) return;
       if (!(S.preds[o.m] || {})[o.p]) { (S.preds[o.m] = S.preds[o.m] || {})[o.p] = clone(o.v); healed = true; }
     } else if (o.c === "players") {
       const p = S.players.find(x => x.id === o.id); if (!p || gone[p.id]) return;
@@ -1494,6 +1528,7 @@ function adopt(st, silent) {
   const rec = mergeCromos() || healed; if (rec) same = false;
   cacheSave(); if (rec) flush();
   if (me && !meP()) { setMe(""); if (!silent) { go("cuenta"); toast("No se pudo completar el registro. Inténtalo de nuevo."); } return; }
+  applyMaint();   // modo mantenimiento: se echa a los jugadores aunque estén escribiendo
   if ((!same || firstSync) && !silent && !typing()) { setMe(me); render(); }
   migrate();
 }
@@ -1510,8 +1545,16 @@ async function pull(silent) {
 function toast(t) {
   let e = document.getElementById("toast");
   if (!e) { e = document.createElement("div"); e.id = "toast"; e.setAttribute("role", "status"); e.setAttribute("aria-live", "polite"); document.body.appendChild(e); }
-  e.textContent = t; e.classList.remove("on"); void e.offsetWidth; e.classList.add("on");   // se reinicia la animación si llega otro aviso seguido
-  clearTimeout(e._t); e._t = setTimeout(() => { e.classList.remove("on"); }, 4000);
+  e.textContent = t; clearTimeout(e._t); clearTimeout(e._s);
+  e.classList.remove("on"); void e.offsetWidth;   // si ya había uno visible, se reinicia la transición
+  e._s = setTimeout(() => { e.classList.add("on"); }, 40);   // se muestra tras pintar lo que acaba de cambiar: en el móvil, si no, no se veía hasta tocar otra pestaña
+  e._t = setTimeout(() => { e.classList.remove("on"); }, 4000);
+}
+// Avisos de monedas y títulos: se muestran uno tras otro (sin que uno tape al anterior)
+const toastQ = []; let toastQRun = false;
+function toastLater(t) {
+  toastQ.push(t); if (toastQRun) return; toastQRun = true;
+  (function next() { const x = toastQ.shift(); if (!x) { toastQRun = false; return; } toast(x); setTimeout(next, 3300); })();
 }
 async function boot() {
   let first = false;
@@ -1690,6 +1733,46 @@ function rachaActual(pid, rs) {
   });
   return n;
 }
+// Mayor racha de jornadas seguidas puntuando (misma regla que el bonus de racha)
+function rachaMax(pid, rs) {
+  rs = rs || calcRounds();
+  let n = 0, mx = 0;
+  rs.forEach(r => {
+    const base = S.matches.filter(m => m.round === r).reduce((a, m) => a + pts((S.preds[m.id] || {})[pid], m.result), 0);
+    n = base > 0 ? n + 1 : 0; if (n > mx) mx = n;
+  });
+  return mx;
+}
+// Mayor racha conseguida: se guarda en el jugador (p.rmx) y nunca baja, aunque luego falle una jornada o cambien los resultados
+function rachaRec(pl) {
+  const c = rachaMax(pl.id), g = pl.rmx || 0;
+  if (c > g && pl.id === me && synced && S.players.includes(pl)) { pl.rmx = c; save(); }
+  return Math.max(c, g);
+}
+// ===== Modo mantenimiento =====
+// El admin lo activa en su panel. Se guarda como un dato más del servidor (S.preds[MKEY].on), así llega a todos los dispositivos.
+// Mientras está activo, nadie entra (se tapa toda la web) y a quien esté dentro se le cierra la sesión. El admin sigue entrando con su PIN.
+const MKEY = "__mant";
+const maintOn = () => !!(S.preds[MKEY] && S.preds[MKEY].on);
+let maintShown = false;
+function applyMaint() {
+  let o = document.getElementById("maint");
+  if (!o) {
+    o = document.createElement("div"); o.id = "maint"; o.hidden = true; o.setAttribute("role", "alert");
+    o.innerHTML = '<div class="mt-b"><div class="mt-i" aria-hidden="true">🛠️</div><h2>En mantenimiento</h2><p>Estamos haciendo mejoras en Súper Predict.<br>Vuelve a entrar dentro de un rato.</p></div><button type="button" class="mt-a" id="maintAdmin">Admin</button>';
+    document.body.appendChild(o);
+    o.querySelector("#maintAdmin").onclick = () => go("admin");
+  }
+  const adminView = $("#admin").classList.contains("on"), on = maintOn(), show = on && !unlocked && !adminView;
+  if (show) {
+    if (!maintShown) { maintShown = true; if (me || pend) { pend = null; setMe(""); } }   // se echa a quien estuviera dentro
+    o.hidden = false;
+  } else {
+    o.hidden = true;
+    if (maintShown && !on) { maintShown = false; if (!adminView && !me) go("cuenta"); }   // fin del mantenimiento: pantalla de inicio de sesión
+  }
+}
+
 // Clasificación tras la jornada r (por defecto, la última calculada)
 function standings(r) {
   const rs = calcRounds(); if (r == null) r = rs.length ? rs[rs.length - 1] : 0;
@@ -1918,7 +2001,7 @@ function renderJugar() {
     if (!todo.length) return fail("Escribe el resultado.");
     if (!(await ask("Una vez enviado no podrás cambiar tu pronóstico. ¿Enviarlo?", "Enviar"))) return;
     todo.forEach(([id, v]) => { const o = S.preds[id] = S.preds[id] || {}; if (!o[me]) o[me] = v; });
-    save(); renderJugar();
+    save(); renderJugar(); renderSobres(); checkCoins(); renderLogros();   // avisos de monedas y títulos al momento (primero monedas, luego títulos)
   };
 }
 
@@ -2683,10 +2766,9 @@ function renderHistorial() {
   const rounds = [...new Set(S.matches.filter(vis).map(m => m.round))].sort((a, b) => a - b);
   const tt = standings(), ix = tt.findIndex(p => p.id === pid);
   const fireOn = ix >= 0 && tt[ix].rc >= 3;   // en racha: el recuadro del perfil lleva llamas
-  let rk = 0, rc = 0;   // mayor racha de partidos seguidos puntuando (para la cabecera)
-  S.matches.filter(m => m.result).sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff)).forEach(m => { if (pts((S.preds[m.id] || {})[pid], m.result) > 0) { rc++; if (rc > rk) rk = rc; } else rc = 0; });
+  const rk = rachaRec(who);   // mayor racha conseguida (no baja nunca; para la cabecera)
   const head = (other ? `<div class="pf-top"><button class="pf-back" id="pfBack" aria-label="Volver">‹ Volver</button></div>` : "") + `
-    <div class="pf-hero${ix < 0 ? "" : ix < 4 ? " z-ucl" : ix < 6 ? " z-uel" : ix < 8 ? " z-uecl" : ""}${fireOn ? " fire" : ""}">${fireOn ? '<span class="pf-fire" aria-hidden="true"><i class="t"></i><i class="r"></i><i class="b"></i><i class="l"></i></span>' : ""}<div class="pf-crest">${crest(who.team)}</div><div class="pf-name" role="heading" aria-level="2">${esc(who.name)}</div>${ttlHtml(who, "pf")}
+    <div class="pf-hero${ix < 0 ? "" : ix < 4 ? " z-ucl" : ix < 6 ? " z-uel" : ix < 8 ? " z-uecl" : ""}${fireOn ? " fire" : ""}">${fireOn ? '<span class="pf-fire" aria-hidden="true"><i class="u"></i></span>' : ""}<div class="pf-crest">${crest(who.team)}</div><div class="pf-name" role="heading" aria-level="2">${esc(who.name)}</div>${ttlHtml(who, "pf")}
     <div class="pf-badges"><span class="gd">${ix >= 0 ? ix + 1 + "º" : "—"}</span><span>${ix >= 0 ? tt[ix].pt : 0}<small>PT</small></span><span class="fr" title="Mayor racha" aria-label="Mayor racha: ${rk}">${rk}<i aria-hidden="true">🔥</i></span></div></div>` + (other ? `
     <p class="pf-sec">Sus predicciones</p>` : `
     <h2>Historial</h2>`);
@@ -2708,8 +2790,7 @@ function renderHistorial() {
   const t = standings(), i = t.findIndex(p => p.id === pid), jug = S.matches.filter(m => m.result);
   const pm = jug.map(m => pts((S.preds[m.id] || {})[pid], m.result)), ex = pm.filter(x => x === 3).length, md = pm.filter(x => x === 1).length, ef = jug.length ? Math.round(pm.reduce((a, b) => a + b, 0) / (3 * jug.length) * 100) + "%" : "0%";
   const part = jug.filter(m => (S.preds[m.id] || {})[pid]).length;
-  let racha = 0, cur_ = 0;   // mayor racha de partidos seguidos puntuando
-  [...jug].sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff)).forEach(m => { if (pts((S.preds[m.id] || {})[pid], m.result) > 0) { cur_++; if (cur_ > racha) racha = cur_; } else cur_ = 0; });
+  const racha = rk;   // mayor racha conseguida
   const pc = n => jug.length ? Math.round(n / jug.length * 100) + "%" : "0%";
   box.innerHTML = head + list + (other ? vitrinaHtml(who) + albumVerHtml(who) : `<h2 style="margin-top:26px">Estadísticas</h2><div class="stats">
       <div class="st"><span>Posición actual</span><b>${i >= 0 ? i + 1 + "º" : "—"}</b></div>
@@ -2834,10 +2915,18 @@ function renderAdmin() {
   </svg>
     <div class="ub-t"><b aria-label="Súper Predict"><span aria-hidden="true"><span class="w"><span class="l" style="--i:0">S</span><span class="l" style="--i:1">ú</span><span class="l" style="--i:2">p</span><span class="l" style="--i:3">e</span><span class="l" style="--i:4">r</span></span> <span class="w"><span class="l" style="--i:6">P</span><span class="l" style="--i:7">r</span><span class="l" style="--i:8">e</span><span class="l" style="--i:9">d</span><span class="l" style="--i:10">i</span><span class="l" style="--i:11">c</span><span class="l" style="--i:12">t</span></span></span><i class="sp" aria-hidden="true" style="left:-3%;top:-34%;--d:0s">✦</i><i class="sp" aria-hidden="true" style="left:100%;top:-14%;--d:1.6s;font-size:.4em">✦</i></b><span>Panel de administración</span></div>
     <button class="ub-btn" id="exitA" aria-label="Salir del admin" title="Salir del admin"><svg class="ub-back" viewBox="0 0 24 24" aria-hidden="true"><g transform="matrix(-1 0 0 1 24 0)"><path d="M13 4.6V1.8H2.2v20.4H13v-2.8"/><path d="M8.6 8.2h6.6V4.6L22.6 12l-7.4 7.4v-3.6H8.6z"/></g></svg></button></div>
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px${maintOn() ? ";border-color:#ffb347" : ""}"><div><b>Modo mantenimiento</b><div class="muted" style="font-size:13px;margin-top:2px">${maintOn() ? "ACTIVO: nadie puede entrar" : "Desactivado"}</div></div><button class="btn ${maintOn() ? "" : "ghost"}" id="maintBtn" style="margin:0;white-space:nowrap">${maintOn() ? "Desactivar" : "Activar"}</button></div>
     <div class="row" style="margin-bottom:14px">${subs.map(([k, l]) => `<button class="sub ${AD.tab === k ? "on" : ""}" data-sub="${k}">${l}</button>`).join("")}</div>
     <div id="adTab"></div>`;
   eyeInit();
   $("#exitA").onclick = () => { unlocked = false; AD.round = null; AD.open = false; AD.det = null; AD.res = null; go(meP() ? "inicio" : "cuenta"); };
+  $("#maintBtn").onclick = async () => {
+    const on = maintOn();
+    if (!(await ask(on ? "¿Desactivar el modo mantenimiento? Los jugadores podrán volver a entrar." : "¿Activar el modo mantenimiento? Se echará a todos los jugadores y nadie podrá entrar hasta que lo desactives.", on ? "Desactivar" : "Activar"))) return;
+    if (on) { const m = S.preds[MKEY]; delete m.on; if (!Object.keys(m).length) delete S.preds[MKEY]; }
+    else (S.preds[MKEY] = S.preds[MKEY] || {}).on = { t: Date.now() };
+    save(); renderAdmin();
+  };
   box.querySelectorAll("[data-sub]").forEach(b => b.onclick = () => { AD.tab = b.dataset.sub; AD.msg = ""; AD.det = null; AD.res = null; renderAdmin(); });
   ({ jornada: adJornada, participantes: adParts, trofeos: adTrofeos, monedas: adMonedas })[AD.tab]($("#adTab"));
 }
@@ -2861,7 +2950,7 @@ async function delRound(r) {
 const histLen = p => Array.isArray(p.hist) ? p.hist.length : 0;
 const temporada = () => Math.max(1, ...S.players.map(p => (Number.isInteger(p.tb) && p.tb > 0 ? p.tb : 1) + histLen(p)));
 async function nuevaTemporada() {
-  const n = temporada(), played = calcRounds().length > 0, nr = new Set(S.matches.map(m => m.round)).size, np = Object.values(S.preds).reduce((a, m) => a + Object.keys(m).length, 0);
+  const n = temporada(), played = calcRounds().length > 0, nr = new Set(S.matches.map(m => m.round)).size, np = Object.keys(S.preds).filter(k => k !== MKEY).reduce((a, k) => a + Object.keys(S.preds[k]).length, 0);
   const txt = `¿Empezar la temporada ${n + 1}? Se borrarán ${nr} jornada${nr === 1 ? "" : "s"} y ${np} predicción${np === 1 ? "" : "es"}, la clasificación volverá a cero y todos pasarán a "Sin pagar". Se mantienen los participantes, sus escudos y sus trofeos${played ? `, y se guarda la posición final de cada uno en la temporada ${n}` : ""}. Si quieres una copia de seguridad, expórtala antes desde Participantes. No se puede deshacer.`;
   if (!(await ask(txt, "Nueva temporada"))) return;
   if (played) standings().forEach((q, i) => { const pl = S.players.find(x => x.id === q.id); if (pl) pl.hist = [...(Array.isArray(pl.hist) ? pl.hist : []), { t: n, pos: i + 1, pt: q.pt }]; });
@@ -3094,7 +3183,7 @@ function checkCoins() {
   const p = meP(); if (!p) return;
   if (!coinSeen) { try { coinSeen = JSON.parse(localStorage.getItem(CSEEN)) || {}; } catch (e) { coinSeen = {}; } }
   const g = ganadasDe(p), prev = coinSeen[p.id];
-  if (prev !== undefined && g > prev) { const d = g - prev; toast(`¡Has conseguido ${d} PredictCoin${d === 1 ? "" : "s"}!`); }
+  if (prev !== undefined && g > prev) { const d = g - prev; toastLater(`¡Has conseguido ${d} PredictCoin${d === 1 ? "" : "s"}!`); }
   if (prev !== g) { coinSeen[p.id] = g; try { localStorage.setItem(CSEEN, JSON.stringify(coinSeen)); } catch (e) {} }
 }
 function coinsDe(p) {
@@ -3463,12 +3552,13 @@ async function abrirSobre() {
   if (document.getElementById("pko") || abriendo) return;
   SFX.init();   // dentro del toque del usuario: el navegador permite el audio
   const me0 = meP(); if (!me0) return;
-  mergeCromos();   // por si el servidor había pisado algún cromo: no se repite ni se pierde ninguno
+  if (!synced) { toast("Sincronizando con el servidor… inténtalo en un momento"); pull(); return; }   // con datos viejos del móvil la moneda podía parecer sin gastar
+  mergeCromos();   // por si el servidor había pisado algún cromo o un gasto: no se repite ni se pierde ninguno
   const libre = gratisLibres(me0) > 0;   // primero se gasta el sobre gratis, si hay
   if (!libre && coinsDe(me0) < PACK_PRECIO) return;
   const c = sortearCromo(me0); if (!c) return;   // colección completa
   abriendo = true;
-  me0.cromos = [...(me0.cromos || []), c.n]; me0.sobres = (me0.sobres || 0) + 1; if (libre) me0.sg = (me0.sg || 0) + 1; ledgerAdd(me0, c.n); save();   // se guarda ya: cerrar la pestaña no pierde el cromo
+  me0.cromos = [...(me0.cromos || []), c.n]; me0.sobres = (me0.sobres || 0) + 1; if (libre) me0.sg = (me0.sg || 0) + 1; ledgerAdd(me0, c.n); mergeGastos(); save();   // se guarda ya: cerrar la pestaña no pierde el cromo
   const R = RAREZA[c.k];
   const reduce = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
   const o = document.createElement("div");
@@ -3892,7 +3982,7 @@ function renderTitulos() {   // tienda (pestaña Sobres, entre abrir sobres y el
     if (!(await ask(`¿Comprar «${t.n}» por ${TITULO_PRECIO} PredictCoins?`, "Comprar"))) return;
     q = meP();   // mientras el diálogo estaba abierto, el estado pudo recargarse
     if (!q || !S.players.includes(q) || coinsDe(q) < TITULO_PRECIO || (q.comprados || []).includes(id)) return;
-    q.comprados = [...(q.comprados || []), id]; save(); toast("¡Título comprado: " + t.n + "!"); render();
+    q.comprados = [...(q.comprados || []), id]; mergeGastos(); save(); toast("¡Título comprado: " + t.n + "!"); render();
   });
 }
 let titulosAbiertos = false;   // lista de títulos del perfil: 5 a la vista y "Ver más" para el resto
@@ -3909,7 +3999,7 @@ function renderLogros() {
   const had0 = new Set(have);
   if (real && synced) {   // los logros desbloqueados se guardan para siempre en el jugador (solo tras leer el servidor, para no recrear fichas borradas)
     const nu = TITULOS.filter(t => !have.has(t.id) && s[t.k] >= t.v);
-    if (nu.length) { nu.forEach(t => have.add(t.id)); p.logros = [...have]; save(); toast("¡Título desbloqueado: " + nu[0].n + "!" + (nu.length > 1 ? " (+" + (nu.length - 1) + ")" : "")); }
+    if (nu.length) { nu.forEach(t => have.add(t.id)); p.logros = [...have]; save(); toastLater("¡Título desbloqueado: " + nu[0].n + "!" + (nu.length > 1 ? " (+" + (nu.length - 1) + ")" : "")); }
   }
   let nuevos = new Set();   // logros conseguidos que el jugador aún no ha visto (puntito rojo)
   if (real && synced) {
@@ -4004,7 +4094,7 @@ function renderAvisos() {
     el.classList.remove("nw"); navDot("jugar", nuevos.some(id => !vis.includes(id)));
   }); else seenWatch("partidos", [], () => {});
 }
-function render() { renderEquipo(); if (pend) return; renderCuenta(); renderJugar(); renderTabla(); renderHistorial(); renderSobres(); renderLogros(); renderAvisos(); renderAdmin(); checkCoins(); }
+function render() { applyMaint(); renderEquipo(); if (pend) return; renderCuenta(); renderJugar(); renderTabla(); renderHistorial(); renderSobres(); checkCoins(); renderLogros(); renderAvisos(); renderAdmin(); }
 setMe(me);
 go(meP() ? "inicio" : "cuenta");
 boot();
