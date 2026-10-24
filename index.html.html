@@ -547,7 +547,8 @@ td .crest{width:30px;height:30px}
 /* ===== Sobres / PredictCoin ===== */
 #sobres>h2{font:700 17px/1.3 var(--b)!important;letter-spacing:.12em!important;text-transform:uppercase;text-align:center;color:var(--mute)!important;-webkit-text-fill-color:currentColor!important;background:none!important;filter:none!important;animation:none!important;margin-bottom:14px}
 #sobres{position:relative}
-#sobresBox{position:absolute;right:4px;top:37px;transform:translateY(-50%);white-space:nowrap}
+#sobresBox{position:sticky;top:calc(var(--ubh,76px) + 13px);z-index:12;height:0;display:flex;justify-content:flex-end;padding-right:4px;white-space:nowrap;pointer-events:none}
+#sobresBox .pcc{margin-top:11px;transform:translateY(-50%);padding:4px 12px 4px 5px;border-radius:99px;background:rgba(12,17,21,.88);border:1px solid var(--line);box-shadow:0 4px 14px #0008;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .pcc{display:flex;align-items:center;gap:6px;padding-right:2px}
 .pcc img{width:28px;height:28px;display:block;border-radius:50%;box-shadow:0 0 9px rgba(240,190,70,.5);user-select:none;-webkit-user-drag:none}
 .pcc b{font:400 19px/1 var(--h);color:#fff;text-shadow:0 0 6px rgba(255,255,255,.55),0 0 12px rgba(255,255,255,.25);letter-spacing:.02em}
@@ -759,6 +760,8 @@ html.pko-lock,html.pko-lock body{overflow:hidden}
 .ti-r.on .ti-b{background:#ffc83d;color:#1a1204}
 .ti-l{flex:none;font-size:18px}
 .mtl.sh{color:#7fd4ff;text-shadow:0 0 8px rgba(0,180,216,.4)}
+.pl>.plw{flex:1 1 0;min-width:0}
+.mtl.tb{width:0;min-width:100%;box-sizing:border-box;font-size:5px;line-height:1.2;letter-spacing:.02em;text-transform:none;white-space:nowrap;margin-top:1px}
 .ti-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:22px 2px 10px;font:700 13px/1.2 var(--b);letter-spacing:.14em;text-transform:uppercase;color:var(--text)}
 .ti-h:first-of-type{margin-top:6px}
 .ti-h span{font-weight:600;letter-spacing:.06em;text-transform:none;font-size:12px;color:var(--mute)}
@@ -949,19 +952,20 @@ html.pko-lock,html.pko-lock body{overflow:hidden}
 
 <!-- SOBRES -->
 <section id="sobres">
-  <h2>Sobres</h2>
   <div id="sobresBox"></div>
+  <h2>Sobres</h2>
   <div id="packBox"></div>
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:34px"><h2 style="margin:0">Álbum</h2><button type="button" class="btn" id="albOpen" style="width:auto;padding:0 20px">Ver álbum</button></div>
-  <div id="albumBox"></div>
-  <h2 style="margin-top:34px">Títulos</h2>
+  <h2 style="margin-top:34px">Tienda de títulos</h2>
   <div id="titulosBox"></div>
+  <h2 style="margin-top:34px">Álbum</h2>
+  <div id="albumBox"></div>
 </section>
 
 <!-- HISTORIAL -->
 <section id="historial">
   <h2>Historial</h2>
   <div id="historialBox"></div>
+  <div id="logrosBox"></div>
 </section>
 
 <!-- ADMIN -->
@@ -1099,10 +1103,12 @@ CONFIG.ligas = [
 
 const KEY = "superpredict_v1";
 const MAX_PLAYERS = 20;
+const okPl = p => !!p && typeof p.name === "string" && p.name !== "";   // una ficha sin nombre no es un jugador (se descarta y se borra del servidor)
 const clone = o => JSON.parse(JSON.stringify(o));
 const norm = d => { d = d && typeof d === "object" ? d : {}; return Object.assign({}, d, { players: Array.isArray(d.players) ? d.players : [], matches: Array.isArray(d.matches) ? d.matches : [], preds: d.preds && typeof d.preds === "object" ? d.preds : {} }); };
-let S = norm(null), base = norm(null), busy = false, again = false;
+let S = norm(null), base = norm(null), busy = false, again = false, synced = false;   // synced: ya se ha leído el servidor al menos una vez
 try { const r = localStorage.getItem(KEY); if (r) S = norm(JSON.parse(r)); } catch (e) {}
+S.players = S.players.filter(okPl);
 try { const r = localStorage.getItem(KEY + "_base"); base = r ? norm(JSON.parse(r)) : clone(S); } catch (e) { base = clone(S); }
 const cacheSave = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); localStorage.setItem(KEY + "_base", JSON.stringify(base)); } catch (e) {} };
 let wseq = 0;   // contador de escrituras: una lectura del servidor lanzada antes de una escritura queda obsoleta
@@ -1222,6 +1228,8 @@ function adopt(st, silent) {
   const ns = norm(st); let same = JSON.stringify(ns) === JSON.stringify(S);
   S = ns; base = clone(S);   // base = copia del servidor; lo recuperado abajo se enviará como cambio
   let healed = false;
+  const firstSync = !synced; synced = true;
+  if (S.players.some(q => !okPl(q))) { S.players = S.players.filter(okPl); healed = true; }   // fichas fantasma: se quitan aquí y la diferencia con el servidor las borra allí
   if (prevMe && justReg.id === me && Date.now() < justReg.until && !S.players.some(p => p.id === me)
       && S.players.length < MAX_PLAYERS && !S.players.some(p => p.name.toLowerCase() === prevMe.name.toLowerCase() || (prevMe.team && p.team === prevMe.team))) {
     S.players.push(clone(prevMe)); healed = true;   // el servidor devolvió un estado viejo o pisó el alta: se reenvía
@@ -1229,7 +1237,7 @@ function adopt(st, silent) {
   const rec = mergeCromos() || healed; if (rec) same = false;
   cacheSave(); if (rec) flush();
   if (me && !meP()) { setMe(""); if (!silent) { go("cuenta"); toast("No se pudo completar el registro. Inténtalo de nuevo."); } return; }
-  if (!same && !silent && !typing()) { setMe(me); render(); }
+  if ((!same || firstSync) && !silent && !typing()) { setMe(me); render(); }
   migrate();
 }
 async function pull(silent) {
@@ -1279,7 +1287,7 @@ function setMe(id) {
   try { keep ? localStorage.setItem(SESSION, id) : localStorage.removeItem(SESSION); } catch (e) {}
   try { document.cookie = SESSION + "=" + (keep ? encodeURIComponent(id) : "") + "; max-age=" + (keep ? 31536000 : 0) + "; path=/; SameSite=Lax"; } catch (e) {}
   try { if (id && navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
-  const p = meP(); $("#userBar").style.display = p ? "block" : "none"; $("#ubName").innerHTML = p ? (p.team ? crest(p.team, false) : "") + "<span>" + sn(p.name) + "</span>" : ""; document.querySelector(".hero").style.display = p ? "none" : ""; $("#mainNav").style.display = p ? "flex" : "none";
+  const p = meP(); $("#userBar").style.display = p ? "block" : "none"; $("#ubName").innerHTML = p ? (p.team ? crest(p.team, false) : "") + "<span>" + sn(p.name) + "</span>" : ""; document.querySelector(".hero").style.display = (p || $("#admin").classList.contains("on")) ? "none" : ""; $("#mainNav").style.display = p ? "flex" : "none";
 }
 const b64 = u => btoa(String.fromCharCode(...u)), unb64 = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));
 async function pinKey() {
@@ -1675,8 +1683,9 @@ function renderTabla() {
   const nav = rs.length ? `<div class="jhead"><div class="jn">${rs.length > 1 ? `<button class="jb" data-jd="-1" ${idx <= 0 ? "disabled" : ""} aria-label="Jornada anterior">‹</button>` : ""}<b>Jornada ${cur}</b>${rs.length > 1 ? `<button class="jb" data-jd="1" ${idx >= rs.length - 1 ? "disabled" : ""} aria-label="Jornada siguiente">›</button>` : ""}</div></div>` : "";
   $("#tablaNav").innerHTML = nav;
   $("#tablaBox").innerHTML = `<table><thead><tr><th class="n">Pos</th><th>Jugador</th><th class="n">PG</th><th class="n">PT</th><th class="arr"></th></tr></thead><tbody>` +
-    t.map((p, i) => `<tr data-pid="${p.id}" class="${i < 4 ? "z-ucl" : i < 6 ? "z-uel" : i < 8 ? "z-uecl" : ""}${p.id === me ? " mine" : ""}"><td class="pos">${i + 1}º</td><td><div class="pl">${p.team ? crest(p.team, false) : ""}<span class="plw"><span class="${p.id === me ? "me" : ""}">${esc(p.name)}</span>${ttlHtml(p)}</span></div></td><td class="n ${p.pg > 0 ? "pg-up" : "pg-0"}">${p.pg > 0 ? "+" + p.pg : "0"}</td><td class="n pt">${p.pt}</td><td class="arr">${mvIcon(p.mv)}</td></tr>`).join("") + "</tbody></table>";
+    t.map((p, i) => `<tr data-pid="${p.id}" class="${i < 4 ? "z-ucl" : i < 6 ? "z-uel" : i < 8 ? "z-uecl" : ""}${p.id === me ? " mine" : ""}"><td class="pos">${i + 1}º</td><td><div class="pl">${p.team ? crest(p.team, false) : ""}<span class="plw"><span class="${p.id === me ? "me" : ""}">${esc(p.name)}</span>${ttlHtml(p, "tb")}</span></div></td><td class="n ${p.pg > 0 ? "pg-up" : "pg-0"}">${p.pg > 0 ? "+" + p.pg : "0"}</td><td class="n pt">${p.pt}</td><td class="arr">${mvIcon(p.mv)}</td></tr>`).join("") + "</tbody></table>";
   $("#tablaNav").querySelectorAll("[data-jd]").forEach(b => b.onclick = () => { const n = rs[idx + +b.dataset.jd]; if (n == null) return; tv = n === last ? null : n; renderTabla(); });
+  fitTitulos($("#tablaBox"));
   setupMyPos(t);
 }
 
@@ -2332,10 +2341,10 @@ function renderHistorial() {
   const tt = standings(), ix = tt.findIndex(p => p.id === pid);
   let rk = 0, rc = 0;   // mayor racha de partidos seguidos puntuando (para la cabecera)
   S.matches.filter(m => m.result).sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff)).forEach(m => { if (pts((S.preds[m.id] || {})[pid], m.result) > 0) { rc++; if (rc > rk) rk = rc; } else rc = 0; });
-  const head = other ? `<div class="pf-top"><button class="pf-back" id="pfBack" aria-label="Volver">‹ Volver</button></div>
-    <div class="pf-hero"><div class="pf-crest">${crest(who.team)}</div><div class="pf-name" role="heading" aria-level="2">${esc(who.name)}</div>${ttlHtml(who, "pf")}${who.team ? `<div class="pf-team">${esc(who.team)}</div>` : ""}
-    <div class="pf-badges"><span class="gd">${ix >= 0 ? ix + 1 + "º" : "—"}</span><span>${ix >= 0 ? tt[ix].pt : 0}<small>PT</small></span><span class="fr" title="Mayor racha" aria-label="Mayor racha: ${rk}">${rk}<i aria-hidden="true">🔥</i></span></div></div>
-    <p class="pf-sec">Sus predicciones</p>` : "";
+  const head = (other ? `<div class="pf-top"><button class="pf-back" id="pfBack" aria-label="Volver">‹ Volver</button></div>` : "") + `
+    <div class="pf-hero"><div class="pf-crest">${crest(who.team)}</div><div class="pf-name" role="heading" aria-level="2">${esc(who.name)}</div>${ttlHtml(who, "pf")}
+    <div class="pf-badges"><span class="gd">${ix >= 0 ? ix + 1 + "º" : "—"}</span><span>${ix >= 0 ? tt[ix].pt : 0}<small>PT</small></span><span class="fr" title="Mayor racha" aria-label="Mayor racha: ${rk}">${rk}<i aria-hidden="true">🔥</i></span></div></div>` + (other ? `
+    <p class="pf-sec">Sus predicciones</p>` : "");
   const bindBack = () => { const bk = $("#pfBack"); if (bk) bk.onclick = () => { viewId = null; go(viewFrom); }; };
   if (!rounds.length) { box.innerHTML = head + `<div class="card muted">${other ? "Todavía no hay partidos cerrados." : "Todavía no hay partidos."}</div>` + vitrinaHtml(who); bindVitrina(box, who); bindBack(); return; }
   const withRes = rounds.filter(r => S.matches.some(m => m.round === r && m.result));
@@ -3291,6 +3300,7 @@ let lastCoins = null;
 function renderSobres() {
   const box = $("#sobresBox"); if (!box) return;
   const p = meP(), n = coinsDe(p), pop = lastCoins !== null && n !== lastCoins;
+  { const ub = $("#userBar"); if (ub && ub.offsetHeight) document.documentElement.style.setProperty("--ubh", ub.offsetHeight + "px"); }
   lastCoins = n;
   renderPack();
   renderAlbum();
@@ -3403,47 +3413,70 @@ function statsDe(p) {
   });
   return s;
 }
-function renderTitulos() {
+function renderTitulos() {   // tienda (pestaña Sobres, entre abrir sobres y el álbum)
   const box = $("#titulosBox"); if (!box) return;
   const p = meP(); if (!p) { box.innerHTML = ""; return; }
-  const real = p !== pend && S.players.includes(p), s = statsDe(p), have = new Set((p.logros || []).filter(id => TITULOS.some(t => t.id === id)));
-  if (real) {   // los logros desbloqueados se guardan para siempre en el jugador
-    const nu = TITULOS.filter(t => !have.has(t.id) && s[t.k] >= t.v);
-    if (nu.length) { nu.forEach(t => have.add(t.id)); p.logros = [...have]; save(); toast("¡Título desbloqueado: " + nu[0].n + "!" + (nu.length > 1 ? " (+" + (nu.length - 1) + ")" : "")); }
-  }
+  const real = p !== pend && S.players.includes(p);
   const own = new Set((p.comprados || []).filter(id => TIENDA.some(t => t.id === id)));
   const sem = tiendaSemana(), coins = coinsDe(p), cur = ttlFind(p.titulo);
   const shopRow = t => {
     const ok = own.has(t.id), on = p.titulo === t.id;
-    return `<div class="ti-r sh${ok ? " ok" : ""}${on ? " on" : ""}"><div class="ti-i"><b>${esc(t.n)}</b><span>Título de la tienda</span></div>${ok
+    return `<div class="ti-r sh${ok ? " ok" : ""}${on ? " on" : ""}"><div class="ti-i"><b>${esc(t.n)}</b><span>Título de Personalización</span></div>${ok
       ? `<button type="button" class="ti-b" data-ti="${t.id}">${on ? "Quitar" : "Equipar"}</button>`
       : `<button type="button" class="ti-b ti-buy" data-buy="${t.id}"${real && coins >= TITULO_PRECIO ? "" : " disabled"} aria-label="Comprar por ${TITULO_PRECIO} PredictCoins"><img src="${COIN_IMG}" alt=""><span>${TITULO_PRECIO}</span></button>`}</div>`;
   };
   const prev = TIENDA.filter(t => own.has(t.id) && !sem.items.includes(t));
-  box.innerHTML = `<p class="muted" style="text-align:center;margin:-4px 0 12px">${have.size}/${TITULOS.length} logros · ${cur ? "Llevas «" + esc(cur.n) + "»" : "Toca Equipar para ponértelo bajo tu nombre"}</p>
-    <h3 class="ti-h">Tienda<span>Se renueva ${sem.dias === 1 ? "mañana" : "en " + sem.dias + " días"}</span></h3>
+  box.innerHTML = `<p class="muted" style="text-align:center;margin:-4px 0 14px">Se renueva ${sem.dias === 1 ? "mañana" : "en " + sem.dias + " días"}</p>
     <div class="ti-g">${sem.items.map(shopRow).join("")}</div>
-    ${prev.length ? `<h3 class="ti-h">Tus compras</h3><div class="ti-g">${prev.map(shopRow).join("")}</div>` : ""}
-    <h3 class="ti-h">Logros<span>No se pueden comprar</span></h3>
-    <div class="ti-g">${TITULOS.map(t => {
-      const ok = have.has(t.id), c = Math.min(s[t.k], t.v), on = p.titulo === t.id;
-      return `<div class="ti-r${ok ? " ok" : ""}${on ? " on" : ""}"><div class="ti-i"><b>${esc(t.n)}</b><span>${esc(t.d)}</span>${ok ? "" : `<i class="ti-p"><u style="width:${c / t.v * 100}%"></u></i><em>${c}/${t.v}</em>`}</div>${ok ? `<button type="button" class="ti-b" data-ti="${t.id}">${on ? "Quitar" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}</div>`;
-    }).join("")}</div>`;
+    ${prev.length ? `<h3 class="ti-h">Tus compras</h3><div class="ti-g">${prev.map(shopRow).join("")}</div>` : ""}`;
   box.querySelectorAll("[data-ti]").forEach(b => b.onclick = () => {
-    const id = b.dataset.ti; if (!real || !(have.has(id) || own.has(id))) return;
+    const id = b.dataset.ti; if (!real || !synced || !own.has(id)) return;
     p.titulo = p.titulo === id ? "" : id; save(); render();
   });
   box.querySelectorAll("[data-buy]").forEach(b => b.onclick = async () => {
     const id = b.dataset.buy, t = TIENDA.find(x => x.id === id);
-    if (!real || !t || own.has(id) || !sem.items.includes(t)) return;
+    if (!real || !synced || !t || own.has(id) || !sem.items.includes(t)) return;
     if (coinsDe(p) < TITULO_PRECIO) { toast("No tienes PredictCoins suficientes"); return; }
     if (!(await ask(`¿Comprar «${t.n}» por ${TITULO_PRECIO} PredictCoins?`, "Comprar"))) return;
     if (coinsDe(p) < TITULO_PRECIO || (p.comprados || []).includes(id)) return;
     p.comprados = [...(p.comprados || []), id]; save(); toast("¡Título comprado: " + t.n + "!"); render();
   });
 }
+function renderLogros() {   // logros (pestaña de perfil, debajo del palmarés)
+  const box = $("#logrosBox"); if (!box) return;
+  const p = meP(); if (!p) { box.innerHTML = ""; return; }
+  const real = p !== pend && S.players.includes(p), s = statsDe(p), have = new Set((p.logros || []).filter(id => TITULOS.some(t => t.id === id)));
+  if (real && synced) {   // los logros desbloqueados se guardan para siempre en el jugador (solo tras leer el servidor, para no recrear fichas borradas)
+    const nu = TITULOS.filter(t => !have.has(t.id) && s[t.k] >= t.v);
+    if (nu.length) { nu.forEach(t => have.add(t.id)); p.logros = [...have]; save(); toast("¡Título desbloqueado: " + nu[0].n + "!" + (nu.length > 1 ? " (+" + (nu.length - 1) + ")" : "")); }
+  }
+  if (viewId && viewId !== me) { box.innerHTML = ""; return; }   // en el perfil de otro jugador no se muestran
+  const cur = ttlFind(p.titulo);
+  box.innerHTML = `<h2 style="margin-top:26px">Logros</h2>
+    <p class="muted" style="text-align:center;margin:-4px 8px 6px">Cada logro que consigues desbloquea un <b>título de personalización</b>: equípalo y aparecerá bajo tu nombre en tu perfil y en la clasificación.</p>
+    <p class="muted" style="text-align:center;margin:0 0 12px">${have.size}/${TITULOS.length} desbloqueados · ${cur ? "Llevas «" + esc(cur.n) + "»" : "Aún no llevas ninguno"}</p>
+    <div class="ti-g">${[...TITULOS.filter(t => have.has(t.id)), ...TITULOS.filter(t => !have.has(t.id))].map(t => {
+      const ok = have.has(t.id), c = Math.min(s[t.k], t.v), on = p.titulo === t.id;
+      return `<div class="ti-r${ok ? " ok" : ""}${on ? " on" : ""}"><div class="ti-i"><b>${esc(t.n)}</b><span>${esc(t.d)}</span>${ok ? "" : `<i class="ti-p"><u style="width:${c / t.v * 100}%"></u></i><em>${c}/${t.v}</em>`}</div>${ok ? `<button type="button" class="ti-b" data-ti="${t.id}">${on ? "Quitar" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}</div>`;
+    }).join("")}</div>`;
+  box.querySelectorAll("[data-ti]").forEach(b => b.onclick = () => {
+    const id = b.dataset.ti; if (!real || !synced || !have.has(id)) return;
+    p.titulo = p.titulo === id ? "" : id; save(); render();
+  });
+}
 
-function render() { renderEquipo(); if (pend) return; renderCuenta(); renderJugar(); renderTabla(); renderHistorial(); renderSobres(); renderAdmin(); }
+// Títulos de la clasificación: letra muy pequeña y, si hace falta, aún menor para que quepan enteros en una sola línea
+function fitTitulos(root) {
+  (root || document).querySelectorAll(".mtl.tb").forEach(el => {
+    const w = el.clientWidth; if (!w) return;   // pestaña oculta: se ajustará al mostrarla
+    el.style.fontSize = "5px"; const sw = el.scrollWidth;
+    if (sw > w) el.style.fontSize = Math.max(3, 5 * w / sw * .97).toFixed(2) + "px";
+  });
+}
+window.addEventListener("resize", () => fitTitulos());
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitTitulos());
+
+function render() { renderEquipo(); if (pend) return; renderCuenta(); renderJugar(); renderTabla(); renderHistorial(); renderSobres(); renderLogros(); renderAdmin(); }
 setMe(me);
 go(meP() ? "inicio" : "cuenta");
 boot();
