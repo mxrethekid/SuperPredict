@@ -1003,6 +1003,83 @@ nav button.nw::after{top:7px;left:calc(50% + 10px)}
 .mdn{font-size:12px;line-height:1.35;color:#a8efff;margin:4px 12px 0}
 .vrow{width:100%;color:inherit;font:inherit;text-align:left;cursor:pointer}
 .vrow .vs{font-size:13px;color:var(--cyan);white-space:nowrap}
+#evolBtn[hidden]{display:none}
+.br-cup{height:96px;font-size:0;line-height:0;margin:4px 0 10px}
+.en.wide .br-cup{height:80px;font-size:0;margin:0}
+.br-cup svg{display:block;height:100%;width:auto}
+.pc-sec{margin:6px 0 18px}
+.pc-t{font:700 17px/1.3 var(--b);letter-spacing:.12em;text-transform:uppercase;text-align:center;color:var(--mute);margin:8px 0 12px}
+.pc{max-width:430px;margin:0 auto;border-radius:18px;padding:10px;background:radial-gradient(120% 90% at 50% 0%,rgba(201,161,74,.16),rgba(12,17,21,.2) 70%);border:1px solid var(--line)}
+.pc-w{position:relative;width:100%;aspect-ratio:.9}
+.pc-w.pf-on{aspect-ratio:auto}
+.pc-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+.pc-ld{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--mute)}
+.pc-b{position:absolute;background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;border-radius:14px}
+.pc-b:focus-visible,.pf-b:focus-visible{outline:2px solid var(--cyan)}
+.pc-n{position:absolute;transform:translate(-50%,-50%);font:700 11px var(--b);color:#f0dcae;text-shadow:0 1px 2px #000;white-space:nowrap;pointer-events:none;letter-spacing:.02em}
+.pc-n.used{opacity:.45;text-decoration:line-through}
+.pc-n.armed{color:#ffd24a}
+.pc-h{text-align:center;font-size:12px;margin:8px 0 0}
+.pf{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:6px}
+.pf-b{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px 8px;border-radius:12px;border:1px solid var(--line);background:rgba(120,75,38,.35);color:var(--text);cursor:pointer}
+.pf-b .pf-i{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--c);background:linear-gradient(90deg,var(--c) 50%,var(--c2,var(--c)) 50%)}
+.pf-b .pc-n{position:static;transform:none}
+.pf-b.used{opacity:.5}.pf-b.armed{border-color:#ffd24a}
+.pq{margin-left:8px;padding:3px 10px;border-radius:99px;border:1px solid rgba(242,194,48,.6);background:none;color:inherit;font:600 12px var(--b);cursor:pointer}
+.pm-ov{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center;background:rgba(4,7,10,.78);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:tvf .2s ease}
+.pm-md{position:relative;width:100%;max-width:480px;max-height:88vh;overflow:auto;background:var(--panel);border:1px solid rgba(var(--gl),.55);border-bottom:0;border-radius:22px 22px 0 0;padding:22px 18px calc(22px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 40px -10px rgba(var(--gl),.45)}
+.pm-x{position:absolute;top:10px;right:10px;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--text);font-size:16px;cursor:pointer}
+.pm-h{display:flex;align-items:center;gap:14px;margin:0 40px 14px 0}
+.pm-i{flex:none;width:58px;height:58px;border-radius:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 22px -2px rgba(var(--gl),.7)}
+.pm-i i{font-style:normal;font-size:30px;line-height:1}
+.pm-n{font:700 22px/1.15 var(--b)}
+.pm-tag{margin-top:4px;font-size:13px;color:var(--mute)}
+.pm-s{margin:12px 0 0}
+.pm-s b{display:block;font-size:13px;color:var(--mute);margin-bottom:3px}
+.pm-s p{margin:0;font-size:15px;line-height:1.45}
+.pm-w{margin:12px 0 0;font-size:13px;line-height:1.4;color:#f2c230}
+.pm-q{margin:12px 0 0;font-size:16px;line-height:1.45}
+.pm-sc{display:inline!important;color:var(--text)!important;font-size:inherit!important}
+.pm-l{margin-top:10px}
+.pm-r{display:flex;gap:10px;margin-top:6px}
+.pm-r .btn{flex:1}
+.pm-md>.pm-bd>.btn{width:100%}
+.pm-md .cg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.pm-md .cg button{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:12px 8px;border-radius:10px;border:1px solid rgba(var(--gl),.55);background:rgba(var(--gl),.14);color:var(--text);font:600 14px var(--b);cursor:pointer}
+.pm-md .cg button:disabled{opacity:.35;cursor:default}
+.vrow[disabled]{opacity:.5;cursor:default}
+.pa-ov{position:fixed;inset:0;z-index:70;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 42%,rgba(var(--gl),.30),rgba(4,7,10,.93) 68%);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);animation:pa-bg .35s ease both;cursor:pointer}
+.pa-ov.out{animation:pa-out .45s ease forwards}
+.pa-b{position:relative;width:170px;height:212px;animation:pa-pop .5s cubic-bezier(.2,1.4,.4,1) both}
+.pa-b svg{position:relative;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 16px rgba(var(--gl),.65));animation:pa-shake 1.3s .4s ease-in-out both}
+.pa-liq{animation:pa-drain 1.35s .55s cubic-bezier(.5,0,.6,1) both}
+.pa-wv{animation:pa-wave .7s linear infinite}
+.pa-bu{fill:rgba(255,255,255,.7);animation:pa-bub 1s ease-in infinite}
+.pa-ck{transform-box:fill-box;transform-origin:center;animation:pa-cork .9s .3s cubic-bezier(.3,.7,.4,1) both}
+.pa-ring{position:absolute;left:50%;top:48%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:2px solid rgba(var(--gl),.9);opacity:0;animation:pa-ring 1.2s .45s ease-out both}
+.pa-ring.r2{animation-delay:.85s}
+.pa-sp{position:absolute;left:50%;top:5%;width:0;height:0}
+.pa-s{position:absolute;left:0;top:0;width:var(--sz);height:var(--sz);margin:calc(var(--sz)/-2) 0 0 calc(var(--sz)/-2);border-radius:50%;opacity:0;box-shadow:0 0 8px 2px rgba(var(--gl),.8);animation:pa-spark 1.2s var(--dl) ease-out both}
+.pa-t{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;padding:0 24px;animation:pa-up .55s 1.55s ease-out both}
+.pa-t b{font:700 26px/1.1 var(--b);color:var(--c);text-shadow:0 0 22px var(--c)}
+.pa-t span{font-size:15px;color:var(--text);opacity:.9}
+.pa-rm *{animation:none!important}
+.pa-rm .pa-liq,.pa-rm .pa-ck,.pa-rm .pa-ring,.pa-rm .pa-s{display:none}
+@keyframes pa-bg{from{opacity:0}to{opacity:1}}
+@keyframes pa-out{to{opacity:0}}
+@keyframes pa-pop{from{opacity:0;transform:scale(.55) translateY(24px)}to{opacity:1;transform:none}}
+@keyframes pa-shake{0%,100%{transform:rotate(0)}15%{transform:rotate(-6deg)}35%{transform:rotate(5deg)}55%{transform:rotate(-4deg)}75%{transform:rotate(3deg)}}
+@keyframes pa-drain{from{transform:translateY(0)}to{transform:translateY(82px)}}
+@keyframes pa-wave{from{transform:translateX(0)}to{transform:translateX(-25px)}}
+@keyframes pa-bub{0%{transform:translateY(8px);opacity:0}25%{opacity:.9}100%{transform:translateY(-34px);opacity:0}}
+@keyframes pa-cork{0%{transform:none;opacity:1}35%{transform:translateY(-26px) rotate(-18deg);opacity:1}100%{transform:translateY(-95px) rotate(42deg);opacity:0}}
+@keyframes pa-ring{0%{transform:scale(.35);opacity:.9}100%{transform:scale(2.3);opacity:0}}
+@keyframes pa-spark{0%{transform:translate(0,0) scale(.3);opacity:0}15%{opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1);opacity:0}}
+@keyframes pa-up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.pm-mt{display:flex;align-items:center;justify-content:center;gap:10px;margin:6px 0 4px;font-weight:600;font-size:15px;text-align:center}
+.pm-sr{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0 0}
+.pm-sl{flex:1;font-size:13px;color:var(--mute)}
+.pm-sr input{width:70px;text-align:center;font:400 28px var(--h);padding:8px 4px}
 </style>
 </head>
 <body>
@@ -1216,13 +1293,14 @@ nav button.nw::after{top:7px;left:calc(50% + 10px)}
   <div id="tablaNav"></div>
   <div class="card" style="padding:6px 10px"><div id="tablaBox"></div></div>
   <div class="muted" style="margin:12px 0;line-height:1.6"><div>- <b>PG</b>: Puntos ganados en la jornada</div><div>- <b>PT</b>: Puntos totales</div></div>
+  <button type="button" class="btn ghost" id="evolBtn" style="width:100%;margin:0 0 14px" aria-expanded="false" aria-controls="evolCard" hidden>Ver evolución de posiciones</button>
+  <div class="card" id="evolCard" style="margin-bottom:18px" hidden><h3 style="text-align:center;color:var(--cyan)">Evolución de posiciones</h3><div id="evolBox"></div></div>
   <div class="badges">
     <span class="badge z-ucl">Champions</span>
     <span class="badge z-uel">Europa League</span>
     <span class="badge z-uecl">Conference League</span>
   </div>
   <div id="euroBox"></div>
-  <div class="card" id="evolCard" style="margin-top:18px" hidden><h3 style="text-align:center;color:var(--cyan)">Evolución de posiciones</h3><div id="evolBox"></div></div>
 </section>
 
 <!-- SOBRES -->
@@ -1782,11 +1860,31 @@ const closeAt = m => new Date(m.kickoff).getTime() - CIERRE_MS;
 const isClosed = m => closeAt(m) <= Date.now();
 const started = m => new Date(m.kickoff).getTime() <= Date.now();
 const POCIONES = {
-  doble:  { ico: "⚡", nom: "Doble filo",  txt: "Multiplica x2 tus puntos si puntúas (1 pasa a 2, 3 pasa a 6), pero te resta 1 punto si sacas 0." },
-  clon:   { ico: "🔀", nom: "Clonadora",   txt: "Envías dos marcadores distintos y cuenta solo el que más puntúe." },
-  salva:  { ico: "🛡️", nom: "Salvavidas",  txt: "Si sacas 0 puntos te da +1 de consolación. Si puntúas, no añade nada." },
-  vision: { ico: "👁️", nom: "Visión",      txt: "Revela el pronóstico de un rival antes del cierre." },
-  cambia: { ico: "🧬", nom: "Cambiaforma", txt: "Cambia en 1 gol el pronóstico de un rival, entre el cierre y el inicio del partido." }
+  doble:  { ico: "⚡", nom: "Doble filo", hex: "#ffc21a", gl: "255,194,26",
+    txt: "Multiplica x2 tus puntos si puntúas (1 pasa a 2, 3 pasa a 6), pero te resta 1 punto si sacas 0.",
+    como: "Pulsa «Usar», elige el partido, escribe tu pronóstico y confírmalo: se envía con la poción y se gasta.",
+    cuando: "Cuando tengas una corazonada absoluta y quieras jugártelo todo.",
+    col: "Dorado y eléctrico: o te lleva muy arriba o te cuesta un punto." },
+  clon:   { ico: "🔀", nom: "Clonadora", hex: "#19d3ff", hex2: "#ff6fb5", gl: "25,211,255",
+    txt: "Envías dos marcadores distintos para el mismo partido y cuenta solo el que más puntúe.",
+    como: "Pulsa «Usar», elige el partido, escribe dos marcadores distintos y confírmalos: se envían con la poción y se gasta.",
+    cuando: "En derbis o choques muy igualados en los que dudas entre dos resultados.",
+    col: "Dos colores en el mismo frasco: dos marcadores a la vez." },
+  salva:  { ico: "🛡️", nom: "Salvavidas", hex: "#2fd37a", gl: "47,211,122",
+    txt: "Si terminas el partido con 0 puntos, te da +1 de consolación. Si puntúas por ti mismo, no añade nada.",
+    como: "Pulsa «Usar», elige el partido, escribe tu pronóstico y confírmalo: se envía con la poción y se gasta.",
+    cuando: "En semanas con partidos trampa o marcadores impredecibles, para no irte de vacío.",
+    col: "Verde de protección, con su flotador: te ampara ante el cero." },
+  vision: { ico: "👁️", nom: "Visión", hex: "#9b6bff", gl: "155,107,255",
+    txt: "Revela en exclusiva el marcador exacto que ha puesto un rival, antes de que cierren las apuestas.",
+    como: "Con un pronóstico pendiente (antes de enviar el tuyo), pulsa «Usar», elige el partido y a un rival, y confirma. Si ya ha enviado, ves su marcador (solo tú) y se gasta; si no, no se gasta.",
+    cuando: "En las últimas jornadas o duelos directos por el liderato o los puestos de Champions/Europa, para ajustar tu jugada.",
+    col: "Violeta del ojo que ve lo que está oculto." },
+  cambia: { ico: "🧬", nom: "Cambiaforma", hex: "#ff7a1a", gl: "255,122,26",
+    txt: "Cambia en exactamente 1 gol el pronóstico de un rival (+1 o -1 a uno de los dos equipos).",
+    como: "Entre el cierre de apuestas (1 hora antes) y el inicio del partido, pulsa «Usar», elige el partido, el rival y qué gol cambiar (+1 o -1), y confirma.",
+    cuando: "Cuando veas que un rival va a puntuar y quieras romperle el marcador.",
+    col: "Naranja de mutación: transforma el marcador de otro." }
 };
 // Datos: pronóstico = { h, a, t, pot?: "doble"|"clon"|"salva", h2?, a2? (clonadora), mods?: [{ by, dh|da }] (cambiaforma de un rival) }
 // Visión: jugador.vis = ["partidoId>rivalId"]. Una poción de cada tipo por temporada (nueva temporada borra pronósticos y vis).
@@ -1858,6 +1956,10 @@ function eSlot(c, st) {
   const w = st.from.map(k => eWinner(eMatch(c, k)));
   return { m: null, pl: w.every(Boolean) ? [...w].sort((a, b) => L.indexOf(a) - L.indexOf(b)) : w, prov: false };
 }
+const CUP_ID = { champions: "ucl", europa: "uel", conference: "uecl" };
+function cupSvg(c) {   // el trofeo real de cada competición (el mismo de la vitrina); si no estuviera disponible, el emoji
+  try { return trofeoSvg(TROFEOS.find(t => t.id === CUP_ID[c]), true).replace('viewBox="-1.75 -.05 3.5 3.2"', 'viewBox="-1 -.05 2 3.2"'); } catch (e) { return "🏆"; }
+}
 function eNode(c, st, admin, wide) {
   const s = eSlot(c, st), m = s.m, res = m && m.result, win = res ? eWinner(m) : null;
   const sel = admin && AD.ec === c && AD.ek === st.k, prov = s.prov && calcRounds().length < CONFIG.jornadas;
@@ -1870,14 +1972,14 @@ function eNode(c, st, admin, wide) {
   const mline = m
     ? `<div class="en-m"><span>${crest(m.home)}<em>${esc(m.home)}</em></span><b>${res ? res.h + " – " + res.a : "vs"}</b><span><em>${esc(m.away)}</em>${crest(m.away)}</span></div><div class="en-d">${res ? "Finalizado" : fmt(m.kickoff)}</div>`
     : `<div class="en-d none">${admin ? "Partido sin añadir" : "Partido por anunciar"}</div>`;
-  const body = wide ? `<div class="en-pp">${row(s.pl[0])}<div class="br-cup" aria-hidden="true">🏆</div>${row(s.pl[1])}</div>` : row(s.pl[0]) + '<div class="en-v">VS</div>' + row(s.pl[1]);
+  const body = wide ? `<div class="en-pp">${row(s.pl[0])}<div class="br-cup" aria-hidden="true">${cupSvg(c)}</div>${row(s.pl[1])}</div>` : row(s.pl[0]) + '<div class="en-v">VS</div>' + row(s.pl[1]);
   return `<div class="en${wide ? " wide" : ""}${admin ? " ad" : ""}${sel ? " sel" : ""}"${admin ? ` data-en="${c}:${st.k}" role="button" tabindex="0"` : ""}><div class="en-h"><span>${st.nom}</span>${prov && !m ? "<i>Provisional</i>" : ""}${res ? "<i>Finalizado</i>" : ""}</div>${body}${mline}${admin ? `<div class="en-add">${m ? (res ? "Ver" : "Editar partido") : "＋ Añadir partido"}</div>` : ""}</div>`;
 }
 function eBracket(c, admin) {
   const C = COMPS[c], N = (k, w) => eNode(c, C.st.find(s => s.k === k), admin, w);
   const fin = eMatch(c, "final"), champ = fin && fin.result ? pById(eWinner(fin)) : null;
   const ch = champ ? `<div class="br-champ">${crest(champ.team)}<b>${esc(champ.name)}</b><small>Campeón</small></div>` : "";
-  if (c === "champions") return `<div class="br"><div class="br-r">${N("sf1")}${N("sf2")}</div><svg class="br-l" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"><path d="M25 0V13H75V0M50 13V26"/></svg><div class="br-cup${champ ? " got" : ""}" aria-hidden="true">🏆</div>${ch}${N("final")}</div>`;
+  if (c === "champions") return `<div class="br"><div class="br-r">${N("sf1")}${N("sf2")}</div><svg class="br-l" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"><path d="M25 0V13H75V0M50 13V26"/></svg><div class="br-cup${champ ? " got" : ""}" aria-hidden="true">${cupSvg(c)}</div>${ch}${N("final")}</div>`;
   return `<div class="br">${N("final", true)}${ch}</div>`;
 }
 function renderEuro() {
@@ -1931,6 +2033,7 @@ function renderEuroPlay() {
 // Perfil: partidos europeos del jugador (los de otros, solo cuando ya se han cerrado)
 function renderEuroHist() {
   const box = $("#euroHist"); if (!box) return;
+  box.innerHTML = ""; return;   // el perfil ya no muestra las competiciones europeas
   if (!meP()) { box.innerHTML = ""; return; }
   const other = viewId && viewId !== me ? S.players.find(p => p.id === viewId && p.regAt) : null, pid = other ? other.id : me, now = new Date();
   const ms = S.matches.filter(m => m.comp && m.pl && m.pl.includes(pid) && (!other || m.result || isClosed(m))).sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff));
@@ -2253,7 +2356,7 @@ function othersCard(ms) {
       `<div class="osub">${sent} de ${ps.length} ${ps.length === 1 ? "participante" : "participantes"}</div>` +
       [...ps].sort((x, y) => (y.id === me) - (x.id === me) || (y.id !== me && same(y)) - (x.id !== me && same(x)) || x.name.localeCompare(y.name)).map(x => {
         const q = pm[x.id], e = effPred(q), hl = dup && x.id !== me && same(x);
-        const cb = canCb && q && x.id !== me && !(q.mods || []).length ? `<button type="button" class="cbtn" data-cm="${m.id}" data-cp="${x.id}" aria-label="Poción cambiaforma sobre ${esc(x.name)}">🧬</button>` : "";
+        const cb = "";
         const sc = q ? `<b class="os">${e.h} - ${e.a}</b>${e.h2 != null ? `<b class="os os2">${e.h2} - ${e.a2}</b>` : ""}` : `<b class="os none">-</b>`;
         const nt = q && q.mods && q.mods.length ? `<div class="mdn">🧬 ${esc((pById(q.mods[0].by) || { name: "Un rival" }).name)} ha cambiado este pronóstico: ${esc(modTxt(m, q.mods[0]))}</div>` : "";
         return `<div data-pid="${x.id}" class="orow${x.id === me ? " me" : ""}${hl ? " same" : ""}">${x.team ? crest(x.team, false) : ""}<span class="on">${esc(x.name)}${q && q.pot ? potTag({ pot: q.pot }) : ""}</span>${sc}${cb}</div>${nt}`;
@@ -2264,71 +2367,336 @@ function othersCard(ms) {
 const myPotInfo = pr => !pr ? "" :
   (pr.pot ? `<div class="potb">${POCIONES[pr.pot].ico} Poción ${POCIONES[pr.pot].nom}${pr.h2 != null ? " · 2.º marcador " + pr.h2 + " - " + pr.a2 : ""}</div>` : "") +
   (pr.mods && pr.mods.length ? `<div class="potb cf">🧬 ${esc((pById(pr.mods[0].by) || { name: "Un rival" }).name)} ha cambiado tu pronóstico. Ahora cuenta como ${effPred(pr).h} - ${effPred(pr).a}</div>` : "");
-// Selector de poción al enviar el pronóstico (doble filo, clonadora, salvavidas)
-function potPicker(m) {
-  const av = ["doble", "clon", "salva"].filter(t => !potUsada(me, t));
-  if (!av.length) return `<div class="potn">🧪 Ya has gastado tus pociones de pronóstico.</div>`;
-  return `<div class="potp" data-pm="${m.id}"><div class="potl">🧪 Poción para este partido</div><div class="potc"><button type="button" class="pot on" data-pot="">Ninguna</button>${av.map(t => `<button type="button" class="pot" data-pot="${t}">${POCIONES[t].ico} ${POCIONES[t].nom}</button>`).join("")}</div>
-    <div class="potx" hidden><span>2.º marcador</span><input type="number" min="0" max="20" inputmode="numeric" placeholder="–" data-ph2="${m.id}" aria-label="Goles ${esc(m.home)} (2.º marcador)"><span>-</span><input type="number" min="0" max="20" inputmode="numeric" placeholder="–" data-pa2="${m.id}" aria-label="Goles ${esc(m.away)} (2.º marcador)"></div><div class="pott muted"></div></div>`;
+// ===== Estantería de pociones (3D estática, en la pestaña Jugar) =====
+const POT_ORDER = ["doble", "clon", "salva", "vision", "cambia"];
+const DRAFT = {};   // marcadores a medio escribir, para que no se pierdan al repintar
+const byName = (x, y) => x.name.localeCompare(y.name);
+const pendMatches = () => me ? openMatches().filter(m => !(S.preds[m.id] || {})[me]) : [];
+// Pociones usadas CONTRA un jugador en un partido (Visión o Cambiaforma, de quien sea): solo se permite una
+const contraN = (mid, tid) => { const q = (S.preds[mid] || {})[tid]; return ((q && Array.isArray(q.mods)) ? q.mods.length : 0) + S.players.filter(p => Array.isArray(p.vis) && p.vis.includes(mid + ">" + tid)).length; };
+// Solo se permite una poción por partido (de cualquier tipo)
+function potEnPartido(pid, mid) {
+  const q = (S.preds[mid] || {})[pid];
+  if (q && q.pot) return q.pot;
+  if (visVista(pid, mid)) return "vision";
+  if (Object.values(S.preds[mid] || {}).some(x => x && Array.isArray(x.mods) && x.mods.some(y => y.by === pid))) return "cambia";
+  return null;
 }
-function bindPots(box) {
-  box.querySelectorAll(".potp").forEach(w => {
-    const tx = w.querySelector(".pott"), x = w.querySelector(".potx");
-    w.querySelectorAll(".pot").forEach(b => b.onclick = () => {
-      w.querySelectorAll(".pot").forEach(o => o.classList.toggle("on", o === b));
-      const t = b.dataset.pot; x.hidden = t !== "clon";
-      tx.textContent = t ? POCIONES[t].txt + " Solo hay una por temporada." : "";
+const cambiaVentana = () => leagueMs().filter(m => !m.result && isClosed(m) && !started(m));
+const cambiaBase = () => cambiaVentana().filter(m => S.players.some(x => x.id !== me && (S.preds[m.id] || {})[x.id] && contraN(m.id, x.id) === 0));
+const usables = t => (t === "cambia" ? cambiaBase() : pendMatches()).filter(m => !potEnPartido(me, m.id));
+function potEstado(t) { return potUsada(me, t) ? "used" : "ok"; }
+function potPuede(t) {
+  if (!me || !meP()) return { ok: false, why: "Inicia sesión para usar pociones." };
+  if (potUsada(me, t)) return { ok: false, why: "Ya la has gastado esta temporada." };
+  if (usables(t).length) return { ok: true };
+  if (t === "cambia") return cambiaVentana().length && cambiaVentana().every(m => potEnPartido(me, m.id))
+    ? { ok: false, why: "Ya has usado una poción en ese partido." }
+    : { ok: false, why: "Solo se puede usar entre el cierre de apuestas y el inicio del partido, sobre el pronóstico de un rival. Ahora no hay ningún partido en esa franja con rivales disponibles." };
+  if (pendMatches().length) return { ok: false, why: "Ya has usado una poción en este partido." };
+  return { ok: false, why: openMatches().length ? "Ya has enviado tu pronóstico de este partido. Solo puedes usarla cuando tengas un pronóstico pendiente." : "Solo puedes usarla cuando tengas un pronóstico pendiente. Ahora no hay ningún partido abierto." };
+}
+const shelfHtml = () => `<div class="pc-sec"><div class="pc-t">Pociones</div><div class="pc" id="pcHost" role="group" aria-label="Estantería de pociones. Toca una poción para ver qué hace."></div><p class="muted pc-h">Toca una poción para ver qué hace y cómo usarla</p></div>`;
+// Lo que has visto con la poción visión
+function visSeen(ms) {
+  const out = ms.map(m => {
+    const id = visVista(me, m.id); if (!id) return "";
+    const r = pById(id), q = (S.preds[m.id] || {})[id];
+    return (ms.length > 1 ? omtRow(m) : "") + `<div class="orow">${r && r.team ? crest(r.team, false) : ""}<span class="on">${esc(r ? r.name : "Rival")}</span><b class="os">${predTxt(effPred(q))}</b></div>`;
+  }).join("");
+  return out ? `<div class="card oc vc"><h3>👁️ Visión</h3><div class="osub">Lo que ha puesto tu rival (solo lo ves tú)</div>${out}</div>` : "";
+}
+const DK = i => { const k = i.getAttributeNames().find(n => /^data-p[ha]$/.test(n)); return k ? k + ":" + i.getAttribute(k) : null; };
+function draftSave(box) { if (!box) return; box.querySelectorAll("input[data-ph],input[data-pa]").forEach(i => { const k = DK(i); if (k && !i.disabled) DRAFT[k] = i.value; }); }
+function draftLoad(box) { if (!box) return; box.querySelectorAll("input[data-ph],input[data-pa]").forEach(i => { const k = DK(i); if (k && !i.disabled && DRAFT[k]) i.value = DRAFT[k]; }); }
+
+// ---- Animación al gastar una poción: se destapa, se vacía y salen chispas ----
+const paQ = []; let paBusy = false;
+function potionAnim(t, sub) { paQ.push([t, sub]); if (!paBusy) paNext(); }
+function paNext() {
+  const it = paQ.shift(); if (!it) { paBusy = false; return; }
+  const [t, sub] = it, P = POCIONES[t]; if (!P) return paNext();
+  paBusy = true;
+  const BOT = "M42 10H58V38A38 38 0 1 1 42 38Z", c2 = P.hex2 || P.hex;
+  const sparks = Array.from({ length: 16 }, (_, i) => `<i class="pa-s" style="--dx:${Math.round((i - 7.5) * 13 + ((i * 37) % 13 - 6))}px;--dy:${-(70 + (i * 53) % 110)}px;--dl:${(.62 + (i % 8) * .1).toFixed(2)}s;--sz:${4 + (i % 3) * 2}px;background:${i % 3 === 0 ? "#fff" : i % 2 ? P.hex : c2}"></i>`).join("");
+  const bubs = [[30, 78, 0], [48, 90, .25], [62, 74, .5], [40, 100, .15], [56, 96, .4], [70, 88, .65]].map(([x, y, d]) => `<circle class="pa-bu" cx="${x}" cy="${y}" r="${3 + (x % 3)}" style="animation-delay:${d}s"/>`).join("");
+  const ov = document.createElement("div"); ov.className = "pa-ov" + (reduceMotion ? " pa-rm" : ""); ov.style.setProperty("--gl", P.gl);
+  ov.setAttribute("role", "status");
+  ov.innerHTML = `<div class="pa-b"><span class="pa-ring"></span><span class="pa-ring r2"></span>
+    <svg viewBox="0 0 100 125" aria-hidden="true"><defs><clipPath id="paclip"><path d="${BOT}"/></clipPath></defs>
+      <g clip-path="url(#paclip)"><g class="pa-liq">
+        <g class="pa-wv"><path d="M-50 62Q-37 55-25 62T0 62T25 62T50 62T75 62T100 62T125 62T150 62V140H-50Z" fill="${P.hex}"/>${P.hex2 ? `<path d="M50 40H160V140H50Z" fill="${c2}"/>` : ""}</g>
+        <ellipse cx="38" cy="70" rx="5" ry="14" fill="#fff" opacity=".22"/>${bubs}</g></g>
+      <path d="${BOT}" fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.8)" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M30 70A26 26 0 0 1 40 52" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+      <g class="pa-ck"><rect x="40" y="0" width="20" height="13" rx="3" fill="#a9733c"/><rect x="40" y="0" width="20" height="4" rx="2" fill="#c98f52"/></g>
+    </svg><div class="pa-sp">${sparks}</div></div>
+    <div class="pa-t" style="--c:${P.hex}"><b>${P.ico} ${esc(P.nom)}</b><span>${esc(sub || "Poción gastada")}</span></div>`;
+  document.body.appendChild(ov);
+  let done = false;
+  const end = () => { if (done) return; done = true; ov.classList.add("out"); setTimeout(() => { ov.remove(); paNext(); }, reduceMotion ? 0 : 450); };
+  ov.onclick = end; setTimeout(end, reduceMotion ? 1600 : 3100);
+}
+
+// ---- Ficha de una poción y recorrido guiado para usarla (es la única forma de usarlas) ----
+function openPocion(t) {
+  const P = POCIONES[t]; if (!P || document.querySelector(".pm-ov")) return;
+  const ov = document.createElement("div"); ov.className = "pm-ov";
+  ov.innerHTML = `<div class="pm-md" style="--gl:${P.gl}" role="dialog" aria-modal="true" aria-label="${esc(P.nom)}"><button class="pm-x" type="button" aria-label="Cerrar">✕</button><div class="pm-bd"></div></div>`;
+  document.body.appendChild(ov); document.body.style.overflow = "hidden";
+  const bd = ov.querySelector(".pm-bd");
+  const key = e => { if (e.key === "Escape") close(); };
+  const close = () => { document.removeEventListener("keydown", key); document.body.style.overflow = ""; ov.remove(); };
+  document.addEventListener("keydown", key);
+  ov.onclick = e => { if (e.target === ov) close(); };
+  ov.querySelector(".pm-x").onclick = close;
+  const own = t === "doble" || t === "clon" || t === "salva", NS = t === "cambia" ? 4 : 3;
+  let skipM = 0;   // 1 si solo hay un partido y no hace falta elegirlo
+  const stp = k => `Paso ${k - skipM} de ${NS - skipM}`;
+  const head = tag => `<div class="pm-h"><span class="pm-i" style="background:${P.hex2 ? `linear-gradient(90deg,${P.hex} 50%,${P.hex2} 50%)` : P.hex}"><i>${P.ico}</i></span><div><div class="pm-n">${esc(P.nom)}</div>${tag ? `<div class="pm-tag">${tag}</div>` : ""}</div></div>`;
+  const note = (txt, cls) => { bd.innerHTML = head("") + `<p class="${cls || "pm-w"}">${txt}</p><button class="btn" id="pmC" type="button">Cerrar</button>`; bd.querySelector("#pmC").onclick = close; };
+  const confirmView = (k, txt, okTxt, back, onOk) => {
+    bd.innerHTML = head(stp(k)) + `<p class="pm-q">${txt}</p><div class="pm-r"><button class="btn ghost" id="pmN" type="button">Atrás</button><button class="btn" id="pmY" type="button">${okTxt}</button></div>`;
+    bd.querySelector("#pmN").onclick = back; bd.querySelector("#pmY").onclick = onOk;
+  };
+  const backFirst = () => skipM ? main() : usar();
+  const choose = (list, text, cb) => {
+    if (list.length === 1) { skipM = 1; return cb(list[0]); }
+    skipM = 0;
+    bd.innerHTML = head(stp(1)) + `<div class="pm-s"><p>${esc(text)}</p></div><div class="pm-l">${list.map(m => `<button type="button" class="orow vrow" data-m="${m.id}">${crest(m.home)}<span class="on">${esc(m.home)} vs ${esc(m.away)}</span></button>`).join("")}</div><button class="btn ghost" id="pmB" type="button">Atrás</button>`;
+    bd.querySelectorAll("[data-m]").forEach(b => b.onclick = () => cb(S.matches.find(x => x.id === b.dataset.m)));
+    bd.querySelector("#pmB").onclick = main;
+  };
+  // ---- doble filo / clonadora / salvavidas: escribir el pronóstico y enviarlo con la poción ----
+  const PS = { doble: "Se juega con tu pronóstico", clon: "Tus dos marcadores están enviados", salva: "Te cubre si sacas 0" };
+  function scoreStep(m, pre) {
+    pre = pre || {}; const two = t === "clon";
+    const dh = pre.h != null ? pre.h : (DRAFT["data-ph:" + m.id] || ""), da = pre.a != null ? pre.a : (DRAFT["data-pa:" + m.id] || "");
+    const inp = (id, v, lab) => `<input type="number" min="0" max="20" inputmode="numeric" id="${id}" value="${v}" placeholder="–" aria-label="${esc(lab)}">`;
+    const row = (n, ia, ib, va, vb) => `<div class="pm-sr"><span class="pm-sl">${two ? "Marcador " + n : "Tu pronóstico"}</span>${inp(ia, va, "Goles " + m.home)}<span>-</span>${inp(ib, vb, "Goles " + m.away)}</div>`;
+    const msg = { doble: "Si puntúas, tus puntos se multiplican x2. Si sacas 0, pierdes 1 punto.", clon: "Escribe dos marcadores distintos: cuenta solo el que más puntúe.", salva: "Si terminas con 0 puntos, te da +1 de consolación." }[t];
+    bd.innerHTML = head(stp(2)) + `<div class="pm-mt">${crest(m.home)}<span>${esc(m.home)} vs ${esc(m.away)}</span>${crest(m.away)}</div><div class="pm-s"><p>${msg}</p></div>` +
+      row(1, "pmH", "pmA", dh, da) + (two ? row(2, "pmH2", "pmA2", pre.h2 != null ? pre.h2 : "", pre.a2 != null ? pre.a2 : "") : "") +
+      `<p class="pm-w" id="pmE" role="alert"></p><div class="pm-r"><button class="btn ghost" id="pmB" type="button">Atrás</button><button class="btn" id="pmY" type="button">Continuar</button></div>`;
+    bd.querySelector("#pmB").onclick = backFirst;
+    bd.querySelector("#pmY").onclick = () => {
+      const g = id => parseInt(bd.querySelector("#" + id).value), er = x => { bd.querySelector("#pmE").textContent = x; };
+      const h = g("pmH"), a = g("pmA"); if (isNaN(h) || isNaN(a) || h < 0 || a < 0) return er("Escribe los goles de los dos equipos.");
+      const v = { h, a, t: Date.now(), pot: t };
+      if (two) {
+        const h2 = g("pmH2"), a2 = g("pmA2");
+        if (isNaN(h2) || isNaN(a2) || h2 < 0 || a2 < 0) return er("Escribe también el segundo marcador.");
+        if (h2 === h && a2 === a) return er("Los dos marcadores deben ser distintos.");
+        v.h2 = h2; v.a2 = a2;
+      }
+      confirmSend(m, v);
+    };
+  }
+  function confirmSend(m, v) {
+    const sc = v.h2 != null ? `${v.h}-${v.a} y ${v.h2}-${v.a2}` : `${v.h}-${v.a}`;
+    confirmView(3, `Vas a enviar <b>${sc}</b> para ${esc(m.home)} vs ${esc(m.away)} con la poción ${esc(P.nom)}. Una vez enviado no podrás cambiarlo. ¿Confirmas?`, "Enviar", () => scoreStep(m, v), () => {
+      if (isClosed(m) || (S.preds[m.id] || {})[me] || potUsada(me, t) || potEnPartido(me, m.id)) return note("Ya no se puede usar la poción. No se ha enviado nada ni has gastado la poción.");
+      const o = S.preds[m.id] = S.preds[m.id] || {}; if (!o[me]) o[me] = v;
+      delete DRAFT["data-ph:" + m.id]; delete DRAFT["data-pa:" + m.id];
+      save(); renderJugar(); renderSobres(); checkCoins(); renderLogros();
+      bd.innerHTML = head("Poción gastada") + `<p class="pm-q">Tu pronóstico <b>${sc}</b> está enviado con ${esc(P.nom)}.</p><button class="btn" id="pmC" type="button">Cerrar</button>`;
+      bd.querySelector("#pmC").onclick = close; potionAnim(t, PS[t]);
     });
-  });
-}
-// Poción visión: mientras las apuestas están abiertas, ver el pronóstico de un rival
-function visCard(ms) {
-  const ps = S.players.filter(x => x.regAt && x.id !== me).sort((x, y) => x.name.localeCompare(y.name)), usada = potUsada(me, "vision");
-  return `<div class="card oc vc"><h3>👁️ Poción visión</h3>` + ms.map(m => {
-    const pm = S.preds[m.id] || {}, seen = visVista(me, m.id), head = ms.length > 1 ? omtRow(m) : "";
-    if (seen) { const r = pById(seen); return head + `<div class="osub">Pronóstico de ${esc(r ? r.name : "tu rival")} (solo lo ves tú)</div><div class="orow">${r && r.team ? crest(r.team, false) : ""}<span class="on">${esc(r ? r.name : "")}</span><b class="os">${predTxt(effPred(pm[seen]))}</b></div>`; }
-    if (usada) return head + `<div class="osub">Ya has gastado tu poción de visión esta temporada.</div>`;
-    return head + `<div class="osub">Elige a un rival para ver su marcador. Si aún no ha pronosticado, no gastas la poción.</div>` +
-      ps.map(x => `<button type="button" class="orow vrow" data-vm="${m.id}" data-vp="${x.id}">${x.team ? crest(x.team, false) : ""}<span class="on">${esc(x.name)}</span><span class="vs">${pm[x.id] ? "👁️ Ver" : "sin enviar"}</span></button>`).join("");
-  }).join("") + `</div>`;
-}
-function bindVision(box) {
-  box.querySelectorAll(".vrow").forEach(b => b.onclick = async () => {
-    const m = S.matches.find(x => x.id === b.dataset.vm), t = pById(b.dataset.vp), p = meP();
-    if (!m || !t || !p) return;
-    if (isClosed(m)) return toast("Las apuestas ya están cerradas.");
-    if (potUsada(me, "vision")) return toast("Ya has gastado tu poción de visión.");
-    if (!(S.preds[m.id] || {})[t.id]) return toast(t.name + " aún no ha enviado su pronóstico. No has gastado la poción.");
-    if (!(await ask(`Vas a gastar tu poción Visión (solo hay una por temporada) para ver el pronóstico de ${t.name}. ¿Usarla?`, "Usar"))) return;
-    if (isClosed(m) || potUsada(me, "vision")) return;
-    p.vis = [...(Array.isArray(p.vis) ? p.vis : []), m.id + ">" + t.id]; save(); renderJugar();
-  });
-}
-// Poción cambiaforma: entre el cierre y el inicio del partido, sobre el pronóstico de un rival (solo uno por rival y partido)
-function bindCambia(box) {
-  box.querySelectorAll(".cbtn").forEach(b => b.onclick = ev => {
-    ev.stopPropagation();
-    const row = b.closest(".orow"), open = row.nextElementSibling && row.nextElementSibling.classList.contains("cpan");
-    box.querySelectorAll(".cpan").forEach(x => x.remove()); if (open) return;
-    const m = S.matches.find(x => x.id === b.dataset.cm), q = effPred((S.preds[b.dataset.cm] || {})[b.dataset.cp]), t = pById(b.dataset.cp); if (!m || !q || !t) return;
-    const lows = [q.h, q.a, q.h2, q.a2].filter(v => v != null);
+  }
+  // ---- visión / cambiaforma: elegir rival (solo una poción contra cada jugador por partido) ----
+  function rivals(m, mode) {
+    const pm = S.preds[m.id] || {}, ps = S.players.filter(x => x.regAt && x.id !== me && pById(x.id)).sort(byName);
+    const ok = x => !!pm[x.id] && contraN(m.id, x.id) === 0;
+    const lab = x => !pm[x.id] ? "sin enviar" : contraN(m.id, x.id) ? "no disponible" : mode === "vision" ? "👁️ Ver" : predTxt(effPred(pm[x.id]));
+    bd.innerHTML = head(stp(2)) + `<div class="pm-s"><p>${mode === "vision" ? "Elige a quién espiar" : "Elige a qué rival cambiar el pronóstico"} en ${esc(m.home)} vs ${esc(m.away)}. ${mode === "vision" ? "Si aún no ha enviado, no gastas la poción." : ""}</p></div><div class="pm-l">${ps.map(x => `<button type="button" class="orow vrow" data-r="${x.id}" ${ok(x) ? "" : "disabled"}>${x.team ? crest(x.team, false) : ""}<span class="on">${esc(x.name)}</span><span class="vs">${lab(x)}</span></button>`).join("")}</div><button class="btn ghost" id="pmB" type="button">Atrás</button>`;
+    bd.querySelector("#pmB").onclick = backFirst;
+    bd.querySelectorAll("[data-r]").forEach(b => b.onclick = () => { const r = pById(b.dataset.r); if (mode === "vision") useVision(m, r); else changeView(m, r); });
+  }
+  function useVision(m, r) {
+    confirmView(3, `Vas a gastar tu poción Visión para ver el pronóstico de ${esc(r.name)}. ¿Usarla?`, "Usar", () => rivals(m, "vision"), () => {
+      const q = (S.preds[m.id] || {})[r.id], p = meP();
+      if (isClosed(m) || potUsada(me, "vision") || !p || potEnPartido(me, m.id)) return note("Ya no se puede usar. No has gastado la poción.");
+      if (!q) return note(`${esc(r.name)} aún no ha enviado su pronóstico. No has gastado la poción.`);
+      if (contraN(m.id, r.id)) return note(`${esc(r.name)} ya no está disponible en este partido. No has gastado la poción.`);
+      p.vis = [...(Array.isArray(p.vis) ? p.vis : []), m.id + ">" + r.id]; save(); renderJugar(); potionAnim("vision", "Pronóstico de " + r.name + " revelado");
+      bd.innerHTML = head("Poción gastada") + `<div class="pm-s"><b>${esc(r.name)} ha puesto</b></div><div class="orow">${r.team ? crest(r.team, false) : ""}<span class="on">${esc(r.name)}</span><b class="os">${predTxt(effPred(q))}</b></div><p class="pm-w">Solo lo ves tú. Lo tienes también en la tarjeta «Visión» de la pestaña.</p><button class="btn" id="pmC" type="button">Cerrar</button>`;
+      bd.querySelector("#pmC").onclick = close;
+    });
+  }
+  function changeView(m, r) {
+    const q = effPred((S.preds[m.id] || {})[r.id]); if (!q) return main();
     const opts = [["dh", 1, "+1 " + m.home], ["dh", -1, "-1 " + m.home], ["da", 1, "+1 " + m.away], ["da", -1, "-1 " + m.away]];
-    const pan = document.createElement("div"); pan.className = "cpan";
-    pan.innerHTML = `<p>🧬 Cambiar 1 gol al pronóstico de ${esc(t.name)}. Solo tienes una por temporada.</p><div class="cg">${opts.map((o, i) => { const mins = o[0] === "dh" ? [q.h, q.h2] : [q.a, q.a2], bad = o[1] < 0 && mins.some(v => v != null && v + o[1] < 0); return `<button type="button" data-o="${i}" ${bad ? "disabled" : ""}>${esc(o[2])}</button>`; }).join("")}</div>`;
-    row.after(pan);
-    pan.querySelectorAll("button").forEach(ob => ob.onclick = async () => {
-      const o = opts[+ob.dataset.o], q2 = (S.preds[m.id] || {})[t.id];
-      if (started(m) || !isClosed(m)) return toast("Solo se puede usar entre el cierre y el inicio del partido.");
-      if (potUsada(me, "cambia")) return toast("Ya has gastado tu poción cambiaforma.");
-      if (!q2 || (q2.mods || []).length) return toast("Ese pronóstico ya ha sido cambiado por otro jugador. No has gastado la poción.");
-      if (!(await ask(`Vas a gastar tu poción Cambiaforma (solo hay una por temporada): ${o[2]} en el pronóstico de ${t.name}. ¿Usarla?`, "Usar"))) return;
-      const q3 = (S.preds[m.id] || {})[t.id];
-      if (!q3 || (q3.mods || []).length || started(m) || potUsada(me, "cambia")) return toast("Ya no se puede aplicar. No has gastado la poción.");
-      q3.mods = [{ by: me, [o[0]]: o[1], t: Date.now() }]; save(); renderJugar();
+    bd.innerHTML = head(stp(3)) + `<div class="pm-s"><p>Pronóstico de ${esc(r.name)}: <b class="pm-sc">${predTxt(q)}</b>. Elige qué gol cambiar.</p></div><div class="cg">${opts.map((o, i) => { const mins = o[0] === "dh" ? [q.h, q.h2] : [q.a, q.a2], bad = o[1] < 0 && mins.some(v => v != null && v + o[1] < 0); return `<button type="button" data-o="${i}" ${bad ? "disabled" : ""}>${esc(o[2])}</button>`; }).join("")}</div><button class="btn ghost" id="pmB" type="button">Atrás</button>`;
+    bd.querySelector("#pmB").onclick = () => rivals(m, "cambia");
+    bd.querySelectorAll("[data-o]").forEach(b => b.onclick = () => {
+      const o = opts[+b.dataset.o];
+      confirmView(4, `Vas a gastar tu poción Cambiaforma: ${esc(o[2])} en el pronóstico de ${esc(r.name)}. ¿Usarla?`, "Usar", () => changeView(m, r), () => {
+        const q3 = (S.preds[m.id] || {})[r.id];
+        if (started(m) || !isClosed(m) || potUsada(me, "cambia") || potEnPartido(me, m.id)) return note("Ya no se puede usar. No has gastado la poción.");
+        if (!q3 || contraN(m.id, r.id)) return note(`${esc(r.name)} ya no está disponible en este partido. No has gastado la poción.`);
+        q3.mods = [{ by: me, [o[0]]: o[1], t: Date.now() }]; save(); renderJugar(); potionAnim("cambia", "Pronóstico de " + r.name + " cambiado");
+        note(`Hecho: ${esc(o[2])} en el pronóstico de ${esc(r.name)}.`, "pm-q");
+      });
     });
-  });
+  }
+  function usar() {
+    if (own) return choose(usables(t), "¿Para qué partido quieres usarla?", m => scoreStep(m));
+    choose(usables(t), "¿En qué partido quieres usarla?", m => rivals(m, t === "vision" ? "vision" : "cambia"));
+  }
+  function main() {
+    const st = potEstado(t), pu = potPuede(t);
+    bd.innerHTML = head(st === "used" ? "Gastada esta temporada" : "Disponible") +
+      `<div class="pm-s"><b>Qué hace</b><p>${esc(P.txt)}</p></div><div class="pm-s"><b>Cómo se usa</b><p>${esc(P.como)}</p></div><div class="pm-s"><b>Cuándo usarla</b><p>${esc(P.cuando)}</p></div>` +
+      `<button class="btn" id="pmU" type="button" ${pu.ok ? "" : "disabled"}>Usar</button>` + (!pu.ok ? `<p class="pm-w">${esc(pu.why)}</p>` : "");
+    const u = bd.querySelector("#pmU"); if (u) u.onclick = usar;
+  }
+  main();
 }
-function renderJugar() {
+
+// ---- Estantería 3D (se dibuja una sola vez y solo se repinta al cambiar el estado) ----
+let pcCtl = null;
+function mountShelf() {
+  const host = $("#pcHost"); if (!host) return;
+  if (pcCtl && !pcCtl.dead) { pcCtl.attach(host); pcCtl.update(); return; }
+  pcCtl = montarEstanteria(host);
+}
+function montarEstanteria(host) {
+  const ASPECT = .9, CAMZ = 17.5, CY = 1.1, TH = Math.tan(14 * Math.PI / 180);
+  const wrap = document.createElement("div"); wrap.className = "pc-w"; wrap.innerHTML = '<div class="pc-ld">Montando la estantería…</div>';
+  const disp = []; let ren = null, ro = null, slots = [], draw = () => {}, lw = 0, lh = 0;
+  const ctl = { wrap, dead: false, fallback: false,
+    attach(h) { h.appendChild(wrap); ctl.resize(); },
+    resize() { if (!ren) return; const w = wrap.clientWidth, h = wrap.clientHeight; if (!w || !h || (w === lw && h === lh)) return; lw = w; lh = h; ren.setSize(w, h, false); draw(); },
+    update() { paint(); },
+    dispose() { ctl.dead = true; if (ro) ro.disconnect(); disp.forEach(o => { try { o.dispose(); } catch (e) {} }); if (ren) { try { ren.dispose(); ren.forceContextLoss(); } catch (e) {} } wrap.remove(); } };
+  wrap.addEventListener("click", e => { const b = e.target.closest("[data-p]"); if (b) openPocion(b.dataset.p); });
+  ctl.attach(host);
+  const paint = () => {
+    POT_ORDER.forEach(t => {
+      const st = potEstado(t), nm = wrap.querySelector(`.pc-n[data-p="${t}"]`), b = wrap.querySelector(`.pc-b[data-p="${t}"], .pf-b[data-p="${t}"]`), sl = slots.find(s => s.t === t);
+      if (nm) { nm.className = "pc-n " + st; nm.textContent = (st === "armed" ? "✓ " : "") + POCIONES[t].nom; }
+      if (b) { b.classList.toggle("used", st === "used"); b.classList.toggle("armed", st === "armed"); b.setAttribute("aria-label", POCIONES[t].nom + (st === "used" ? ": gastada" : st === "armed" ? ": activada" : "")); }
+      if (sl) { sl.liq.forEach(m => { m.visible = st !== "used"; }); sl.label.material.opacity = st === "used" ? .35 : 1; sl.halo.visible = st === "armed"; }
+    });
+    draw();
+  };
+  const fb = () => {   // sin WebGL o sin conexión: versión plana
+    if (ctl.dead) return; ctl.fallback = true; if (ren) { try { ren.dispose(); } catch (e) {} ren = null; }
+    wrap.classList.add("pf-on");
+    wrap.innerHTML = `<div class="pf">${POT_ORDER.map(t => `<button type="button" class="pf-b" data-p="${t}" style="--c:${POCIONES[t].hex}${POCIONES[t].hex2 ? `;--c2:${POCIONES[t].hex2}` : ""}"><span class="pf-i">${POCIONES[t].ico}</span><span class="pc-n">${POCIONES[t].nom}</span></button>`).join("")}</div>`;
+    paint();
+  };
+  loadThree().then(() => { if (ctl.dead) return; try { build(); } catch (e) { console.error(e); fb(); } }).catch(fb);
+  return ctl;
+
+  function build() {
+    const T = THREE;
+    ren = new T.WebGLRenderer({ antialias: true, alpha: true });
+    ren.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); ren.setClearColor(0x000000, 0);
+    const maxAn = Math.min(ren.capabilities.getMaxAnisotropy(), 8);
+    const sc = new T.Scene(), cam = new T.PerspectiveCamera(28, ASPECT, .5, 80);
+    cam.position.set(0, CY, CAMZ); cam.lookAt(0, CY, 0);
+    let sd = 11; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+    const mkc = (w, h, fn) => { const c = document.createElement("canvas"); c.width = w; c.height = h; fn(c.getContext("2d"), w, h); return c; };
+    const tex = (c, rep) => { const x = new T.CanvasTexture(c); x.anisotropy = maxAn; if (rep) { x.wrapS = x.wrapT = T.RepeatWrapping; x.repeat.set(rep[0], rep[1]); } disp.push(x); return x; };
+    const mat = (cls, o) => { const m = new T[cls](o); disp.push(m); return m; };
+    const geo = g => { disp.push(g); return g; };
+    const box = (w, h, d, m, x, y, z) => { const o = new T.Mesh(geo(new T.BoxGeometry(w, h, d)), m); o.position.set(x, y, z); sc.add(o); return o; };
+
+    // ---- madera ----
+    const woodC = (base, dark, n, seams) => mkc(256, 256, (x, w, h) => {
+      x.fillStyle = base; x.fillRect(0, 0, w, h);
+      for (let i = 0; i < n; i++) { const y = rnd() * h; x.strokeStyle = dark; x.globalAlpha = .07 + rnd() * .2; x.lineWidth = .6 + rnd() * 2.2; x.beginPath(); x.moveTo(0, y); for (let k = 1; k <= 8; k++) x.lineTo(k * w / 8, y + Math.sin(k * 1.3 + i) * 3); x.stroke(); }
+      x.globalAlpha = 1; if (seams) { x.fillStyle = "rgba(0,0,0,.55)"; for (let k = 1; k < seams; k++) x.fillRect(k * w / seams - 1, 0, 2, h); }
+    });
+    const wd = mat("MeshPhongMaterial", { map: tex(woodC("#7b4b27", "#35200f", 70), [1.4, 1]), shininess: 24, specular: 0x2a1a0c });
+    const wdSide = mat("MeshPhongMaterial", { map: tex(woodC("#5e3a1e", "#2a1809", 80), [.6, 2.2]), shininess: 14, specular: 0x1a1008 });
+    const wdBack = mat("MeshPhongMaterial", { map: tex(woodC("#3a2514", "#150c05", 90, 6), [1, 1]), shininess: 4 });
+    const Wi = 6.6, SF = -1.9, SU = 1.6, PT = .45;
+    // ---- mueble ----
+    const back = new T.Mesh(geo(new T.PlaneGeometry(Wi, 6.9)), wdBack); back.position.set(0, 1.1, -.9); sc.add(back);
+    [-1, 1].forEach(s => box(.35, 7.85, 1.9, wdSide, s * (Wi / 2 + .175), 1.025, 0));
+    box(7.3, .55, 1.9, wdSide, 0, -2.625, 0);
+    box(Wi, PT, 1.8, wd, 0, SF - PT / 2, 0);
+    box(Wi, PT, 1.8, wd, 0, SU - PT / 2, 0);
+    box(7.5, .45, 2.1, wdSide, 0, 4.725, 0);
+    box(7.65, .14, 2.25, wd, 0, 5.02, 0);
+    // luces
+    sc.add(new T.AmbientLight(0xffffff, .62));
+    const dl = new T.DirectionalLight(0xfff0d8, .95); dl.position.set(-4, 8, 10); sc.add(dl);
+    const dl2 = new T.DirectionalLight(0x8fa4ff, .28); dl2.position.set(6, 2, 6); sc.add(dl2);
+    const pl = new T.PointLight(0xffc27a, .55, 40); pl.position.set(0, 5.5, 5); sc.add(pl);
+
+    // ---- frascos ----
+    const lathe = (pts, seg, a0, a1) => geo(new T.LatheGeometry(pts.map(p => new T.Vector2(p[0], p[1])), seg, a0, a1));
+    const rAt = (pts, y) => { for (let i = 1; i < pts.length; i++) { const a = pts[i - 1], b = pts[i]; if (b[1] !== a[1] && y >= Math.min(a[1], b[1]) && y <= Math.max(a[1], b[1])) return a[0] + (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]); } return pts[pts.length - 1][0]; };
+    const bulb = (cy, rx, ry, rn, y2) => { const t1 = Math.acos(rn / rx), p = []; for (let i = 0; i <= 30; i++) { const t = -Math.PI / 2 + (t1 + Math.PI / 2) * i / 30; p.push([rx * Math.cos(t), cy + ry * Math.sin(t)]); } p.push([rn, y2], [rn + .07, y2 + .05], [rn + .07, y2 + .12]); return p; };
+    const gourd = () => {
+      const p = [], r1 = .78, c1 = .82, rw = .28, r2 = .5, c2 = 2.02, rn = .2, a1 = Math.acos(rw / r1), a2 = -Math.acos(rw / r2), a3 = Math.acos(rn / r2);
+      for (let i = 0; i <= 24; i++) { const t = -Math.PI / 2 + (a1 + Math.PI / 2) * i / 24; p.push([r1 * Math.cos(t), c1 + r1 * Math.sin(t)]); }
+      for (let i = 0; i <= 22; i++) { const t = a2 + (a3 - a2) * i / 22; p.push([r2 * Math.cos(t), c2 + r2 * Math.sin(t)]); }
+      p.push([rn, 2.55], [rn + .07, 2.6], [rn + .07, 2.67]); return p;
+    };
+    const DEFS = {
+      doble:  { pts: bulb(.94, .9, .9, .24, 2.32), rn: .24, level: 1.3, lab: [.55, 1.4], ico: "⚡" },
+      clon:   { pts: [[0, .04], [.58, .04], [.66, .12], [.66, 1.55], [.6, 1.75], [.3, 1.98], [.26, 2.1], [.26, 2.3], [.33, 2.36], [.33, 2.43]], rn: .26, level: 1.3, lab: [.45, 1.35], ico: "🔀" },
+      salva:  { pts: [[0, .04], [.98, .04], [.98, .1], [.3, 1.55], [.25, 1.7], [.25, 2.15], [.32, 2.2], [.32, 2.27]], rn: .25, level: .8, lab: [.2, .75], ico: "🛡️" },
+      vision: { pts: bulb(1.1, .78, 1.05, .22, 2.45), rn: .22, level: 1.45, lab: [.65, 1.55], ico: "👁️" },
+      cambia: { pts: gourd(), rn: .2, level: 1.2, lab: [.35, 1.15], ico: "🧬" }
+    };
+    const glassM = mat("MeshPhongMaterial", { color: 0xcfe8ff, transparent: true, opacity: .22, shininess: 140, specular: 0xffffff, side: T.DoubleSide, depthWrite: false });
+    const corkM = mat("MeshPhongMaterial", { color: 0xa9733c, shininess: 8 });
+    const liqM = hx => mat("MeshPhongMaterial", { color: hx, emissive: hx, emissiveIntensity: .32, shininess: 90, specular: 0xffffff, transparent: true, opacity: .94, side: T.DoubleSide });
+    const shineT = tex(mkc(64, 4, (x, w, h) => { const g = x.createLinearGradient(0, 0, w, 0); g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(.5, "rgba(255,255,255,.85)"); g.addColorStop(1, "rgba(255,255,255,0)"); x.fillStyle = g; x.fillRect(0, 0, w, h); }));
+    const shineM = mat("MeshBasicMaterial", { map: shineT, transparent: true, blending: T.AdditiveBlending, depthWrite: false, side: T.DoubleSide });
+    const shadowT = tex(mkc(128, 128, (x, w, h) => { const g = x.createRadialGradient(64, 64, 4, 64, 64, 62); g.addColorStop(0, "rgba(0,0,0,.6)"); g.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = g; x.fillRect(0, 0, w, h); }));
+    const shadowM = mat("MeshBasicMaterial", { map: shadowT, transparent: true, depthWrite: false });
+    const labT = emo => tex(mkc(128, 128, (x, w, h) => {
+      x.fillStyle = "#f3e6c8"; x.strokeStyle = "#8a6b3c"; x.lineWidth = 5; x.beginPath(); x.moveTo(16, 4); x.arcTo(124, 4, 124, 124, 14); x.arcTo(124, 124, 4, 124, 14); x.arcTo(4, 124, 4, 4, 14); x.arcTo(4, 4, 124, 4, 14); x.closePath(); x.fill(); x.stroke();
+      x.font = "66px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(emo, w / 2, h / 2 + 5);
+    }));
+    const lin = (a, b, n) => Array.from({ length: n }, (_, i) => a + (b - a) * i / (n - 1));
+    function bottle(t) {
+      const D = DEFS[t], P = POCIONES[t], g = new T.Group(), pts = D.pts, top = pts[pts.length - 1][1];
+      const glass = new T.Mesh(lathe(pts, 44), glassM); glass.renderOrder = 3; g.add(glass);
+      // líquido (la clonadora lleva dos colores, uno en cada mitad)
+      const lp = [[0, pts[0][1] + .05]]; for (const p of pts) { if (p[1] > D.level) break; if (p[1] > pts[0][1] + .05) lp.push([Math.max(.02, p[0] * .9), p[1]]); } lp.push([rAt(pts, D.level) * .9, D.level], [0, D.level]);
+      const liq = [];
+      (P.hex2 ? [[0, Math.PI, P.hex], [Math.PI, Math.PI, P.hex2]] : [[0, Math.PI * 2, P.hex]]).forEach(([a0, al, hx]) => { const m = new T.Mesh(lathe(lp, 44, a0, al), liqM(hx)); m.renderOrder = 1; g.add(m); liq.push(m); });
+      // etiqueta curvada sobre el vidrio
+      const [y0, y1] = D.lab, ys = lin(y0, y1, 6), pl = (y1 - y0) / rAt(pts, (y0 + y1) / 2);
+      const label = new T.Mesh(lathe(ys.map(y => [rAt(pts, y) + .016, y]), 12, -pl / 2, pl), mat("MeshPhongMaterial", { map: labT(D.ico), transparent: true, side: T.DoubleSide, shininess: 12, depthWrite: false })); label.renderOrder = 4; g.add(label);
+      // brillo del vidrio
+      const sy = lin(.3, Math.min(top - .5, D.level + .55), 8), sh = new T.Mesh(lathe(sy.map(y => [rAt(pts, y) + .024, y]), 8, -1.02, .28), shineM); sh.renderOrder = 5; g.add(sh);
+      // tapón
+      const ck = new T.Mesh(geo(new T.CylinderGeometry(D.rn + .03, D.rn - .01, .36, 18)), corkM); ck.position.y = top - .06 + .18; g.add(ck);
+      if (t === "salva") { const tor = new T.Mesh(geo(new T.TorusGeometry(.36, .1, 12, 30)), mat("MeshPhongMaterial", { color: 0xe8453c, shininess: 50 })); tor.rotation.x = Math.PI / 2; tor.position.y = 1.86; g.add(tor); }
+      g.scale.setScalar(.9);
+      return { g, liq, label };
+    }
+    // ---- colocación ----
+    const ROWS = [{ y: SU, items: [["doble", -2.1], ["clon", 0], ["salva", 2.1]] }, { y: SF, items: [["vision", -1.15], ["cambia", 1.15]] }];
+    const px = (x, y, z) => { const dz = CAMZ - z; return [(x / (dz * TH * ASPECT) + 1) / 2 * 100, (1 - (y - CY) / (dz * TH)) / 2 * 100]; };
+    let hits = "";
+    ROWS.forEach(r => r.items.forEach(([t, x]) => {
+      const b = bottle(t); b.g.position.set(x, r.y, -.05); sc.add(b.g);
+      const sh = new T.Mesh(geo(new T.PlaneGeometry(2.3, 2.3)), shadowM); sh.rotation.x = -Math.PI / 2; sh.position.set(x, r.y + .012, -.05); sc.add(sh);
+      const halo = new T.Mesh(geo(new T.RingGeometry(.86, 1.16, 44)), mat("MeshBasicMaterial", { color: 0xffd24a, transparent: true, opacity: .9, side: T.DoubleSide, blending: T.AdditiveBlending, depthWrite: false }));
+      halo.rotation.x = -Math.PI / 2; halo.position.set(x, r.y + .02, -.05); halo.visible = false; sc.add(halo);
+      slots.push({ t, liq: b.liq, label: b.label, halo });
+      const a = px(x - .95, r.y + 2.75, 0), c = px(x + .95, r.y - PT + .02, .9), n = px(x, r.y - PT / 2, .9);
+      hits += `<button type="button" class="pc-b" data-p="${t}" style="left:${a[0].toFixed(2)}%;top:${a[1].toFixed(2)}%;width:${(c[0] - a[0]).toFixed(2)}%;height:${(c[1] - a[1]).toFixed(2)}%" aria-label="${esc(POCIONES[t].nom)}"></button><span class="pc-n" data-p="${t}" style="left:${n[0].toFixed(2)}%;top:${n[1].toFixed(2)}%">${esc(POCIONES[t].nom)}</span>`;
+    }));
+    wrap.innerHTML = ""; ren.domElement.className = "pc-cv"; wrap.appendChild(ren.domElement); wrap.insertAdjacentHTML("beforeend", hits);
+    draw = () => { if (ren) ren.render(sc, cam); };
+    ro = new ResizeObserver(() => ctl.resize()); ro.observe(wrap);
+    ren.domElement.addEventListener("webglcontextlost", e => { e.preventDefault(); fb(); });
+    lw = lh = 0; ctl.resize(); paint();
+  }
+}
+
+function renderJugar() { const box = $("#jugarBox"); draftSave(box); renderJugarBase(); draftLoad(box); mountShelf(); }
+function renderJugarBase() {
   clearInterval(cdTimer);
   const box = $("#jugarBox"), p = meP(), tit = document.querySelector("#jugar h2");
   tit.style.display = "";
@@ -2336,24 +2704,24 @@ function renderJugar() {
   const ms = openMatches();
   if (!ms.length) {
     const cl = closedMatches();
-    if (!cl.length) { tit.style.display = "none"; box.innerHTML = `<div class="card wait"><svg viewBox="0 0 64 92" width="84" height="120" aria-hidden="true"><ellipse class="sh" cx="32" cy="86" rx="20" ry="4" fill="#000"/><g class="ball"><g class="spin"><circle cx="32" cy="32" r="26" fill="#fff" stroke="#cfd6dc" stroke-width="2"/><path d="M32 23 40.6 29.2 37.3 39.3H26.7L23.4 29.2Z" fill="#1b2228"/><path d="M32 23V10M40.6 29.2 52.9 25.2M37.3 39.3 44.9 49.8M26.7 39.3 19.1 49.8M23.4 29.2 11.1 25.2" stroke="#1b2228" stroke-width="2.2" stroke-linecap="round" fill="none"/></g></g></svg>Hola, ${esc(p.name)}. Aún no hay ninguna jornada abierta. ¡Vuelve pronto!</div>`; return; }
-    box.innerHTML = cdRow(true, cl[0].kickoff) + cl.map(m => { const cur = (S.preds[m.id] || {})[me]; return `<div class="card match"><div class="jt" style="margin-bottom:4px">Jornada ${m.round}</div><div class="mdate">${fmt(m.kickoff)}</div>${scoreRow(m, cur ? cur.h : "", cur ? cur.a : "", "data-ph", "data-pa", "disabled")}${myPotInfo(cur)}</div>`; }).join("") +
-      `<button class="btn" style="width:100%" disabled>Predicción cerrada</button>` + othersCard(cl); bindCambia(box); cdTimer = setInterval(() => { if (cl.every(started)) { clearInterval(cdTimer); renderJugar(); } }, 15000);
+    if (!cl.length) { tit.style.display = "none"; box.innerHTML = shelfHtml() + `<div class="card wait"><svg viewBox="0 0 64 92" width="84" height="120" aria-hidden="true"><ellipse class="sh" cx="32" cy="86" rx="20" ry="4" fill="#000"/><g class="ball"><g class="spin"><circle cx="32" cy="32" r="26" fill="#fff" stroke="#cfd6dc" stroke-width="2"/><path d="M32 23 40.6 29.2 37.3 39.3H26.7L23.4 29.2Z" fill="#1b2228"/><path d="M32 23V10M40.6 29.2 52.9 25.2M37.3 39.3 44.9 49.8M26.7 39.3 19.1 49.8M23.4 29.2 11.1 25.2" stroke="#1b2228" stroke-width="2.2" stroke-linecap="round" fill="none"/></g></g></svg>Hola, ${esc(p.name)}. Aún no hay ninguna jornada abierta. ¡Vuelve pronto!</div>`; return; }
+    box.innerHTML = shelfHtml() + cdRow(true, cl[0].kickoff) + cl.map(m => { const cur = (S.preds[m.id] || {})[me]; return `<div class="card match"><div class="jt" style="margin-bottom:4px">Jornada ${m.round}</div><div class="mdate">${fmt(m.kickoff)}</div>${scoreRow(m, cur ? cur.h : "", cur ? cur.a : "", "data-ph", "data-pa", "disabled")}${myPotInfo(cur)}</div>`; }).join("") +
+      `<button class="btn" style="width:100%" disabled>Predicción cerrada</button>` + othersCard(cl); cdTimer = setInterval(() => { if (cl.every(started)) { clearInterval(cdTimer); renderJugar(); } }, 15000);
     return;
   }
   const end = closeAt(ms[0]), mine = m => (S.preds[m.id] || {})[me], free = ms.filter(m => !mine(m));
-  box.innerHTML = cdRow(false, ms[0].kickoff) +
-    ms.map(m => { const cur = mine(m); return `<div class="card match" data-mid="${m.id}"><div class="jt" style="margin-bottom:4px">Jornada ${m.round}</div><div class="mdate">${fmt(m.kickoff)}</div>${scoreRow(m, cur ? cur.h : "", cur ? cur.a : "", "data-ph", "data-pa", cur ? "disabled" : "")}${cur ? myPotInfo(cur) : potPicker(m)}</div>`; }).join("") +
+  box.innerHTML = (free.length ? "" : shelfHtml()) + cdRow(false, ms[0].kickoff) +
+    ms.map(m => { const cur = mine(m); return `<div class="card match" data-mid="${m.id}"><div class="jt" style="margin-bottom:4px">Jornada ${m.round}</div><div class="mdate">${fmt(m.kickoff)}</div>${scoreRow(m, cur ? cur.h : "", cur ? cur.a : "", "data-ph", "data-pa", cur ? "disabled" : "")}${myPotInfo(cur)}</div>`; }).join("") +
     (free.length
-      ? `<button class="btn" id="send" style="width:100%">Enviar predicción</button><p class="msg" id="jmsg"></p><p class="muted" style="text-align:center;margin-top:10px">Una vez enviado no podrás cambiarlo.</p><div class="muted" style="margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);text-align:center;line-height:1.4">🔒 Los pronósticos de los demás se ven al cerrarse las apuestas (1 hora antes del partido). Solo la poción Visión deja verlos antes.</div>` + visCard(ms) + ``
-      : `<button class="btn" style="width:100%" disabled>Predicción enviada ✓</button><p class="muted" style="text-align:center;margin-top:10px">Tu pronóstico está guardado y ya no se puede cambiar.</p>` + visCard(ms));
+      ? `<button class="btn" id="send" style="width:100%">Enviar predicción</button><p class="msg" id="jmsg"></p><p class="muted" style="text-align:center;margin-top:10px">Una vez enviado no podrás cambiarlo.</p><div class="muted" style="margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);text-align:center;line-height:1.4">🔒 Los pronósticos de los demás se ven al cerrarse las apuestas (1 hora antes del partido). Solo la poción Visión deja verlos antes.</div>` + visSeen(ms) + shelfHtml()
+      : `<button class="btn" style="width:100%" disabled>Predicción enviada ✓</button><p class="muted" style="text-align:center;margin-top:10px">Tu pronóstico está guardado y ya no se puede cambiar.</p>` + visSeen(ms));
   const tick = () => {
     const el = $("#cdv"), left = end - Date.now();
     if (!el) return clearInterval(cdTimer);
     if (left <= 0) { clearInterval(cdTimer); renderJugar(); return; }
     el.textContent = fmtCd(left); const col = left < 21600000 ? "var(--bad)" : left < 43200000 ? "#f2c230" : "var(--text)"; el.style.color = col; const k = $("#cdk"); if (k) k.style.color = col;
   };
-  tick(); cdTimer = setInterval(tick, 1000); bindPots(box); bindVision(box);
+  tick(); cdTimer = setInterval(tick, 1000);
   if (free.length) $("#send").onclick = async () => {
     const msg = $("#jmsg"), fail = t => { msg.className = "msg err"; msg.textContent = t; }, now = new Date(), todo = [];
     for (const m of free) {
@@ -2362,22 +2730,11 @@ function renderJugar() {
       const h = parseInt(hv), a = parseInt(av);
       if (isNaN(h) || isNaN(a) || h < 0 || a < 0) return fail("Escribe los goles de los dos equipos.");
       if (isClosed(m)) return fail("El cierre de apuestas ya pasó.");
-      const w = box.querySelector(`.potp[data-pm="${m.id}"]`), on = w && w.querySelector(".pot.on"), pot = on ? on.dataset.pot : "", v = { h, a, t: Date.now() };
-      if (pot) {
-        if (potUsada(me, pot) || todo.some(z => z[1].pot === pot)) return fail("Esa poción ya la has gastado.");
-        v.pot = pot;
-        if (pot === "clon") {
-          const h2 = parseInt(w.querySelector("[data-ph2]").value), a2 = parseInt(w.querySelector("[data-pa2]").value);
-          if (isNaN(h2) || isNaN(a2) || h2 < 0 || a2 < 0) return fail("Escribe el segundo marcador de la clonadora.");
-          if (h2 === h && a2 === a) return fail("Los dos marcadores de la clonadora deben ser distintos.");
-          v.h2 = h2; v.a2 = a2;
-        }
-      }
+      const v = { h, a, t: Date.now() };
       todo.push([m.id, v]);
     }
     if (!todo.length) return fail("Escribe el resultado.");
-    const gp = todo.filter(z => z[1].pot).map(z => POCIONES[z[1].pot].nom);
-    if (!(await ask("Una vez enviado no podrás cambiar tu pronóstico." + (gp.length ? " Vas a gastar la poción " + gp.join(" y ") + " (solo hay una de cada por temporada)." : "") + " ¿Enviarlo?", "Enviar"))) return;
+    if (!(await ask("Una vez enviado no podrás cambiar tu pronóstico. ¿Enviarlo?", "Enviar"))) return;
     todo.forEach(([id, v]) => { const o = S.preds[id] = S.preds[id] || {}; if (!o[me]) o[me] = v; });
     save(); renderJugar(); renderSobres(); checkCoins(); renderLogros();   // avisos de monedas y títulos al momento (primero monedas, luego títulos)
   };
@@ -2421,11 +2778,14 @@ function renderEquipo() {
 // Tabla
 let tv = null;   // jornada que se está viendo (null = la última)
 // Gráfica de evolución de posiciones por jornada (todos los participantes)
+let evolOpen = false;
 function renderEvol() {
-  const card = $("#evolCard"), box = $("#evolBox"), rs = calcRounds();
+  const card = $("#evolCard"), box = $("#evolBox"), btn = $("#evolBtn"), rs = calcRounds();
   const final = standings(), n = final.length;
-  if (!rs.length || !n) { card.hidden = true; return; }
-  card.hidden = false;
+  if (!rs.length || !n) { card.hidden = true; btn.hidden = true; return; }
+  btn.hidden = false; card.hidden = !evolOpen;
+  btn.setAttribute("aria-expanded", String(evolOpen)); btn.textContent = evolOpen ? "Ocultar evolución de posiciones" : "Ver evolución de posiciones";
+  if (!evolOpen) return;
   const order = [...final].sort((x, y) => x.regAt - y.regAt).map(p => p.id);
   const col = id => `hsl(${(order.indexOf(id) * 137.5) % 360} 72% 60%)`;
   const pos = {};   // id -> [posición en cada jornada]
@@ -2453,6 +2813,7 @@ function renderEvol() {
     <div class="muted" style="text-align:center;font-size:13px;margin-top:2px">Jornada</div>
     <div style="display:grid;grid-auto-flow:column;grid-template-rows:repeat(${Math.min(7, Math.ceil(n / 3))},auto);grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 8px;margin:16px 0 0">${final.map(p => `<div class="pl" style="font-size:14px;gap:8px;min-width:0"><span style="flex:0 0 26px;display:flex;align-items:center;justify-content:center">${crest(p.team)}</span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;${p.id === me ? "font-weight:700" : ""}">${esc(p.name)}</span></div>`).join("")}</div>`;
 }
+$("#evolBtn").onclick = () => { evolOpen = !evolOpen; renderEvol(); if (evolOpen) $("#evolCard").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "nearest" }); };
 function renderTabla() {
   renderEvol();
   const rs = calcRounds(), last = rs[rs.length - 1], cur = rs.includes(tv) ? tv : last, idx = rs.indexOf(cur);
