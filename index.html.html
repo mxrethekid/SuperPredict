@@ -1090,18 +1090,24 @@ nav button.nw::after{top:7px;left:calc(50% + 10px)}
 .hpv{display:inline}
 .hp2 .hpv{display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.15}
 
-/* Animación 3D de uso de poción */
-.pa3{position:fixed;inset:0;z-index:9999;perspective:900px;overflow:hidden;cursor:pointer;background:radial-gradient(85% 65% at 50% 48%,transparent 35%,rgba(3,7,10,.6));animation:pa3in .25s}
-@keyframes pa3in{from{opacity:0}}
-.pa3.out{opacity:0;transition:opacity .3s;pointer-events:none}
-.pa3-b{position:absolute;left:0;top:0;transform-style:preserve-3d;will-change:transform;filter:drop-shadow(0 10px 18px rgba(0,0,0,.5)) drop-shadow(0 0 16px rgba(var(--gl),.45))}
-.pa3-st{position:absolute;width:6px;border-radius:3px;transform-origin:top;box-shadow:0 0 12px rgba(var(--gl),.9)}
-.pa3-fill{position:absolute;border-radius:20px;pointer-events:none}
-.pa3-t{position:absolute;left:0;right:0;bottom:calc(120px + env(safe-area-inset-bottom,0px));text-align:center;display:flex;flex-direction:column;gap:4px;padding:0 20px}
-.pa3-t b{font:400 34px/1 var(--h);letter-spacing:.08em;text-transform:uppercase;color:var(--c);text-shadow:0 0 18px var(--c)}
-.pa3-t span{font:600 14px var(--b);color:#dfe8ee}
-.pa3-d{position:absolute;width:7px;height:7px;border-radius:50%;pointer-events:none}
-.pa3-rm .pa3-b,.pa3-rm .pa3-st,.pa3-rm .pa3-fill{display:none}
+/* Animación de uso de poción */
+.pa4{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;perspective:900px;overflow:hidden;cursor:pointer;background:radial-gradient(circle at 50% 42%,rgba(var(--gl),.30),rgba(4,7,10,.93) 68%);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);animation:pa4in .35s ease}
+@keyframes pa4in{from{opacity:0}}
+.pa4.out{opacity:0;transition:opacity .4s;pointer-events:none}
+.pa4-w{position:relative;width:190px;height:238px;transform-style:preserve-3d}
+.pa4-b{position:absolute;inset:0;will-change:transform}
+.pa4-b svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 18px rgba(var(--gl),.7))}
+.pa4-rays{position:absolute;left:50%;top:50%;width:560px;height:560px;margin:-280px 0 0 -280px;border-radius:50%;opacity:0;pointer-events:none;background:repeating-conic-gradient(rgba(var(--gl),.28) 0 7deg,transparent 7deg 22deg);-webkit-mask-image:radial-gradient(circle,#000 12%,transparent 66%);mask-image:radial-gradient(circle,#000 12%,transparent 66%)}
+.pa4-s,.pa4-v,.pa4-rg,.pa4-beam{position:absolute;opacity:0;pointer-events:none}
+.pa4-s{border-radius:50%;box-shadow:0 0 8px 2px rgba(var(--gl),.85)}
+.pa4-v{width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;filter:blur(12px)}
+.pa4-rg{width:90px;height:90px;margin:-45px 0 0 -45px;border-radius:50%;border:2px solid rgba(var(--gl),.95)}
+.pa4-beam{width:50px;height:300px;left:70px;top:-278px;transform-origin:50% 100%;background:linear-gradient(0deg,rgba(var(--gl),.7),rgba(var(--gl),0));filter:blur(7px)}
+.pa4-t{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;padding:0 24px;opacity:0}
+.pa4-t b{font:700 28px/1.1 var(--b);color:var(--c);text-shadow:0 0 22px var(--c)}
+.pa4-t span{font-size:15px;color:var(--text);opacity:.9}
+.pa4-rm .pa4-w{display:none}.pa4-rm .pa4-t{opacity:1}
+.pc-ro{pointer-events:none}
 </style>
 </head>
 <body>
@@ -2422,7 +2428,7 @@ function potEnPartido(pid, mid) {
 const cambiaVentana = () => leagueMs().filter(m => !m.result && isClosed(m) && !started(m));
 const cambiaBase = () => cambiaVentana().filter(m => S.players.some(x => x.id !== me && (S.preds[m.id] || {})[x.id] && contraN(m.id, x.id) === 0));
 const usables = t => (t === "cambia" ? cambiaBase() : pendMatches()).filter(m => !potEnPartido(me, m.id));
-function potEstado(t) { return potUsada(me, t) ? "used" : "ok"; }
+function potEstado(t, pid) { return potUsada(pid || me, t) ? "used" : "ok"; }
 function potPuede(t) {
   if (!me || !meP()) return { ok: false, why: "Inicia sesión para usar pociones." };
   if (potUsada(me, t)) return { ok: false, why: "Ya la has gastado esta temporada." };
@@ -2472,53 +2478,55 @@ const paQ = []; let paBusy = false;
 function potionAnim(t, sub) { paQ.push([t, sub]); if (!paBusy) paNext(); }
 function paNext() {
   const it = paQ.shift(); if (!it) { paBusy = false; return; }
-  const [t, sub] = it, P = POCIONES[t]; if (!P) return paNext();
+  const [t, sub] = it, P = POCIONES[t], F = PIC[t]; if (!P || !F) return paNext();
   paBusy = true;
-  const rm = reduceMotion, c2 = P.hex2 || P.hex, BOT = "M42 10H58V38A38 38 0 1 1 42 38Z", tm = [], W = 110, H = 138, D = 3600;
-  const card = document.querySelector(".card.match");
-  if (card) { const r = card.getBoundingClientRect(); if (r.top < 110 || r.bottom > innerHeight - 100) card.scrollIntoView({ block: "center" }); }
-  const cr = card ? card.getBoundingClientRect() : { left: innerWidth / 2 - 100, width: 200, top: innerHeight / 2 - 40, height: 100 };
-  const src = document.querySelector(`.pc-b[data-p="${t}"], .pf-b[data-p="${t}"]`), sr = src ? src.getBoundingClientRect() : { left: innerWidth / 2 - 30, top: innerHeight - 170, width: 60, height: 90 };
-  const sx = sr.left + sr.width / 2 - W / 2, sy = Math.min(innerHeight - H - 90, sr.top + sr.height / 2 - H / 2);
-  const ang = -100, rad = ang * Math.PI / 180, tx = cr.left + cr.width / 2, ty = cr.top - 26;
-  const cx = tx - 57.75 * Math.sin(rad) - W / 2, cy = ty + 57.75 * Math.cos(rad) - H / 2, L = Math.max(30, cr.top + 20 - ty);
-  const T3 = (x, y, ry, rz, rx, s) => `translate3d(${x}px,${y}px,0) rotateY(${ry}deg) rotateZ(${rz}deg) rotateX(${rx}deg) scale(${s})`;
-  const uid = "pa" + (Date.now() % 1e6);
-  const ov = document.createElement("div"); ov.className = "pa3" + (rm ? " pa3-rm" : ""); ov.style.setProperty("--gl", P.gl); ov.setAttribute("role", "status");
-  ov.innerHTML = `<div class="pa3-fill" style="left:${cr.left}px;top:${cr.top}px;width:${cr.width}px;height:${cr.height}px;background:linear-gradient(0deg,${P.hex}cc,${c2}55 70%,transparent)"></div>
-  <div class="pa3-st" style="left:${tx - 3}px;top:${ty}px;height:${L}px;background:linear-gradient(90deg,${P.hex},${c2})"></div>
-  <div class="pa3-b" style="width:${W}px;height:${H}px"><svg viewBox="0 0 100 125" width="${W}" height="${H}" aria-hidden="true" style="overflow:visible"><defs><clipPath id="${uid}"><path d="${BOT}"/></clipPath></defs>
-    <g clip-path="url(#${uid})"><g class="pa3-l2" style="transform-origin:50px 80px"><g class="pa3-l1"><rect x="-150" y="62" width="400" height="400" fill="${P.hex}"/>${P.hex2 ? `<rect x="50" y="62" width="200" height="400" fill="${c2}"/>` : ""}<ellipse cx="50" cy="62" rx="34" ry="3.2" fill="#fff" opacity=".35"/></g></g></g>
-    <path d="${BOT}" fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.85)" stroke-width="2.5" stroke-linejoin="round"/>
-    <path d="M30 70A26 26 0 0 1 40 52" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".55"/>
-    <g class="pa3-ck"><rect x="40" y="0" width="20" height="13" rx="3" fill="#a9733c"/><rect x="40" y="0" width="20" height="4" rx="2" fill="#c98f52"/></g></svg></div>
-  <div class="pa3-t" style="--c:${P.hex}"><b>${icoSvg(t)} ${esc(P.nom)}</b><span>${esc(sub || "Poción gastada")}</span></div>`;
+  const rm = reduceMotion, c2 = P.hex2 || P.hex, D = 3900, tm = [], uid = "pa" + (Date.now() % 1e6), LY = { doble: 84, clon: 84, salva: 98, vision: 84, cambia: 98 }[t] || 86;
+  let wv = "M-100 0Q-87.5 -6 -75 0"; for (let x = -50; x <= 200; x += 25) wv += "T" + x + " 0"; wv += "V300H-100Z";
+  const bubs = [[38, 26, 2.2], [52, 40, 3], [62, 22, 1.8], [45, 50, 2.4], [58, 56, 1.6], [34, 44, 1.8]].map(([x, y, r]) => `<circle class="pa4-bu" data-y="${y}" cx="${x}" cy="${y}" r="${r}" fill="rgba(255,255,255,.7)"/>`).join("");
+  const fillW = P.hex2 ? `url(#${uid}l)` : P.hex;
+  const svg = `<svg viewBox="0 0 100 125" aria-hidden="true"><defs><clipPath id="${uid}c"><path d="${F.d}"/></clipPath>
+    ${P.hex2 ? `<linearGradient id="${uid}l" x1="0" y1="0" x2="1" y2="0"><stop offset=".47" stop-color="${P.hex}"/><stop offset=".53" stop-color="${c2}"/></linearGradient>` : ""}
+    <linearGradient id="${uid}s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".42"/></linearGradient>
+    <linearGradient id="${uid}k" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8d5d2c"/><stop offset=".45" stop-color="#d3a062"/><stop offset="1" stop-color="#8d5d2c"/></linearGradient></defs>
+    <g clip-path="url(#${uid}c)"><g class="pa4-lq"><g transform="translate(0 ${F.y})">
+      <g class="pa4-wv"><path d="${wv}" fill="${fillW}"/><path d="${wv}" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1.3"/></g>
+      <rect x="-100" y="4" width="300" height="130" fill="url(#${uid}s)"/>${bubs}</g></g>
+      <rect x="23" y="38" width="6" height="72" rx="3" fill="#fff" opacity=".2"/><circle cx="70" cy="50" r="2.4" fill="#fff" opacity=".4"/></g>
+    <path d="${F.d}" fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.88)" stroke-width="2.4" stroke-linejoin="round"/>${F.x || ""}
+    <g transform="translate(50 ${LY})"><rect x="-13" y="-13" width="26" height="26" rx="6" fill="#f3e6c8" stroke="#8a6b3c" stroke-width="1.6"/><path d="${ICO[t]}" transform="translate(-8 -8) scale(.667)" fill="none" stroke="#5a3a12" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g class="pa4-ck" style="transform-box:fill-box;transform-origin:center"><rect x="39" y="-2" width="22" height="16" rx="3.5" fill="url(#${uid}k)"/><path d="M43 3v8M50 3v8M57 3v8" stroke="rgba(60,30,8,.35)" stroke-width="1.2" stroke-linecap="round"/></g></svg>`;
+  const ov = document.createElement("div"); ov.className = "pa4" + (rm ? " pa4-rm" : ""); ov.style.setProperty("--gl", P.gl); ov.setAttribute("role", "status");
+  ov.innerHTML = `<div class="pa4-w"><div class="pa4-rays"></div><div class="pa4-beam"></div><div class="pa4-b">${svg}</div></div>
+    <div class="pa4-t" style="--c:${P.hex}"><b>${icoSvg(t)} ${esc(P.nom)}</b><span>${esc(sub || "Poción gastada")}</span></div>`;
   document.body.appendChild(ov);
-  const q = s => ov.querySelector(s), A = (el, kf, o) => el.animate(kf, { fill: "both", duration: D, ...o });
+  const w = ov.querySelector(".pa4-w"), q = s => ov.querySelector(s), A = (el, kf, o) => el.animate(kf, { fill: "both", duration: D, ...o }), ke = (kf, e) => kf.map(k => ({ easing: e, ...k }));
   if (!rm) {
-    A(q(".pa3-b"), [
-      { transform: T3(sx, sy, 0, 0, 0, .62), offset: 0 }, { transform: T3(cx + 40, cy - 70, 360, 0, 0, 1.15), offset: .27, easing: "ease-out" },
-      { transform: T3(cx, cy, 360, ang, 14, 1.15), offset: .45 }, { transform: T3(cx, cy, 360, ang - 6, 14, 1.15), offset: .55 },
-      { transform: T3(cx, cy, 360, ang - 1, 14, 1.15), offset: .66 }, { transform: T3(cx, cy, 360, ang - 7, 14, 1.15), offset: .75 },
-      { transform: T3(cx, cy, 360, ang, 14, 1.15), offset: .8 }, { transform: T3(cx + 20, cy - 90, 360, 0, 0, 1), opacity: 1, offset: .92 },
-      { transform: T3(cx + 20, cy - 120, 360, 0, 0, .9), opacity: 0, offset: 1 }], { easing: "ease-in-out" });
-    A(q(".pa3-l2"), [{ transform: "rotate(0deg)", offset: 0 }, { transform: "rotate(0deg)", offset: .27 }, { transform: "rotate(100deg)", offset: .45 }, { transform: "rotate(100deg)", offset: .8 }, { transform: "rotate(0deg)", offset: .92 }, { transform: "rotate(0deg)", offset: 1 }], { easing: "ease-in-out" });
-    A(q(".pa3-l1"), [{ transform: "translateY(0)", offset: 0 }, { transform: "translateY(0)", offset: .47 }, { transform: "translateY(70px)", offset: .8 }, { transform: "translateY(70px)", offset: 1 }], { easing: "linear" });
-    A(q(".pa3-ck"), [{ transform: "none", opacity: 1, offset: 0 }, { transform: "none", opacity: 1, offset: .2 }, { transform: "translate(14px,-70px) rotate(50deg)", opacity: 0, offset: .3 }, { transform: "translate(14px,-70px) rotate(50deg)", opacity: 0, offset: 1 }]);
-    A(q(".pa3-st"), [{ transform: "scaleY(0)", opacity: 0, offset: 0 }, { transform: "scaleY(0)", opacity: 0, offset: .44 }, { transform: "scaleY(1)", opacity: 1, offset: .49 }, { transform: "scaleY(1)", opacity: 1, offset: .78 }, { transform: "scaleY(0)", opacity: 0, offset: .82 }, { transform: "scaleY(0)", opacity: 0, offset: 1 }]);
-    A(q(".pa3-fill"), [{ clipPath: "inset(100% 0 0 0 round 20px)", opacity: 1, offset: 0 }, { clipPath: "inset(100% 0 0 0 round 20px)", opacity: 1, offset: .5 }, { clipPath: "inset(0% 0 0 0 round 20px)", opacity: .9, offset: .8 }, { clipPath: "inset(0% 0 0 0 round 20px)", opacity: 0, offset: 1 }]);
-    A(q(".pa3-t"), [{ opacity: 0, transform: "translateY(14px)", offset: 0 }, { opacity: 0, transform: "translateY(14px)", offset: .36 }, { opacity: 1, transform: "none", offset: .46 }, { opacity: 1, transform: "none", offset: .9 }, { opacity: 0, transform: "none", offset: 1 }]);
-    const splash = () => { for (let i = 0; i < 7; i++) {
-      const d = document.createElement("i"), dx = (Math.random() - .5) * 130, up = 25 + Math.random() * 40; d.className = "pa3-d"; d.style.cssText = `left:${tx}px;top:${cr.top + 14}px;background:${i % 3 === 0 ? "#fff" : i % 2 ? P.hex : c2}`;
-      ov.appendChild(d); const an = d.animate([{ transform: "translate(0,0) scale(1)", opacity: 1 }, { transform: `translate(${dx * .6}px,${-up}px) scale(.9)`, opacity: 1, offset: .4 }, { transform: `translate(${dx}px,${14 + Math.random() * 20}px) scale(.3)`, opacity: 0 }], { duration: 650 + Math.random() * 250, easing: "ease-out" }); an.onfinish = () => d.remove(); } };
-    sfx.whoosh();
-    tm.push(setTimeout(sfx.cork, 760), setTimeout(() => sfx.pour(1.25), 1620), setTimeout(() => sfx.done(t), 2880));
-    [1700, 2050, 2400].forEach(ms => tm.push(setTimeout(splash, ms)));
-    tm.push(setTimeout(() => { if (card) card.animate([{ boxShadow: `0 0 0 0 rgba(${P.gl},0)`, filter: "brightness(1)" }, { boxShadow: `0 0 34px 6px rgba(${P.gl},.85)`, filter: "brightness(1.18)", offset: .4 }, { boxShadow: `0 0 34px 6px rgba(${P.gl},.85)`, filter: "brightness(1.18)", offset: .65 }, { boxShadow: `0 0 0 0 rgba(${P.gl},0)`, filter: "brightness(1)" }], { duration: 1700, easing: "ease" }); }, 1700));
+    const Z = (y, ry, rz, s) => `translate3d(0,${y}px,0) rotateY(${ry}deg) rotateZ(${rz}deg) scale(${s})`;
+    A(q(".pa4-b"), ke([
+      { transform: Z(150, -120, 0, .3), opacity: 0, offset: 0, easing: "cubic-bezier(.2,1.2,.4,1)" }, { transform: Z(0, 0, 0, 1.08), opacity: 1, offset: .115 }, { transform: Z(0, 0, 0, 1), offset: .15 },
+      { transform: Z(0, 0, -3, 1), offset: .165 }, { transform: Z(0, 0, 3, 1.04), offset: .18 }, { transform: Z(0, 0, 0, 1), offset: .2 },
+      { transform: Z(0, 14, 1.5, 1), offset: .32 }, { transform: Z(0, -12, -1.5, 1), offset: .46 }, { transform: Z(0, 10, 1, 1), offset: .6 }, { transform: Z(0, 0, 0, 1), offset: .7 }, { transform: Z(0, 0, 0, 1), offset: 1 }], "ease-in-out"));
+    A(q(".pa4-ck"), [{ transform: "none", opacity: 1, offset: 0 }, { transform: "none", opacity: 1, offset: .115 }, { transform: "translate(0,-1px) rotate(-7deg)", offset: .14 }, { transform: "translate(0,-1px) rotate(7deg)", offset: .16 },
+      { transform: "translate(0,-3px) rotate(0deg)", opacity: 1, offset: .18, easing: "ease-out" }, { transform: "translate(26px,-75px) rotate(190deg)", opacity: 1, offset: .3, easing: "ease-in" }, { transform: "translate(52px,25px) rotate(380deg)", opacity: 0, offset: .46 }, { transform: "translate(52px,25px) rotate(380deg)", opacity: 0, offset: 1 }]);
+    A(q(".pa4-lq"), [{ transform: "translateY(0)", offset: 0 }, { transform: "translateY(0)", offset: .205, easing: "cubic-bezier(.5,0,.6,1)" }, { transform: "translateY(82px)", offset: .64 }, { transform: "translateY(82px)", offset: 1 }]);
+    A(q(".pa4-wv"), [{ transform: "translateX(0)" }, { transform: "translateX(-50px)" }], { duration: 700, iterations: Infinity });
+    ov.querySelectorAll(".pa4-bu").forEach((c, i) => A(c, [{ transform: "translateY(0)", opacity: 0 }, { opacity: .85, offset: .2 }, { transform: `translateY(${-(+c.dataset.y + 2)}px)`, opacity: 0 }], { duration: 700 + i * 130, iterations: Infinity, delay: i * 90 }));
+    A(q(".pa4-rays"), [{ opacity: 0, offset: 0 }, { opacity: 0, offset: .17 }, { opacity: 1, offset: .25 }, { opacity: .7, offset: .7 }, { opacity: 0, offset: 1 }]);
+    q(".pa4-rays").animate([{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }], { duration: 9000, iterations: Infinity });
+    A(q(".pa4-beam"), [{ opacity: 0, transform: "scaleY(0)", offset: 0 }, { opacity: 0, transform: "scaleY(0)", offset: .18 }, { opacity: .95, transform: "scaleY(1)", offset: .3 }, { opacity: .7, transform: "scaleY(1)", offset: .6 }, { opacity: 0, transform: "scaleY(.8)", offset: .74 }]);
+    A(q(".pa4-t"), [{ opacity: 0, transform: "translateY(16px)", offset: 0 }, { opacity: 0, transform: "translateY(16px)", offset: .38 }, { opacity: 1, transform: "none", offset: .46 }, { opacity: 1, transform: "none", offset: 1 }]);
+    const mk = (cls, css) => { const e = document.createElement("i"); e.className = cls; e.style.cssText = `left:95px;top:24px;${css || ""}`; w.appendChild(e); return e; };
+    [0, 260].forEach(d => mk("pa4-rg").animate([{ transform: "scale(.2)", opacity: .95 }, { transform: "scale(3.4)", opacity: 0 }], { duration: 1100, delay: 700 + d, easing: "ease-out", fill: "forwards" }));
+    for (let i = 0; i < 7; i++) mk("pa4-v", `background:radial-gradient(circle,${i % 2 ? P.hex : c2},transparent 70%)`).animate([{ transform: "translate(0,0) scale(.6)", opacity: 0 }, { opacity: .55, offset: .25 }, { transform: `translate(${(Math.random() - .5) * 60}px,${-120 - Math.random() * 90}px) scale(2.3)`, opacity: 0 }], { duration: 1500 + Math.random() * 500, delay: 760 + i * 230, easing: "ease-out", fill: "forwards" });
+    for (let i = 0; i < 22; i++) {
+      const z = 4 + Math.random() * 5, a = (-160 + Math.random() * 140) * Math.PI / 180, r = 70 + Math.random() * 110, x = Math.cos(a) * r, y = Math.sin(a) * r;
+      mk("pa4-s", `width:${z}px;height:${z}px;margin:${-z / 2}px 0 0 ${-z / 2}px;background:${i % 3 === 0 ? "#fff" : i % 2 ? P.hex : c2}`).animate([{ transform: "translate(0,0) scale(1)", opacity: 1, easing: "ease-out" }, { transform: `translate(${x}px,${y}px) scale(.9)`, opacity: 1, offset: .55, easing: "ease-in" }, { transform: `translate(${x * 1.2}px,${y + 70}px) scale(.2)`, opacity: 0 }], { duration: 1000 + Math.random() * 500, delay: 700 + Math.random() * 120, fill: "forwards" });
+    }
+    sfx.whoosh(); tm.push(setTimeout(sfx.cork, 700), setTimeout(() => sfx.pour(1.6), 800), setTimeout(() => sfx.done(t), 2350));
   } else sfx.done(t);
   let done = false;
-  const end = () => { if (done) return; done = true; tm.forEach(clearTimeout); ov.classList.add("out"); setTimeout(() => { ov.remove(); paNext(); }, rm ? 0 : 350); };
-  ov.onclick = end; tm.push(setTimeout(end, rm ? 1600 : D + 300));
+  const end = () => { if (done) return; done = true; tm.forEach(clearTimeout); ov.classList.add("out"); setTimeout(() => { ov.remove(); paNext(); }, rm ? 0 : 420); };
+  ov.onclick = end; tm.push(setTimeout(end, rm ? 1600 : D));
 }
 
 // ---- Ficha de una poción y recorrido guiado para usarla (es la única forma de usarlas) ----
@@ -2645,7 +2653,7 @@ function mountShelf() {
   if (pcCtl && !pcCtl.dead) { pcCtl.attach(host); pcCtl.update(); return; }
   pcCtl = montarEstanteria(host);
 }
-function montarEstanteria(host) {
+function montarEstanteria(host, pid) {
   const ASPECT = .9, CAMZ = 17.5, CY = 1.1, TH = Math.tan(14 * Math.PI / 180);
   const wrap = document.createElement("div"); wrap.className = "pc-w"; wrap.innerHTML = '<div class="pc-ld">Montando la estantería…</div>';
   const disp = []; let ren = null, ro = null, slots = [], draw = () => {}, lw = 0, lh = 0;
@@ -2654,11 +2662,12 @@ function montarEstanteria(host) {
     resize() { if (!ren) return; const w = wrap.clientWidth, h = wrap.clientHeight; if (!w || !h || (w === lw && h === lh)) return; lw = w; lh = h; ren.setSize(w, h, false); draw(); },
     update() { paint(); },
     dispose() { ctl.dead = true; if (ro) ro.disconnect(); disp.forEach(o => { try { o.dispose(); } catch (e) {} }); if (ren) { try { ren.dispose(); ren.forceContextLoss(); } catch (e) {} } wrap.remove(); } };
-  wrap.addEventListener("click", e => { const b = e.target.closest("[data-p]"); if (b) { sfx.clink(); openPocion(b.dataset.p); } });
+  if (pid) wrap.classList.add("pc-ro");   // perfil de otro jugador: solo se mira
+  wrap.addEventListener("click", e => { if (pid) return; const b = e.target.closest("[data-p]"); if (b) { sfx.clink(); openPocion(b.dataset.p); } });
   ctl.attach(host);
   const paint = () => {
     POT_ORDER.forEach(t => {
-      const st = potEstado(t), nm = wrap.querySelector(`.pc-n[data-p="${t}"]`), b = wrap.querySelector(`.pc-b[data-p="${t}"], .pf-b[data-p="${t}"]`), sl = slots.find(s => s.t === t);
+      const st = potEstado(t, pid), nm = wrap.querySelector(`.pc-n[data-p="${t}"]`), b = wrap.querySelector(`.pc-b[data-p="${t}"], .pf-b[data-p="${t}"]`), sl = slots.find(s => s.t === t);
       if (nm) { nm.className = "pc-n " + st; nm.textContent = (st === "armed" ? "✓ " : "") + POCIONES[t].nom; }
       if (b) { b.classList.toggle("used", st === "used"); b.classList.toggle("armed", st === "armed"); b.setAttribute("aria-label", POCIONES[t].nom + (st === "used" ? ": gastada" : st === "armed" ? ": activada" : "")); }
       if (sl) { sl.liq.forEach(m => { m.visible = st !== "used"; }); sl.label.material.opacity = st === "used" ? .35 : 1; sl.halo.visible = st === "armed"; sl.glow.visible = st !== "used"; }
@@ -2792,7 +2801,7 @@ function montarEstanteria(host) {
         slots.forEach((o, i) => {
           const full = o.liq[0].visible, ph = i * 1.7, sw = Math.sin(s * 1.25 + ph) * .04;
           o.g.rotation.z = full ? sw : 0; o.g.position.y = o.y + (full ? Math.sin(s * 1.9 + ph) * .045 : 0);
-          o.liq.forEach(m => { m.rotation.z = full ? -sw * 2.4 + Math.sin(s * 3.1 + ph) * .035 : 0; m.position.y = full ? Math.sin(s * 4.2 + ph) * .012 : 0; });
+          o.liq.forEach(m => { const k = full ? Math.sin(s * 3.1 + ph) : 0; m.scale.set(1 - k * .008, 1 + k * .014, 1 - k * .008); });
           o.glow.material.opacity = .5 + Math.sin(s * 2 + ph) * .18;
           if (o.halo.visible) o.halo.material.opacity = .65 + Math.sin(s * 5) * .3;
         });
@@ -3245,6 +3254,15 @@ function albumVerHtml(pl) {
   return `<h2 style="margin-top:34px">Álbum</h2><div class="alb-ver">${albumGridHtml(pl)}</div>`;
 }
 function bindAlbumVer() {}
+const pocionesOtroHtml = who => `<h2 style="margin-top:26px;margin-bottom:-4px">Pociones</h2><div class="pc-sec" style="margin-top:0"><div class="pc" id="pfPcHost" role="group" aria-label="Pociones de ${esc(who.name)}"></div><p class="muted pc-h">Las vacías son las que ya ha gastado</p></div>`;
+let pfPcCtl = null;
+function bindPocionesOtro(box, who) {
+  const host = box.querySelector("#pfPcHost");
+  if (!host) { if (pfPcCtl) { pfPcCtl.dispose(); pfPcCtl = null; } return; }
+  if (pfPcCtl && !pfPcCtl.dead && pfPcCtl.pid === who.id) { pfPcCtl.attach(host); pfPcCtl.update(); return; }
+  if (pfPcCtl) pfPcCtl.dispose();
+  pfPcCtl = montarEstanteria(host, who.id); pfPcCtl.pid = who.id;
+}
 function bindVitrina(box, who) {
   const host = box.querySelector("#vtHost"); if (!host) return;
   const key = trofeosDe(who || meP()).join(",");
@@ -3624,7 +3642,7 @@ function renderHistorial() {
     <p class="pf-sec">Sus predicciones</p>` : `
     <h2>Historial</h2>`);
   const bindBack = () => { const bk = $("#pfBack"); if (bk) bk.onclick = () => { viewId = null; go(viewFrom); }; };
-  if (!rounds.length) { box.innerHTML = head + `<div class="card muted">${other ? "Todavía no hay partidos cerrados." : "Todavía no hay partidos."}</div>` + vitrinaHtml(who) + (other ? albumVerHtml(who) : ""); bindVitrina(box, who); bindAlbumVer(box, who); bindBack(); return; }
+  if (!rounds.length) { box.innerHTML = head + `<div class="card muted">${other ? "Todavía no hay partidos cerrados." : "Todavía no hay partidos."}</div>` + (other ? pocionesOtroHtml(who) : "") + vitrinaHtml(who) + (other ? albumVerHtml(who) : ""); bindVitrina(box, who); bindPocionesOtro(box, who); bindAlbumVer(box, who); bindBack(); return; }
   const withRes = rounds.filter(r => S.matches.some(m => m.round === r && m.result));
   const cur = rounds.includes(hv) ? hv : (withRes.length ? withRes[withRes.length - 1] : rounds[rounds.length - 1]);
   const hi = rounds.indexOf(cur);
@@ -3643,7 +3661,7 @@ function renderHistorial() {
   const part = jug.filter(m => (S.preds[m.id] || {})[pid]).length;
   const racha = rk;   // mayor racha conseguida
   const pc = n => jug.length ? Math.round(n / jug.length * 100) + "%" : "0%";
-  box.innerHTML = head + list + (other ? vitrinaHtml(who) + albumVerHtml(who) : `<h2 style="margin-top:26px">Estadísticas</h2><div class="stats">
+  box.innerHTML = head + list + (other ? pocionesOtroHtml(who) + vitrinaHtml(who) + albumVerHtml(who) : `<h2 style="margin-top:26px">Estadísticas</h2><div class="stats">
       <div class="st"><span>Posición actual</span><b>${i >= 0 ? i + 1 + "º" : "—"}</b></div>
       <div class="st"><span>Puntos totales</span><b>${i >= 0 ? t[i].pt : 0}<small> PT</small></b></div>
       <div class="st"><span>Plenos</span><b>${pc(ex)}</b></div>
@@ -3652,6 +3670,7 @@ function renderHistorial() {
       <div class="st"><span>Participación</span><b>${pc(part)}</b></div></div>${vitrinaHtml(who)}`);
   box.querySelectorAll("[data-hd]").forEach(b => b.onclick = () => { const n = rounds[hi + +b.dataset.hd]; if (n == null) return; hv = n; renderHistorial(); });
   bindVitrina(box, who);
+  bindPocionesOtro(box, who);
   bindAlbumVer(box, who);
   bindBack();
 }
