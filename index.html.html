@@ -259,6 +259,7 @@ td.pos{width:38px;font:400 18px var(--h);text-align:center;color:#fff}
 td.pt{font:400 20px var(--h);color:var(--cyan)}
 .pg-up{color:var(--uecl);font-weight:700}
 .pg-0{color:var(--mute)}
+.pg-dn{color:var(--bad);font-weight:700}
 .msg{margin-top:10px;font-weight:700}
 .ok{color:var(--uecl)} .err{color:var(--bad)}
 .item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
@@ -1108,6 +1109,22 @@ nav button.nw::after{top:7px;left:calc(50% + 10px)}
 .pa4-t span{font-size:15px;color:var(--text);opacity:.9}
 .pa4-rm .pa4-w{display:none}.pa4-rm .pa4-t{opacity:1}
 .pc-ro{pointer-events:none}
+.pm-cdv{font:400 38px/1 var(--h);letter-spacing:.06em;color:rgb(var(--gl));text-align:center;margin:8px 0 2px;font-variant-numeric:tabular-nums;text-shadow:0 0 14px rgba(var(--gl),.55)}
+.pm-cdv.low{color:#ff6b5e;text-shadow:0 0 14px rgba(255,107,94,.55)}
+.pf-b.dim{opacity:.62;filter:saturate(.6)}
+.pm-md .cf{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0 4px}
+.cf-c{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px 12px;border-radius:18px;background:var(--panel);border:1px solid var(--line);transition:border-color .2s,box-shadow .2s}
+.cf-c.on{border-color:rgba(var(--gl),.8);box-shadow:0 0 20px rgba(var(--gl),.3)}
+.cf-k{width:74px;height:74px;display:flex;align-items:center;justify-content:center}
+.cf-k .crest{width:74px;height:74px;object-fit:contain;font-size:22px}
+.cf-nm{font:700 15px/1.15 var(--b);text-align:center;min-height:34px;display:flex;align-items:center}
+.cf-s{display:flex;align-items:center;gap:8px;margin-top:2px}
+.cf-n{min-width:40px;text-align:center;font:400 48px/1 var(--h);color:var(--text);transition:color .2s,transform .2s}
+.cf-n.chg{color:rgb(var(--gl));text-shadow:0 0 16px rgba(var(--gl),.7);transform:scale(1.12)}
+.cf-b{width:42px;height:42px;border-radius:50%;border:1px solid rgba(var(--gl),.6);background:rgba(var(--gl),.16);color:var(--text);font:700 24px/1 var(--b);cursor:pointer;padding:0}
+.cf-b:disabled{opacity:.25;cursor:default}
+.cf-2,.cf-was{font-size:12px;color:var(--mute)}
+.cf-sum{text-align:center;margin:10px 0 12px;font-size:15px}
 </style>
 </head>
 <body>
@@ -1891,28 +1908,28 @@ const ICO = { doble: "M13 2 4 14h6l-1 8 9-12h-6z", clon: "M3 7h4l10 10h4M3 17h4l
 const icoSvg = (t, c) => `<svg viewBox="0 0 24 24" width="1.05em" height="1.05em" fill="none" stroke="${c || "currentColor"}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-.15em"><path d="${ICO[t]}"/></svg>`;
 const POCIONES = {
   doble:  { nom: "Doble filo", hex: "#ffc21a", gl: "255,194,26",
-    txt: "Multiplica x2 tus puntos si puntúas (1 pasa a 2, 3 pasa a 6), pero te resta 1 punto si sacas 0.",
-    como: "Pulsa «Usar», elige el partido, escribe tu pronóstico y confírmalo: se envía con la poción y se gasta.",
+    txt: "Multiplica x2 tus puntos si consigues puntuar, pero te resta 1 punto si no puntúas.",
+    como: "",
     cuando: "Cuando tengas una corazonada absoluta y quieras jugártelo todo.",
     col: "Dorado y eléctrico: o te lleva muy arriba o te cuesta un punto." },
   clon:   { nom: "Clonadora", hex: "#19d3ff", hex2: "#ff6fb5", gl: "25,211,255",
     txt: "Envías dos marcadores distintos para el mismo partido y cuenta solo el que más puntúe.",
-    como: "Pulsa «Usar», elige el partido, escribe dos marcadores distintos y confírmalos: se envían con la poción y se gasta.",
+    como: "",
     cuando: "En derbis o choques muy igualados en los que dudas entre dos resultados.",
     col: "Dos colores en el mismo frasco: dos marcadores a la vez." },
   salva:  { nom: "Salvavidas", hex: "#2fd37a", gl: "47,211,122",
-    txt: "Si terminas el partido con 0 puntos, te da +1 de consolación. Si puntúas por ti mismo, no añade nada.",
-    como: "Pulsa «Usar», elige el partido, escribe tu pronóstico y confírmalo: se envía con la poción y se gasta.",
+    txt: "Si terminas el partido sin puntuar, te da +1 de consolación. Si puntúas por ti mismo, no añade nada.",
+    como: "",
     cuando: "En semanas con partidos trampa o marcadores impredecibles, para no irte de vacío.",
     col: "Verde de protección, con su flotador: te ampara ante el cero." },
   vision: { nom: "Visión", hex: "#9b6bff", gl: "155,107,255",
     txt: "Revela en exclusiva el marcador exacto que ha puesto un rival, antes de que cierren las apuestas.",
-    como: "Con un pronóstico pendiente (antes de enviar el tuyo), pulsa «Usar», elige el partido y a un rival, y confirma. Si ya ha enviado, ves su marcador (solo tú) y se gasta; si no, no se gasta.",
+    como: "Antes de enviar tu predicción, pulsa «Usar», elige un rival en el que ponga “Ver” y confirma. Ya podrás ver su marcador (solo tú) y se gasta.",
     cuando: "En las últimas jornadas o duelos directos por el liderato o los puestos de Champions/Europa, para ajustar tu jugada.",
     col: "Violeta del ojo que ve lo que está oculto." },
   cambia: { nom: "Cambiaforma", hex: "#ff7a1a", gl: "255,122,26",
-    txt: "Cambia en exactamente 1 gol el pronóstico de un rival (+1 o -1 a uno de los dos equipos).",
-    como: "Entre el cierre de apuestas (1 hora antes) y el inicio del partido, pulsa «Usar», elige el partido, el rival y qué gol cambiar (+1 o -1), y confirma.",
+    txt: "Cambia en exactamente 1 gol la predicción de un rival (+1 o -1 a uno de los dos equipos).",
+    como: "Entre el cierre de apuestas y el inicio del partido (1 hora), pulsa «Usar», elige el rival y qué gol cambiar (+1 o -1), y confirma.",
     cuando: "Cuando veas que un rival va a puntuar y quieras romperle el marcador.",
     col: "Naranja de mutación: transforma el marcador de otro." }
 };
@@ -2492,7 +2509,7 @@ function paNext() {
       <g class="pa4-wv"><path d="${wv}" fill="${fillW}"/><path d="${wv}" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1.3"/></g>
       <rect x="-100" y="4" width="300" height="130" fill="url(#${uid}s)"/>${bubs}</g></g>
       <rect x="23" y="38" width="6" height="72" rx="3" fill="#fff" opacity=".2"/><circle cx="70" cy="50" r="2.4" fill="#fff" opacity=".4"/></g>
-    <path d="${F.d}" fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.88)" stroke-width="2.4" stroke-linejoin="round"/>${F.x || ""}
+    <path d="${F.d}" fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.88)" stroke-width="2.4" stroke-linejoin="round"/>
     <g transform="translate(50 ${LY})"><rect x="-13" y="-13" width="26" height="26" rx="6" fill="#f3e6c8" stroke="#8a6b3c" stroke-width="1.6"/><path d="${ICO[t]}" transform="translate(-8 -8) scale(.667)" fill="none" stroke="#5a3a12" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></g>
     <g class="pa4-ck" style="transform-box:fill-box;transform-origin:center"><rect x="39" y="-2" width="22" height="16" rx="3.5" fill="url(#${uid}k)"/><path d="M43 3v8M50 3v8M57 3v8" stroke="rgba(60,30,8,.35)" stroke-width="1.2" stroke-linecap="round"/></g></svg>`;
   const ov = document.createElement("div"); ov.className = "pa4" + (rm ? " pa4-rm" : ""); ov.style.setProperty("--gl", P.gl); ov.setAttribute("role", "status");
@@ -2535,9 +2552,9 @@ function openPocion(t) {
   const ov = document.createElement("div"); ov.className = "pm-ov";
   ov.innerHTML = `<div class="pm-md" style="--gl:${P.gl}" role="dialog" aria-modal="true" aria-label="${esc(P.nom)}"><button class="pm-x" type="button" aria-label="Cerrar">✕</button><div class="pm-bd"></div></div>`;
   document.body.appendChild(ov); document.body.style.overflow = "hidden";
-  const bd = ov.querySelector(".pm-bd");
+  const bd = ov.querySelector(".pm-bd"); let cdI = 0;
   const key = e => { if (e.key === "Escape") close(); };
-  const close = () => { document.removeEventListener("keydown", key); document.body.style.overflow = ""; ov.remove(); };
+  const close = () => { clearInterval(cdI); document.removeEventListener("keydown", key); document.body.style.overflow = ""; ov.remove(); };
   document.addEventListener("keydown", key);
   ov.onclick = e => { if (e.target === ov) close(); };
   ov.querySelector(".pm-x").onclick = close;
@@ -2601,7 +2618,7 @@ function openPocion(t) {
     const pm = S.preds[m.id] || {}, ps = S.players.filter(x => x.regAt && x.id !== me && pById(x.id)).sort(byName);
     const ok = x => !!pm[x.id] && contraN(m.id, x.id) === 0;
     const lab = x => !pm[x.id] ? "sin enviar" : contraN(m.id, x.id) ? "no disponible" : mode === "vision" ? "Ver" : predTxt(effPred(pm[x.id]));
-    bd.innerHTML = head(stp(2)) + `<div class="pm-s"><p>${mode === "vision" ? "Elige a quién espiar" : "Elige a qué rival cambiar el pronóstico"} en ${esc(m.home)} vs ${esc(m.away)}. ${mode === "vision" ? "Si aún no ha enviado, no gastas la poción." : ""}</p></div><div class="pm-l">${ps.map(x => `<button type="button" class="orow vrow" data-r="${x.id}" ${ok(x) ? "" : "disabled"}>${x.team ? crest(x.team, false) : ""}<span class="on">${esc(x.name)}</span><span class="vs">${lab(x)}</span></button>`).join("")}</div><button class="btn ghost" id="pmB" type="button">Atrás</button>`;
+    bd.innerHTML = head(stp(2)) + `<div class="pm-s"><p>${mode === "vision" ? "Elige a quién espiar" : "Elige a qué rival cambiar el pronóstico"} en ${esc(m.home)} vs ${esc(m.away)}.</p></div><div class="pm-l">${ps.map(x => `<button type="button" class="orow vrow" data-r="${x.id}" ${ok(x) ? "" : "disabled"}>${x.team ? crest(x.team, false) : ""}<span class="on">${esc(x.name)}</span><span class="vs">${lab(x)}</span></button>`).join("")}</div><button class="btn ghost" id="pmB" type="button">Atrás</button>`;
     bd.querySelector("#pmB").onclick = backFirst;
     bd.querySelectorAll("[data-r]").forEach(b => b.onclick = () => { const r = pById(b.dataset.r); if (mode === "vision") useVision(m, r); else changeView(m, r); });
   }
@@ -2618,30 +2635,55 @@ function openPocion(t) {
   }
   function changeView(m, r) {
     const q = effPred((S.preds[m.id] || {})[r.id]); if (!q) return main();
-    const opts = [["dh", 1, "+1 " + m.home], ["dh", -1, "-1 " + m.home], ["da", 1, "+1 " + m.away], ["da", -1, "-1 " + m.away]];
-    bd.innerHTML = head(stp(3)) + `<div class="pm-s"><p>Pronóstico de ${esc(r.name)}: <b class="pm-sc">${predTxt(q)}</b>. Elige qué gol cambiar.</p></div><div class="cg">${opts.map((o, i) => { const mins = o[0] === "dh" ? [q.h, q.h2] : [q.a, q.a2], bad = o[1] < 0 && mins.some(v => v != null && v + o[1] < 0); return `<button type="button" data-o="${i}" ${bad ? "disabled" : ""}>${esc(o[2])}</button>`; }).join("")}</div><button class="btn ghost" id="pmB" type="button">Atrás</button>`;
-    bd.querySelector("#pmB").onclick = () => rivals(m, "cambia");
-    bd.querySelectorAll("[data-o]").forEach(b => b.onclick = () => {
-      const o = opts[+b.dataset.o];
-      confirmView(4, `Vas a gastar tu poción Cambiaforma: ${esc(o[2])} en el pronóstico de ${esc(r.name)}. ¿Usarla?`, "Usar", () => changeView(m, r), () => {
-        const q3 = (S.preds[m.id] || {})[r.id];
-        if (started(m) || !isClosed(m) || potUsada(me, "cambia") || potEnPartido(me, m.id)) return note("Ya no se puede usar. No has gastado la poción.");
-        if (!q3 || contraN(m.id, r.id)) return note(`${esc(r.name)} ya no está disponible en este partido. No has gastado la poción.`);
-        q3.mods = [{ by: me, [o[0]]: o[1], t: Date.now() }]; save(); renderJugar(); potionAnim("cambia", "Pronóstico de " + r.name + " cambiado");
-        note(`Hecho: ${esc(o[2])} en el pronóstico de ${esc(r.name)}.`, "pm-q");
-      });
-    });
+    const T = { dh: { n: m.home, v: [q.h, q.h2] }, da: { n: m.away, v: [q.a, q.a2] } };
+    let chg = null;   // { k: "dh" | "da", v: +1 | -1 }: un solo gol cambiado
+    const canMinus = k => T[k].v.every(x => x == null || x - 1 >= 0);
+    const val = (k, i) => { const x = T[k].v[i]; return x == null ? null : x + (chg && chg.k === k ? chg.v : 0); };
+    const col = k => {
+      const c = chg && chg.k === k, up = chg == null || (c && chg.v === -1), dn = (chg == null || (c && chg.v === 1)) && canMinus(k);
+      return `<div class="cf-c${c ? " on" : ""}"><div class="cf-k">${crest(T[k].n)}</div><div class="cf-nm">${esc(T[k].n)}</div><div class="cf-s"><button type="button" class="cf-b" data-k="${k}" data-v="-1" aria-label="Quitar un gol a ${esc(T[k].n)}" ${dn ? "" : "disabled"}>−</button><b class="cf-n${c ? " chg" : ""}">${val(k, 0)}</b><button type="button" class="cf-b" data-k="${k}" data-v="1" aria-label="Añadir un gol a ${esc(T[k].n)}" ${up ? "" : "disabled"}>+</button></div>${T[k].v[1] != null ? `<div class="cf-2">2.º marcador: <b>${val(k, 1)}</b></div>` : ""}${c ? `<div class="cf-was">antes: ${T[k].v[0]}</div>` : ""}</div>`;
+    };
+    const render = () => {
+      const lab = chg ? (chg.v > 0 ? "+1 " : "-1 ") + T[chg.k].n : "";
+      bd.innerHTML = head(stp(3)) + `<div class="pm-s"><p>Pronóstico de ${esc(r.name)}. Cambia exactamente 1 gol con + o −.</p></div><div class="cf">${col("dh")}${col("da")}</div><p class="cf-sum">${chg ? "Cambio: <b>" + esc(lab) + "</b>" : "Aún no has elegido el gol"}</p><div class="pm-r"><button class="btn ghost" id="pmB" type="button">Atrás</button><button class="btn" id="pmY" type="button" ${chg ? "" : "disabled"}>Continuar</button></div>`;
+      bd.querySelector("#pmB").onclick = () => rivals(m, "cambia");
+      bd.querySelectorAll(".cf-b").forEach(b => b.onclick = () => { const v = +b.dataset.v; chg = chg ? null : { k: b.dataset.k, v }; _tone(v > 0 ? 700 : 480, .07, { v: .06, type: "triangle" }); render(); });
+      bd.querySelector("#pmY").onclick = () => {
+        if (!chg) return;
+        const o = [chg.k, chg.v, lab];
+        confirmView(4, `Vas a gastar tu poción Cambiaforma: ${esc(o[2])} en el pronóstico de ${esc(r.name)}. ¿Usarla?`, "Usar", () => changeView(m, r), () => {
+          const q3 = (S.preds[m.id] || {})[r.id];
+          if (started(m) || !isClosed(m) || potUsada(me, "cambia") || potEnPartido(me, m.id)) return note("Ya no se puede usar. No has gastado la poción.");
+          if (!q3 || contraN(m.id, r.id)) return note(`${esc(r.name)} ya no está disponible en este partido. No has gastado la poción.`);
+          q3.mods = [{ by: me, [o[0]]: o[1], t: Date.now() }]; save(); renderJugar(); potionAnim("cambia", "Pronóstico de " + r.name + " cambiado");
+          note(`Hecho: ${esc(o[2])} en el pronóstico de ${esc(r.name)}.`, "pm-q");
+        });
+      };
+    };
+    render();
   }
   function usar() {
     if (own) return choose(usables(t), "¿Para qué partido quieres usarla?", m => scoreStep(m));
     choose(usables(t), "¿En qué partido quieres usarla?", m => rivals(m, t === "vision" ? "vision" : "cambia"));
   }
   function main() {
+    clearInterval(cdI);
     const st = potEstado(t), pu = potPuede(t);
+    // cuenta atrás de la Cambiaforma: tiempo que queda para usarla (cierre de apuestas → inicio del partido) o para que se abra
+    const cd = (() => { if (t !== "cambia" || !me || st === "used") return null; const u = usables(t); if (u.length) return { on: true, at: Math.min(...u.map(m => new Date(m.kickoff).getTime())) }; const nx = leagueMs().filter(m => !m.result && !isClosed(m)).map(closeAt); return nx.length ? { on: false, at: Math.min(...nx) } : null; })();
     bd.innerHTML = head(st === "used" ? "Gastada esta temporada" : "Disponible") +
-      `<div class="pm-s"><b>Qué hace</b><p>${esc(P.txt)}</p></div><div class="pm-s"><b>Cómo se usa</b><p>${esc(P.como)}</p></div><div class="pm-s"><b>Cuándo usarla</b><p>${esc(P.cuando)}</p></div>` +
+      (cd ? `<div class="pm-s"><b>${cd.on ? "Tiempo restante para usarla" : "Podrás usarla dentro de"}</b><div class="pm-cdv" id="pmCd" role="timer">--:--:--</div></div>` : "") +
+      `<div class="pm-s"><b>Qué hace</b><p>${esc(P.txt)}</p></div>${P.como ? `<div class="pm-s"><b>Cómo se usa</b><p>${esc(P.como)}</p></div>` : ""}<div class="pm-s"><b>¿Cuándo usarla?</b><p>${esc(P.cuando)}</p></div>` +
       `<button class="btn" id="pmU" type="button" ${pu.ok ? "" : "disabled"}>Usar</button>` + (!pu.ok ? `<p class="pm-w">${esc(pu.why)}</p>` : "");
     const u = bd.querySelector("#pmU"); if (u) u.onclick = usar;
+    if (cd) {
+      const el = bd.querySelector("#pmCd"), tick = () => {
+        if (!el.isConnected) { clearInterval(cdI); return; }
+        const left = cd.at - Date.now(); if (left <= 0) { clearInterval(cdI); main(); return; }
+        el.textContent = fmtCd(left); el.classList.toggle("low", cd.on && left < 3e5);
+      };
+      tick(); cdI = setInterval(tick, 1000);
+    }
   }
   main();
 }
@@ -2670,7 +2712,9 @@ function montarEstanteria(host, pid) {
       const st = potEstado(t, pid), nm = wrap.querySelector(`.pc-n[data-p="${t}"]`), b = wrap.querySelector(`.pc-b[data-p="${t}"], .pf-b[data-p="${t}"]`), sl = slots.find(s => s.t === t);
       if (nm) { nm.className = "pc-n " + st; nm.textContent = (st === "armed" ? "✓ " : "") + POCIONES[t].nom; }
       if (b) { b.classList.toggle("used", st === "used"); b.classList.toggle("armed", st === "armed"); b.setAttribute("aria-label", POCIONES[t].nom + (st === "used" ? ": gastada" : st === "armed" ? ": activada" : "")); }
-      if (sl) { sl.liq.forEach(m => { m.visible = st !== "used"; }); sl.label.material.opacity = st === "used" ? .35 : 1; sl.halo.visible = st === "armed"; sl.glow.visible = st !== "used"; }
+      const lv = st === "used" ? "used" : pid ? "on" : (potPuede(t).ok ? "on" : "off");   // on = se puede usar · off = ahora no · used = vacía y vieja
+      if (b) b.classList.toggle("dim", lv === "off");
+      if (sl) { const on = lv === "on", us = lv === "used"; sl.liq.forEach(m => { m.visible = !us; }); sl.label.material.opacity = us ? .3 : on ? 1 : .62; sl.glow.visible = !us; sl.gl0 = on ? .85 : .14; sl.ga = on ? .2 : .03; sl.glow.scale.setScalar(on ? 1.25 : .9); sl.mv = on ? 1 : us ? 0 : .35; sl.halo.visible = on; sl.halo.material.color.set(POCIONES[t].hex); sl.veil.visible = !on; sl.veil.material.map = us ? sl.dt : sl.vt; sl.veil.material.color.set(us ? 0xffffff : 0x04080b); sl.veil.material.opacity = us ? .88 : .42; sl.veil.material.needsUpdate = true; }
     });
     draw();
   };
@@ -2746,6 +2790,14 @@ function montarEstanteria(host, pid) {
     const shadowT = tex(mkc(128, 128, (x, w, h) => { const g = x.createRadialGradient(64, 64, 4, 64, 64, 62); g.addColorStop(0, "rgba(0,0,0,.6)"); g.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = g; x.fillRect(0, 0, w, h); }));
     const shadowM = mat("MeshBasicMaterial", { map: shadowT, transparent: true, depthWrite: false });
     const glowT = tex(mkc(128, 128, (x, w, h) => { const g = x.createRadialGradient(64, 64, 0, 64, 64, 62); g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(.35, "rgba(255,255,255,.35)"); g.addColorStop(1, "rgba(255,255,255,0)"); x.fillStyle = g; x.fillRect(0, 0, w, h); }));
+    const veilT = tex(mkc(128, 170, (x, w, h) => { const g = x.createRadialGradient(64, 85, 8, 64, 85, 82); g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(.62, "rgba(255,255,255,.9)"); g.addColorStop(1, "rgba(255,255,255,0)"); x.fillStyle = g; x.fillRect(0, 0, w, h); }));
+    const dustT = tex(mkc(128, 170, (x, w, h) => {   // polvo, mugre y telaraña: el frasco vacío y viejo
+      const g = x.createRadialGradient(64, 85, 8, 64, 85, 82); g.addColorStop(0, "rgba(34,26,18,.8)"); g.addColorStop(.62, "rgba(34,26,18,.72)"); g.addColorStop(1, "rgba(34,26,18,0)"); x.fillStyle = g; x.fillRect(0, 0, w, h);
+      for (let i = 0; i < 190; i++) { const a = Math.random() * 6.28, r = Math.sqrt(Math.random()) * 62; x.fillStyle = `rgba(200,185,160,${.12 + Math.random() * .28})`; x.beginPath(); x.arc(64 + Math.cos(a) * r, 85 + Math.sin(a) * r * 1.3, .5 + Math.random() * 1.4, 0, 6.28); x.fill(); }
+      x.strokeStyle = "rgba(235,230,218,.6)"; x.lineWidth = .8;
+      for (let k = 0; k < 6; k++) { const a = k * Math.PI / 10; x.beginPath(); x.moveTo(14, 18); x.lineTo(14 + Math.cos(a) * 62, 18 + Math.sin(a) * 62); x.stroke(); }
+      for (let r = 14; r <= 56; r += 14) { x.beginPath(); for (let k = 0; k <= 5; k++) { const a = k * Math.PI / 10, px = 14 + Math.cos(a) * r, py = 18 + Math.sin(a) * r; if (k) x.quadraticCurveTo(14 + Math.cos(a - Math.PI / 20) * r * .88, 18 + Math.sin(a - Math.PI / 20) * r * .88, px, py); else x.moveTo(px, py); } x.stroke(); }
+    }));
     const labT = t => tex(mkc(128, 128, (x, w, h) => {
       x.fillStyle = "#f3e6c8"; x.strokeStyle = "#8a6b3c"; x.lineWidth = 5; x.beginPath(); x.moveTo(16, 4); x.arcTo(124, 4, 124, 124, 14); x.arcTo(124, 124, 4, 124, 14); x.arcTo(4, 124, 4, 4, 14); x.arcTo(4, 4, 124, 4, 14); x.closePath(); x.fill(); x.stroke();
       x.save(); x.translate(w / 2 - 38, h / 2 - 38); x.scale(76 / 24, 76 / 24); x.strokeStyle = "#5a3a12"; x.lineWidth = 2.3; x.lineCap = x.lineJoin = "round"; x.stroke(new Path2D(ICO[t])); x.restore();
@@ -2779,7 +2831,8 @@ function montarEstanteria(host, pid) {
       const halo = new T.Mesh(geo(new T.RingGeometry(.86, 1.16, 44)), mat("MeshBasicMaterial", { color: 0xffd24a, transparent: true, opacity: .9, side: T.DoubleSide, blending: T.AdditiveBlending, depthWrite: false }));
       halo.rotation.x = -Math.PI / 2; halo.position.set(x, r.y + .02, -.05); halo.visible = false; sc.add(halo);
       const glow = new T.Mesh(geo(new T.PlaneGeometry(3.6, 3.6)), mat("MeshBasicMaterial", { map: glowT, color: POCIONES[t].hex, transparent: true, opacity: .5, blending: T.AdditiveBlending, depthWrite: false })); glow.position.set(x, r.y + 1.2, -.6); sc.add(glow);
-      slots.push({ t, g: b.g, y: r.y, glow, liq: b.liq, label: b.label, halo });
+      const veil = new T.Mesh(geo(new T.PlaneGeometry(2.6, 3.45)), mat("MeshBasicMaterial", { map: veilT, color: 0x04080b, transparent: true, opacity: .42, depthWrite: false })); veil.position.set(x, r.y + 1.4, 1.05); veil.renderOrder = 10; veil.visible = false; sc.add(veil);
+      slots.push({ t, g: b.g, y: r.y, glow, liq: b.liq, label: b.label, halo, veil, vt: veilT, dt: dustT });
       const a = px(x - .95, r.y + 2.75, 0), c = px(x + .95, r.y - PT + .02, .9), n = px(x, r.y - PT / 2, .9);
       hits += `<button type="button" class="pc-b" data-p="${t}" style="left:${a[0].toFixed(2)}%;top:${a[1].toFixed(2)}%;width:${(c[0] - a[0]).toFixed(2)}%;height:${(c[1] - a[1]).toFixed(2)}%" aria-label="${esc(POCIONES[t].nom)}"></button><span class="pc-n" data-p="${t}" style="left:${n[0].toFixed(2)}%;top:${n[1].toFixed(2)}%">${esc(POCIONES[t].nom)}</span>`;
     }));
@@ -2792,17 +2845,18 @@ function montarEstanteria(host, pid) {
       for (let i = 0; i < NS; i++) { sp[i * 3] = (rnd() - .5) * 5.6; sp[i * 3 + 1] = -1.8 + rnd() * 6.2; sp[i * 3 + 2] = .1 + rnd() * .5; }
       sg.setAttribute("position", new T.BufferAttribute(sp, 3)); disp.push(sg);
       sc.add(new T.Points(sg, mat("PointsMaterial", { size: .1, map: glowT, color: 0xffe2a0, transparent: true, opacity: .8, blending: T.AdditiveBlending, depthWrite: false })));
-      let vis = true, raf = 0; const t0 = performance.now();
+      let vis = true, raf = 0, lp = 0; const t0 = performance.now();
       try { const io = new IntersectionObserver(e => { vis = e[0].isIntersecting; }); io.observe(wrap); disp.push({ dispose() { io.disconnect(); } }); } catch (e) {}
       const loop = ts => {
         if (ctl.dead || !ren) return; raf = requestAnimationFrame(loop);
         if (!vis || document.hidden || !wrap.isConnected) return;
         const s = (ts - t0) / 1000;
+        if (!pid && ts - lp > 3000) { lp = ts; paint(); }   // refresca qué pociones se pueden usar
         slots.forEach((o, i) => {
-          const full = o.liq[0].visible, ph = i * 1.7, sw = Math.sin(s * 1.25 + ph) * .04;
-          o.g.rotation.z = full ? sw : 0; o.g.position.y = o.y + (full ? Math.sin(s * 1.9 + ph) * .045 : 0);
+          const full = o.liq[0].visible, ph = i * 1.7, mv = o.mv == null ? 1 : o.mv, sw = Math.sin(s * 1.25 + ph) * .04 * mv;
+          o.g.rotation.z = sw; o.g.position.y = o.y + Math.sin(s * 1.9 + ph) * .045 * mv;
           o.liq.forEach(m => { const k = full ? Math.sin(s * 3.1 + ph) : 0; m.scale.set(1 - k * .008, 1 + k * .014, 1 - k * .008); });
-          o.glow.material.opacity = .5 + Math.sin(s * 2 + ph) * .18;
+          o.glow.material.opacity = (o.gl0 == null ? .5 : o.gl0) + Math.sin(s * 2 + ph) * (o.ga == null ? .18 : o.ga);
           if (o.halo.visible) o.halo.material.opacity = .65 + Math.sin(s * 5) * .3;
         });
         pl.intensity = .55 + Math.sin(s * 7) * .04 + Math.sin(s * 3.3) * .05;
@@ -2943,7 +2997,7 @@ function renderTabla() {
   const nav = rs.length ? `<div class="jhead"><div class="jn">${rs.length > 1 ? `<button class="jb" data-jd="-1" ${idx <= 0 ? "disabled" : ""} aria-label="Jornada anterior">‹</button>` : ""}<b>Jornada ${cur}</b>${rs.length > 1 ? `<button class="jb" data-jd="1" ${idx >= rs.length - 1 ? "disabled" : ""} aria-label="Jornada siguiente">›</button>` : ""}</div></div>` : "";
   $("#tablaNav").innerHTML = nav;
   $("#tablaBox").innerHTML = `<table><thead><tr><th class="n">Pos</th><th>Jugador</th><th class="n">PG</th><th class="n">PT</th><th class="arr"><button type="button" class="tdb" id="tdInfo" aria-label="Criterios de desempate" title="Criterios de desempate"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="7.3" r="1.5" fill="currentColor"/></svg></button></th></tr></thead><tbody>` +
-    t.map((p, i) => `<tr data-pid="${p.id}" class="${i < 4 ? "z-ucl" : i < 6 ? "z-uel" : i < 8 ? "z-uecl" : ""}${p.id === me ? " mine" : ""}${p.rc >= 3 ? " rfire" : ""}"><td class="pos">${i + 1}º</td><td><div class="pl">${p.team ? crest(p.team, false) : ""}<span class="plw"><span class="${p.id === me ? "me" : ""}">${esc(p.name)}</span>${ttlHtml(p, "tb")}</span></div></td><td class="n ${p.pg > 0 ? "pg-up" : "pg-0"}">${p.pg > 0 ? "+" + p.pg : "0"}</td><td class="n pt">${p.pt}</td><td class="arr">${mvIcon(p.mv)}</td></tr>`).join("") + "</tbody></table>";
+    t.map((p, i) => `<tr data-pid="${p.id}" class="${i < 4 ? "z-ucl" : i < 6 ? "z-uel" : i < 8 ? "z-uecl" : ""}${p.id === me ? " mine" : ""}${p.rc >= 3 ? " rfire" : ""}"><td class="pos">${i + 1}º</td><td><div class="pl">${p.team ? crest(p.team, false) : ""}<span class="plw"><span class="${p.id === me ? "me" : ""}">${esc(p.name)}</span>${ttlHtml(p, "tb")}</span></div></td><td class="n ${p.pg > 0 ? "pg-up" : p.pg < 0 ? "pg-dn" : "pg-0"}">${p.pg > 0 ? "+" + p.pg : p.pg < 0 ? p.pg : "0"}</td><td class="n pt">${p.pt}</td><td class="arr">${mvIcon(p.mv)}</td></tr>`).join("") + "</tbody></table>";
   $("#tablaNav").querySelectorAll("[data-jd]").forEach(b => b.onclick = () => { const n = rs[idx + +b.dataset.jd]; if (n == null) return; tv = n === last ? null : n; renderTabla(); });
   fitTitulos($("#tablaBox"));
   setupMyPos(t);
@@ -2981,7 +3035,7 @@ function setupMyPos(t) {
   if (i < 0 || !row) { box.hidden = true; box.classList.remove("fire"); sec.classList.remove("hasMy"); return; }
   const p = t[i];
   box.classList.toggle("fire", p.rc >= 3);   // racha: la barra se llena de llamas
-  box.innerHTML = `<span class="mp-pos mp-c">${i + 1}º</span><div class="mp-pl">${p.team ? crest(p.team, false) : ""}<span class="mp-name">${esc(p.name)}</span></div><span class="mp-pg mp-c ${p.pg > 0 ? "pg-up" : "pg-0"}">${p.pg > 0 ? "+" + p.pg : "0"}</span><span class="mp-pt mp-c">${p.pt}</span><span class="mp-mv mp-c">${mvIcon(p.mv)}</span>`;
+  box.innerHTML = `<span class="mp-pos mp-c">${i + 1}º</span><div class="mp-pl">${p.team ? crest(p.team, false) : ""}<span class="mp-name">${esc(p.name)}</span></div><span class="mp-pg mp-c ${p.pg > 0 ? "pg-up" : p.pg < 0 ? "pg-dn" : "pg-0"}">${p.pg > 0 ? "+" + p.pg : p.pg < 0 ? p.pg : "0"}</span><span class="mp-pt mp-c">${p.pt}</span><span class="mp-mv mp-c">${mvIcon(p.mv)}</span>`;
   sec.classList.add("hasMy");
   box.onclick = () => row.scrollIntoView({ behavior: "smooth", block: "center" });
   const nav = $("#mainNav"), ub = $("#userBar");
