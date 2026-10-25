@@ -449,6 +449,7 @@ td .crest{width:30px;height:30px}
 .cd>div{padding-left:0}
 .cd b{white-space:nowrap;font:400 20px var(--h);color:var(--cyan);font-variant-numeric:tabular-nums;letter-spacing:.04em}
 .cd.off b{color:var(--bad)}
+.cd .cdt{font-size:12px;font-weight:400;opacity:.85;margin-top:1px;text-transform:capitalize}
 .ck{width:22px;height:22px;flex:0 0 auto;color:var(--cyan)}
 .cd.off .ck{color:var(--bad)}
 .ck .mh,.ck .hh{transform-origin:12px 12px}
@@ -1384,7 +1385,7 @@ nav button.nw::after{top:7px;left:calc(50% + 10px)}
 <script>
 // ====== CONFIGURA AQUÍ ======
 const CONFIG = {
-  cuota: "5 €", pin: "1234", jornadas: 20,
+  cuota: "5 €", pin: "2362180", jornadas: 20,
   // Equipos de La Liga para crear partidos (edita la lista cuando cambie la temporada)
   equipos: ["Alavés", "Athletic Club", "Atlético de Madrid", "Barcelona", "Celta de Vigo", "Deportivo", "Elche", "Espanyol", "Getafe", "Levante", "Málaga", "Osasuna", "Racing de Santander", "Rayo Vallecano", "Real Betis", "Real Madrid", "Real Sociedad", "Sevilla FC", "Valencia", "Villarreal"],
   // Escudos incluidos dentro del propio archivo (no hace falta subir carpetas)
@@ -1779,7 +1780,7 @@ try { me = localStorage.getItem(SESSION) || ""; } catch (e) {}
 if (!me) { const c = document.cookie.split("; ").find(x => x.startsWith(SESSION + "=")); if (c) me = decodeURIComponent(c.split("=")[1] || ""); }
 const meP = () => S.players.find(p => p.id === me) || (pend && pend.id === me ? pend : undefined);
 function setMe(id) {
-  const was = me; me = id; if (!id && was) authMode = (pend && pend.id === was) ? "reg" : "login"; if (id !== was) { ligaSel = ""; pick = ""; if (!(pend && pend.id === id)) pend = null; }   // cada registro/sesión empieza sin liga ni escudo elegidos
+  const was = me; me = id; if (!id && was) authMode = (pend && pend.id === was) ? "reg" : "login"; if (id !== was) { try { for (const k in DRAFT) delete DRAFT[k]; } catch (e) {} ligaSel = ""; pick = ""; if (!(pend && pend.id === id)) pend = null; }   // cada registro/sesión empieza sin liga ni escudo elegidos
   const keep = !!id && !(pend && pend.id === id);   // un registro a medias no guarda sesión
   try { keep ? localStorage.setItem(SESSION, id) : localStorage.removeItem(SESSION); } catch (e) {}
   try { document.cookie = SESSION + "=" + (keep ? encodeURIComponent(id) : "") + "; max-age=" + (keep ? 31536000 : 0) + "; path=/; SameSite=Lax"; } catch (e) {}
@@ -1788,7 +1789,7 @@ function setMe(id) {
 }
 const b64 = u => btoa(String.fromCharCode(...u)), unb64 = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));
 async function pinKey() {
-  const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(CONFIG.pin), "PBKDF2", false, ["deriveKey"]);
+  const k = await crypto.subtle.importKey("raw", new TextEncoder().encode("1234"), "PBKDF2", false, ["deriveKey"]);
   return crypto.subtle.deriveKey({ name: "PBKDF2", salt: new TextEncoder().encode("superpredict"), iterations: 100000, hash: "SHA-256" }, k, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
 }
 async function encPin(pin) {
@@ -2403,7 +2404,7 @@ const fmtCd = ms => {
   const t = Math.max(0, Math.floor(ms / 1000)), p = n => String(n).padStart(2, "0");
   return p(Math.floor(t / 3600)) + ":" + p(Math.floor(t % 3600 / 60)) + ":" + p(t % 60);
 };
-const cdRow = (closed, kick) => `<div class="cd ${closed ? "off" : ""}"><div><div>${closed ? "Apuestas cerradas" : "Se cerrará en:"}</div></div><b id="cdv">${closed ? "00:00:00" : ""}</b><svg id="cdk" class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line class="hh" x1="12" y1="12" x2="12" y2="7.5"/><line class="mh" x1="12" y1="12" x2="12" y2="4.5"/></svg></div>`;
+const cdRow = (closed, kick) => `<div class="cd ${closed ? "off" : ""}"><div><div>${closed ? "Apuestas cerradas" : "Se cerrará en:"}</div>${kick ? `<div class="cdt">${closed ? "Cerraron" : "Cierra"}: ${fmt(new Date(closeAt({ kickoff: kick })).toISOString())}</div>` : ""}</div><b id="cdv">${closed ? "00:00:00" : ""}</b><svg id="cdk" class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line class="hh" x1="12" y1="12" x2="12" y2="7.5"/><line class="mh" x1="12" y1="12" x2="12" y2="4.5"/></svg></div>`;
 let cdTimer = null;
 // Predicciones de los demás: solo se ven cuando se cierran las apuestas (1 h antes). Antes, solo con la poción Visión.
 const omtRow = m => `<div class="omt">${crest(m.home)}<span>${esc(m.home)} vs ${esc(m.away)}</span>${crest(m.away)}</div>`;
@@ -2714,7 +2715,13 @@ function montarEstanteria(host, pid) {
       if (b) { b.classList.toggle("used", st === "used"); b.classList.toggle("armed", st === "armed"); b.setAttribute("aria-label", POCIONES[t].nom + (st === "used" ? ": gastada" : st === "armed" ? ": activada" : "")); }
       const lv = st === "used" ? "used" : pid ? "on" : (potPuede(t).ok ? "on" : "off");   // on = se puede usar · off = ahora no · used = vacía y vieja
       if (b) b.classList.toggle("dim", lv === "off");
-      if (sl) { const on = lv === "on", us = lv === "used"; sl.liq.forEach(m => { m.visible = !us; }); sl.label.material.opacity = us ? .3 : on ? 1 : .62; sl.glow.visible = !us; sl.gl0 = on ? .85 : .14; sl.ga = on ? .2 : .03; sl.glow.scale.setScalar(on ? 1.25 : .9); sl.mv = on ? 1 : us ? 0 : .35; sl.halo.visible = on; sl.halo.material.color.set(POCIONES[t].hex); sl.veil.visible = !on; sl.veil.material.map = us ? sl.dt : sl.vt; sl.veil.material.color.set(us ? 0xffffff : 0x04080b); sl.veil.material.opacity = us ? .88 : .42; sl.veil.material.needsUpdate = true; }
+      if (sl) {
+        const on = lv === "on", us = lv === "used", k = on ? 1 : us ? .42 : .5;
+        sl.liq.forEach((m, i) => { m.visible = !us; m.material.color.set(sl.hx[i]).multiplyScalar(k); m.material.emissive.set(sl.hx[i]).multiplyScalar(k); m.material.emissiveIntensity = on ? .38 : us ? .04 : .1; });
+        sl.label.material.opacity = us ? .7 : on ? 1 : .6; sl.label.material.color.setScalar(us ? .72 : on ? 1 : .7);
+        sl.cork.color.set(0xa9733c).multiplyScalar(us ? .72 : on ? 1 : .6); if (sl.ring) sl.ring.color.set(0xe8453c).multiplyScalar(us ? .6 : on ? 1 : .55);
+        sl.crack.visible = us; sl.glow.visible = !us; sl.gl0 = on ? .85 : .1; sl.ga = on ? .2 : .02; sl.glow.scale.setScalar(on ? 1.25 : .9); sl.mv = on ? 1 : us ? 0 : .35; sl.halo.visible = on; sl.halo.material.color.set(POCIONES[t].hex);
+      }
     });
     draw();
   };
@@ -2790,13 +2797,12 @@ function montarEstanteria(host, pid) {
     const shadowT = tex(mkc(128, 128, (x, w, h) => { const g = x.createRadialGradient(64, 64, 4, 64, 64, 62); g.addColorStop(0, "rgba(0,0,0,.6)"); g.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = g; x.fillRect(0, 0, w, h); }));
     const shadowM = mat("MeshBasicMaterial", { map: shadowT, transparent: true, depthWrite: false });
     const glowT = tex(mkc(128, 128, (x, w, h) => { const g = x.createRadialGradient(64, 64, 0, 64, 64, 62); g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(.35, "rgba(255,255,255,.35)"); g.addColorStop(1, "rgba(255,255,255,0)"); x.fillStyle = g; x.fillRect(0, 0, w, h); }));
-    const veilT = tex(mkc(128, 170, (x, w, h) => { const g = x.createRadialGradient(64, 85, 8, 64, 85, 82); g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(.62, "rgba(255,255,255,.9)"); g.addColorStop(1, "rgba(255,255,255,0)"); x.fillStyle = g; x.fillRect(0, 0, w, h); }));
-    const dustT = tex(mkc(128, 170, (x, w, h) => {   // polvo, mugre y telaraña: el frasco vacío y viejo
-      const g = x.createRadialGradient(64, 85, 8, 64, 85, 82); g.addColorStop(0, "rgba(34,26,18,.8)"); g.addColorStop(.62, "rgba(34,26,18,.72)"); g.addColorStop(1, "rgba(34,26,18,0)"); x.fillStyle = g; x.fillRect(0, 0, w, h);
-      for (let i = 0; i < 190; i++) { const a = Math.random() * 6.28, r = Math.sqrt(Math.random()) * 62; x.fillStyle = `rgba(200,185,160,${.12 + Math.random() * .28})`; x.beginPath(); x.arc(64 + Math.cos(a) * r, 85 + Math.sin(a) * r * 1.3, .5 + Math.random() * 1.4, 0, 6.28); x.fill(); }
-      x.strokeStyle = "rgba(235,230,218,.6)"; x.lineWidth = .8;
-      for (let k = 0; k < 6; k++) { const a = k * Math.PI / 10; x.beginPath(); x.moveTo(14, 18); x.lineTo(14 + Math.cos(a) * 62, 18 + Math.sin(a) * 62); x.stroke(); }
-      for (let r = 14; r <= 56; r += 14) { x.beginPath(); for (let k = 0; k <= 5; k++) { const a = k * Math.PI / 10, px = 14 + Math.cos(a) * r, py = 18 + Math.sin(a) * r; if (k) x.quadraticCurveTo(14 + Math.cos(a - Math.PI / 20) * r * .88, 18 + Math.sin(a - Math.PI / 20) * r * .88, px, py); else x.moveTo(px, py); } x.stroke(); }
+    const crackT = tex(mkc(128, 128, (x, w, h) => {   // grietas del frasco gastado
+      const seg = (pts, lw) => { x.beginPath(); pts.forEach(([a, b], k) => k ? x.lineTo(a, b) : x.moveTo(a, b)); x.lineWidth = lw; x.stroke(); };
+      const L = [[[[18, 8], [34, 30], [30, 46], [52, 62], [48, 80], [70, 98], [84, 120]], 1.6], [[[34, 30], [58, 26], [74, 38]], 1.2], [[[52, 62], [30, 74], [20, 92]], 1.2], [[[48, 80], [66, 74], [86, 78]], 1], [[[30, 46], [16, 52]], .9]];
+      x.lineCap = x.lineJoin = "round";
+      x.strokeStyle = "rgba(25,18,12,.75)"; L.forEach(([p, lw]) => seg(p, lw + 1.8));
+      x.strokeStyle = "rgba(255,255,255,.92)"; L.forEach(([p, lw]) => seg(p, lw));
     }));
     const labT = t => tex(mkc(128, 128, (x, w, h) => {
       x.fillStyle = "#f3e6c8"; x.strokeStyle = "#8a6b3c"; x.lineWidth = 5; x.beginPath(); x.moveTo(16, 4); x.arcTo(124, 4, 124, 124, 14); x.arcTo(124, 124, 4, 124, 14); x.arcTo(4, 124, 4, 4, 14); x.arcTo(4, 4, 124, 4, 14); x.closePath(); x.fill(); x.stroke();
@@ -2816,10 +2822,13 @@ function montarEstanteria(host, pid) {
       // brillo del vidrio
       const sy = lin(.3, Math.min(top - .5, D.level + .55), 8), sh = new T.Mesh(lathe(sy.map(y => [rAt(pts, y) + .024, y]), 8, -1.02, .28), shineM); sh.renderOrder = 5; g.add(sh);
       // tapón
-      const ck = new T.Mesh(geo(new T.CylinderGeometry(D.rn + .03, D.rn - .01, .36, 18)), corkM); ck.position.y = top - .06 + .18; g.add(ck);
-      if (t === "salva") { const tor = new T.Mesh(geo(new T.TorusGeometry(.36, .1, 12, 30)), mat("MeshPhongMaterial", { color: 0xe8453c, shininess: 50 })); tor.rotation.x = Math.PI / 2; tor.position.y = 1.86; g.add(tor); }
+      const corkB = mat("MeshPhongMaterial", { color: 0xa9733c, shininess: 8 }), ck = new T.Mesh(geo(new T.CylinderGeometry(D.rn + .03, D.rn - .01, .36, 18)), corkB); ck.position.y = top - .06 + .18; g.add(ck);
+      let ringB = null;
+      
+      const cy0 = pts[0][1] + .35, cy1 = Math.min(top - .6, D.level + .3), cs = lin(cy0, cy1, 8), cw = (cy1 - cy0) / rAt(pts, (cy0 + cy1) / 2) * .8;
+      const crack = new T.Mesh(lathe(cs.map(y => [rAt(pts, y) + .03, y]), 10, .25, cw), mat("MeshBasicMaterial", { map: crackT, transparent: true, side: T.DoubleSide, depthWrite: false })); crack.renderOrder = 6; crack.visible = false; g.add(crack);
       g.scale.setScalar(.9);
-      return { g, liq, label };
+      return { g, liq, label, cork: corkB, ring: ringB, crack };
     }
     // ---- colocación ----
     const ROWS = [{ y: SU, items: [["doble", -2.1], ["clon", 0], ["salva", 2.1]] }, { y: SF, items: [["vision", -1.15], ["cambia", 1.15]] }];
@@ -2831,8 +2840,7 @@ function montarEstanteria(host, pid) {
       const halo = new T.Mesh(geo(new T.RingGeometry(.86, 1.16, 44)), mat("MeshBasicMaterial", { color: 0xffd24a, transparent: true, opacity: .9, side: T.DoubleSide, blending: T.AdditiveBlending, depthWrite: false }));
       halo.rotation.x = -Math.PI / 2; halo.position.set(x, r.y + .02, -.05); halo.visible = false; sc.add(halo);
       const glow = new T.Mesh(geo(new T.PlaneGeometry(3.6, 3.6)), mat("MeshBasicMaterial", { map: glowT, color: POCIONES[t].hex, transparent: true, opacity: .5, blending: T.AdditiveBlending, depthWrite: false })); glow.position.set(x, r.y + 1.2, -.6); sc.add(glow);
-      const veil = new T.Mesh(geo(new T.PlaneGeometry(2.6, 3.45)), mat("MeshBasicMaterial", { map: veilT, color: 0x04080b, transparent: true, opacity: .42, depthWrite: false })); veil.position.set(x, r.y + 1.4, 1.05); veil.renderOrder = 10; veil.visible = false; sc.add(veil);
-      slots.push({ t, g: b.g, y: r.y, glow, liq: b.liq, label: b.label, halo, veil, vt: veilT, dt: dustT });
+      slots.push({ t, g: b.g, y: r.y, glow, liq: b.liq, label: b.label, halo, cork: b.cork, ring: b.ring, crack: b.crack, hx: POCIONES[t].hex2 ? [POCIONES[t].hex, POCIONES[t].hex2] : [POCIONES[t].hex] });
       const a = px(x - .95, r.y + 2.75, 0), c = px(x + .95, r.y - PT + .02, .9), n = px(x, r.y - PT / 2, .9);
       hits += `<button type="button" class="pc-b" data-p="${t}" style="left:${a[0].toFixed(2)}%;top:${a[1].toFixed(2)}%;width:${(c[0] - a[0]).toFixed(2)}%;height:${(c[1] - a[1]).toFixed(2)}%" aria-label="${esc(POCIONES[t].nom)}"></button><span class="pc-n" data-p="${t}" style="left:${n[0].toFixed(2)}%;top:${n[1].toFixed(2)}%">${esc(POCIONES[t].nom)}</span>`;
     }));
