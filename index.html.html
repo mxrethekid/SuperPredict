@@ -1203,6 +1203,34 @@ nav button.nw::after{top:7px;left:calc(50% + 10px)}
 .pn-rd b.g{color:#8dffbd;background:rgba(61,220,132,.16)}
 .pn-rd b.x{color:#ffa097;background:rgba(255,107,94,.16)}
 .pn-rule{margin-top:10px;color:var(--mute);font-size:11.5px;line-height:1.4}
+
+/* ===== Duelo de penaltis v2 ===== */
+.pz{border:1px solid rgba(25,211,255,.35);border-radius:20px;background:linear-gradient(180deg,#0b1722,#0a1118);padding:14px 12px;box-shadow:0 0 22px rgba(25,211,255,.12)}
+.pz-sub{display:flex;align-items:center;justify-content:center;gap:6px;color:#ffc83d;font:700 12.5px/1 var(--b);margin-bottom:12px}.pz-sub img{width:18px;height:18px}
+.pz-vs{display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:start}
+.pz-p{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}.pz-p .crest{width:44px;height:44px}.pz-p b{font-size:14px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pz-p small{font:700 10px/1 var(--b);letter-spacing:.14em;color:var(--mute)}
+.pz-sc{font:400 40px/1 var(--h);letter-spacing:.05em;text-shadow:0 0 14px rgba(25,211,255,.6);padding-top:8px}
+.pz-dots{display:flex;gap:5px;margin-top:4px}.pz-dots i{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25)}.pz-dots i.g{background:#3ddc84;border-color:#3ddc84;box-shadow:0 0 8px #3ddc84}.pz-dots i.x{background:#ff6b5e;border-color:#ff6b5e;box-shadow:0 0 8px #ff6b5e}
+.pz-rn{text-align:center;font:400 22px/1 var(--h);letter-spacing:.14em;text-transform:uppercase;margin:12px 0 0}.pz-rn:empty{display:none}
+.pz-sd{text-align:center;color:#ff6b5e;font:700 11px/1 var(--b);letter-spacing:.16em;margin-top:6px;animation:pzBl 1s infinite}@keyframes pzBl{50%{opacity:.4}}
+.pz-stage{position:relative;height:190px;margin:10px 0;border-radius:14px;overflow:hidden;background:radial-gradient(60% 60% at 12% 0,rgba(255,255,220,.4),transparent 70%),radial-gradient(60% 60% at 88% 0,rgba(255,255,220,.4),transparent 70%),linear-gradient(180deg,#07131d 0,#0d2a1f 38%,#14532d 100%)}
+.pz-stage::before{content:"";position:absolute;inset:60% 0 0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 28px,transparent 28px 56px)}
+.pz-goal{position:absolute;left:8%;right:8%;top:14%;height:46%;border:4px solid #eef2f5;border-bottom:0;border-radius:6px 6px 0 0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.1) 0 2px,transparent 2px 10px),repeating-linear-gradient(-45deg,rgba(255,255,255,.1) 0 2px,transparent 2px 10px),rgba(4,12,10,.55)}
+.pz-goal.sh{animation:pzNet .5s}@keyframes pzNet{0%,100%{transform:none}25%{transform:scale(1.04,1.07)}60%{transform:scale(.99)}}
+.pz-gk{position:absolute;left:50%;bottom:calc(40% + 3px);font-size:40px;line-height:1;transform:translateX(-50%);transition:left .4s cubic-bezier(.3,1.3,.5,1),transform .4s}
+.pz-ball{position:absolute;left:50%;bottom:8px;font-size:28px;line-height:1;transform:translateX(-50%);transition:left .55s cubic-bezier(.2,.7,.3,1),bottom .55s cubic-bezier(.2,.7,.3,1),font-size .55s;filter:drop-shadow(0 6px 4px rgba(0,0,0,.5))}
+.pz-res{position:absolute;left:0;right:0;top:30%;text-align:center;font:400 40px/1 var(--h);letter-spacing:.06em;opacity:0;pointer-events:none;text-shadow:0 0 18px currentColor}
+.pz-res.on{animation:pzRes 1.3s forwards}@keyframes pzRes{0%{opacity:0;transform:scale(.4)}20%{opacity:1;transform:scale(1.15)}35%{transform:scale(1)}80%{opacity:1}100%{opacity:0}}
+.pz-res.g{color:#3ddc84}.pz-res.x{color:#ff6b5e}
+.pz-who{position:absolute;left:10px;top:8px;z-index:2;font:700 11px/1 var(--b);letter-spacing:.1em;color:#fff;opacity:.9;text-transform:uppercase}
+.pz-cf{position:absolute;left:50%;top:40%;width:7px;height:11px;border-radius:2px;animation:pzCf 1.4s ease-out forwards}@keyframes pzCf{to{transform:translate(var(--x),var(--y)) rotate(540deg);opacity:0}}
+.pz-row{margin:10px 0}.pz-row>em{display:block;font:700 11px/1 var(--b);font-style:normal;letter-spacing:.16em;color:var(--mute);margin-bottom:6px}
+.pz-zs{display:grid;gap:6px;grid-template-columns:repeat(3,1fr)}.pz-zs.sd{grid-template-columns:repeat(2,1fr)}
+.pz-b{padding:10px 4px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:#fff;font:700 12px/1.1 var(--b);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:.15s}.pz-b span{display:block;font-size:22px;margin-bottom:3px}
+.pz-b.on{background:rgba(25,211,255,.22);border-color:#19d3ff;box-shadow:0 0 14px rgba(25,211,255,.55);transform:translateY(-2px)}.pz-b.k.on{background:rgba(255,200,61,.2);border-color:#ffc83d;box-shadow:0 0 14px rgba(255,200,61,.5)}
+.pz-wt{text-align:center;color:var(--mute);font-size:14px;margin-top:10px}.pz-wt b{display:inline-block;animation:pzBn 1s infinite}@keyframes pzBn{50%{transform:translateY(-6px)}}
+.pz-end{margin-top:10px;text-align:center;font:400 22px/1.2 var(--h);letter-spacing:.05em;text-transform:uppercase;padding:12px;border-radius:14px;background:rgba(255,255,255,.06)}
+.pz-end.win{color:#ffd35c;background:linear-gradient(180deg,rgba(255,200,61,.2),rgba(255,200,61,.06));border:1px solid rgba(255,200,61,.6);box-shadow:0 0 22px rgba(255,200,61,.3)}.pz-end img{width:24px;height:24px;vertical-align:-5px}.pz-end.lose{color:#ffa097;background:rgba(255,107,94,.1)}
 nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 12px);width:10px;height:10px;border-radius:50%;background:#ff5d4a;box-shadow:0 0 8px #ff5d4a}
 .pv-h{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .pv-ch{flex:none;font:700 24px/1 var(--b);font-style:normal;color:var(--mute);margin-left:2px;transition:transform .2s}.pv.open .pv-ch{transform:rotate(90deg)}
@@ -5556,6 +5584,7 @@ let lastCoins = null;
 // cada uno (p.pen["w<semana>"] = { o: rival, f: 1 si tira primero, s: zonas donde tiró, k: zonas donde paró }). Cada jugador escribe SOLO
 // sus propias elecciones, así nunca se pisan los datos. Zonas: 0 izquierda, 1 centro, 2 derecha. El resultado sale de las dos fichas.
 const PEN_N = ["Izquierda", "Centro", "Derecha"];
+const penDias = () => { const E = new Date(2026, 9, 26), h = new Date(), h0 = new Date(h.getFullYear(), h.getMonth(), h.getDate()), d = Math.round((h0 - E) / 864e5); return (Math.floor(d / 7) + 1) * 7 - d; };   // días hasta la próxima renovación (lunes), igual que la tienda
 const penKey = w => "w" + w;
 function penRng(n) { let t = (n * 2654435761 + 12345) >>> 0; return () => { t = (t + 0x6D2B79F5) >>> 0; let x = Math.imul(t ^ (t >>> 15), 1 | t); x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x; return ((x ^ (x >>> 14)) >>> 0) / 4294967296; }; }
 function penHash(str) { let h = 5381; for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) >>> 0; return h; }
@@ -5579,17 +5608,14 @@ function penState(d) {
   const ea = (d.A.pen && d.A.pen[d.k]) || {}, eb = (d.B.pen && d.B.pen[d.k]) || {};
   const As = ea.s || [], Ak = ea.k || [], Bs = eb.s || [], Bk = eb.k || [];
   const rounds = []; let winner = null, over = false, next = null;
-  for (let r = 0; r < 5; r++) {
-    const R = { r, as: As[r], bk: Bk[r], bs: Bs[r], ak: Ak[r], sd: r >= 3 };
-    R.ga = R.as != null && R.bk != null ? R.as !== R.bk : null;   // ¿marca el primero?
-    R.gb = R.bs != null && R.ak != null ? R.bs !== R.ak : null;   // ¿marca el segundo?
+  for (let r = 0; r < 5; r++) {   // en cada ronda los dos eligen a la vez (tiro + parada); se resuelve cuando ambos han elegido
+    const R = { r, as: As[r], ak: Ak[r], bs: Bs[r], bk: Bk[r], sd: r >= 3 };
+    R.aOk = R.as != null && R.ak != null; R.bOk = R.bs != null && R.bk != null; R.done = R.aOk && R.bOk;
+    R.ga = R.done ? R.as !== R.bk : null; R.gb = R.done ? R.bs !== R.ak : null;
     rounds.push(R);
-    if (R.as == null) { next = { who: d.A, act: "tirar", r }; break; }
-    if (R.bk == null) { next = { who: d.B, act: "parar", r }; break; }
-    if (R.bs == null) { next = { who: d.B, act: "tirar", r }; break; }
-    if (R.ak == null) { next = { who: d.A, act: "parar", r }; break; }
-    if (R.ga !== R.gb) { winner = R.ga ? d.A : d.B; over = true; break; }   // uno marca y el otro falla
-    if (r === 4) over = true;                                                 // 5 rondas igualadas: empate
+    if (!R.done) { next = { r, aOk: R.aOk, bOk: R.bOk }; break; }
+    if (R.ga !== R.gb) { winner = R.ga ? d.A : d.B; over = true; break; }
+    if (r === 4) over = true;
   }
   return { rounds, winner, over, next };
 }
@@ -5598,14 +5624,12 @@ function penWins(p) {   // duelos ganados = monedas
   Object.keys(e).forEach(k => { const d = penOfKey(p, k); if (d && penState(d).winner === p) n++; });
   return n;
 }
-function penPut(d, zone) {   // guarda la elección del jugador que tiene el turno
+function penPut(d, zs, zk) {   // guarda el tiro y la parada del jugador en la ronda actual
   const m = meP(); if (!m) return false;
-  const nx = penState(d).next; if (!nx || nx.who.id !== m.id) return false;
-  if (!(zone >= 0 && zone <= 2) || (nx.r >= 3 && zone === 1)) return false;
-  const e = m.pen && m.pen[d.k]; if (!e) return false;
-  const arr = nx.act === "tirar" ? e.s : e.k;
-  if (arr.length !== nx.r) return false;
-  arr.push(zone); save(); return true;
+  const nx = penState(d).next; if (!nx || (d.A === m ? nx.aOk : nx.bOk)) return false;
+  const ok = z => z >= 0 && z <= 2 && !(nx.r >= 3 && z === 1); if (!ok(zs) || !ok(zk)) return false;
+  const e = m.pen && m.pen[d.k]; if (!e || e.s.length !== nx.r || e.k.length !== nx.r) return false;
+  e.s.push(zs); e.k.push(zk); save(); return true;
 }
 function penMerge(cur, inc) {   // las elecciones solo crecen: si el servidor trae menos, se recuperan las que faltan
   let ch = false; cur = cur || {};
@@ -5617,50 +5641,106 @@ function penMerge(cur, inc) {   // las elecciones solo crecen: si el servidor tr
 }
 // ===== fin lógica del duelo =====
 // ---- Tarjeta del duelo (arriba en la pestaña de perfil: el duelo de la semana de ese jugador y contra quién) ----
-let penSel = null;   // zona elegida (aún sin confirmar): { key, z }
+let penCoinSync = null, penSel = { key: "", s: -1, k: -1 }, penBusy = false, penUnseen = false, penAC = null;
+const penSeenKey = (m, w) => "pen_seen_" + m.id + "_" + w;
+const penSleep = ms => new Promise(r => setTimeout(r, ms));
+function penSnd(t) {
+  try {
+    penAC = penAC || new (window.AudioContext || window.webkitAudioContext)(); const c = penAC, n = c.currentTime;
+    const tone = (f, t0, d, ty, v) => { const o = c.createOscillator(), g = c.createGain(); o.type = ty; o.frequency.setValueAtTime(f, n + t0); g.gain.setValueAtTime(v, n + t0); g.gain.exponentialRampToValueAtTime(.001, n + t0 + d); o.connect(g); g.connect(c.destination); o.start(n + t0); o.stop(n + t0 + d + .02); };
+    if (t === "kick") { tone(160, 0, .12, "sine", .5); tone(70, 0, .15, "triangle", .4); }
+    else if (t === "goal") [523, 659, 784, 1047].forEach((f, i) => tone(f, i * .09, .25, "triangle", .25));
+    else if (t === "save") { tone(110, 0, .25, "square", .18); tone(80, .05, .3, "sawtooth", .15); }
+    else if (t === "whistle") { tone(2200, 0, .22, "sine", .12); tone(2400, .12, .22, "sine", .1); }
+    if (navigator.vibrate) navigator.vibrate(t === "goal" ? [40, 30, 80] : t === "save" ? 30 : 10);
+  } catch (e) {}
+}
+function penConf(stg) {
+  const cs = ["#3ddc84", "#ffd35c", "#19d3ff", "#fff", "#ff6b5e"];
+  for (let i = 0; i < 24; i++) { const s = document.createElement("span"); s.className = "pz-cf"; s.style.background = cs[i % 5]; s.style.setProperty("--x", (Math.random() * 260 - 130) + "px"); s.style.setProperty("--y", (Math.random() * 170 - 70) + "px"); stg.appendChild(s); setTimeout(() => s.remove(), 1500); }
+}
+function penBoardHtml(d, st, shown) {
+  const rs = st.rounds.filter(R => R.done && R.r < shown), dn = st.rounds.filter(R => R.done).length;
+  const gA = rs.filter(R => R.ga).length, gB = rs.filter(R => R.gb).length;
+  const n = st.over && rs.length === dn ? Math.max(rs.length, 1) : Math.min(5, Math.max(3, rs.length + 1));
+  const dots = k => Array.from({ length: n }, (_, i) => { const R = rs[i], g = R ? R[k] : null; return `<i class="${g === true ? "g" : g === false ? "x" : ""}"></i>`; }).join("");
+  const pl = (p, t, k) => `<div class="pz-p">${p.team ? crest(p.team, false) : ""}<b>${esc(p.name)}</b><small>${t}</small><div class="pz-dots">${dots(k)}</div></div>`;
+  return `<div class="pz-vs">${pl(d.A, "LOCAL", "ga")}<div class="pz-sc">${gA} - ${gB}</div>${pl(d.B, "VISITANTE", "gb")}</div>`;
+}
+async function penShot(stg, shooter, zs, zk, goal) {
+  const q = s => stg.querySelector(s), ball = q(".pz-ball"), gk = q(".pz-gk"), res = q(".pz-res"), ge = q(".pz-goal"), X = [22, 50, 78];
+  [ball, gk].forEach(e => e.style.transition = "none");
+  ball.style.left = "50%"; ball.style.bottom = "8px"; ball.style.fontSize = "28px"; gk.style.left = "50%"; gk.style.transform = "translateX(-50%)";
+  res.className = "pz-res"; ge.classList.remove("sh"); void ball.offsetWidth; [ball, gk].forEach(e => e.style.transition = "");
+  q(".pz-who").textContent = shooter.name + " tira"; await penSleep(800);
+  penSnd("kick");
+  ball.style.left = X[zs] + "%"; ball.style.bottom = "calc(40% + 18px)"; ball.style.fontSize = "17px";
+  gk.style.left = X[zk] + "%"; gk.style.transform = "translateX(-50%) rotate(" + (zk === 0 ? -65 : zk === 2 ? 65 : 0) + "deg)";
+  await penSleep(700);
+  if (goal) { ge.classList.add("sh"); penSnd("goal"); penConf(stg); } else penSnd("save");
+  res.textContent = goal ? "¡GOL!" : "¡PARADA!"; res.className = "pz-res on " + (goal ? "g" : "x");
+  await penSleep(1400);
+}
+async function penReplay(box, d, m, w, st, seen) {   // reproduce las rondas ya resueltas que este jugador aún no ha visto
+  penBusy = true; const stg = box.querySelector(".pz-stage");
+  try {
+    for (let r = seen; r < st.rounds.length && st.rounds[r].done; r++) {
+      const R = st.rounds[r]; box.querySelector(".pz-rn").textContent = "Ronda " + (r + 1);
+      penSnd("whistle"); await penSleep(500);
+      await penShot(stg, d.A, R.as, R.bk, R.ga);
+      await penShot(stg, d.B, R.bs, R.ak, R.gb);
+      try { localStorage.setItem(penSeenKey(m, w), r + 1); } catch (e) {}
+      box.querySelector(".pz-bd").innerHTML = penBoardHtml(d, st, r + 1);
+    }
+  } catch (e) {}
+  penBusy = false; renderPen();
+}
 function renderPen() {
   const box = $("#penBox"), nb = document.querySelector('nav button[data-t="jugar"]');
+  if (penBusy) return;
   const m = meP(), w = semTienda(Date.now()), k = penKey(w);
-  if (m && synced && penEnsure(w)) save();   // empareja a quien aún no tenga duelo esta semana
-  const d = m && penOfKey(m, k), s0 = d && penState(d), myTurn = !!s0 && !s0.over && !!s0.next && s0.next.who.id === m.id;
-  if (nb) nb.classList.toggle("pn-dot", myTurn);
+  if (m && synced && penEnsure(w)) save();
+  const d = m && penOfKey(m, k), st = d && penState(d);
+  const done = st ? st.rounds.filter(R => R.done).length : 0;
+  let seen = 0; if (m) { try { seen = Math.min(+localStorage.getItem(penSeenKey(m, w)) || 0, done); } catch (e) {} }
+  const mineOk = !!st && !!st.next && (d.A === m ? st.next.aOk : st.next.bOk);
+  const myTurn = !!st && !st.over && !!st.next && !mineOk;
+  penUnseen = seen < done;
+  if (nb) nb.classList.toggle("pn-dot", myTurn || penUnseen);
   if (!box) return;
   const TIT = `<h2 class="ja-t">Duelo de penaltis</h2>`;
   if (!m) { box.innerHTML = ""; return; }
-  if (!d) { box.innerHTML = S.players.length >= 2 ? TIT + `<div class="pn"><div class="pn-wait" style="margin-top:0">Esta semana descansas: no hay rival para ti.</div></div>` : ""; return; }
-  const own = true, who = m, opp = d.A === m ? d.B : d.A;
-  const st = penState(d), turn = own && myTurn;
-  const gA = st.rounds.filter(r => r.ga === true).length, gB = st.rounds.filter(r => r.gb === true).length;
-  const pl = (p, t) => `<div class="pn-p">${p.team ? crest(p.team, false) : ""}<b>${esc(p.name)}</b><small>${t}</small></div>`;
-  const lines = st.rounds.map(R => {
-    const L = (wh, shot, keep, g, sh) => g === null ? "" : `<div class="pn-rd"><em>R${R.r + 1}</em><span>${esc(wh.name)} tira ${PEN_N[shot].toLowerCase()} · ${esc(sh.name)} para ${PEN_N[keep].toLowerCase()}</span><b class="${g ? "g" : "x"}">${g ? "GOL" : "PARADA"}</b></div>`;
-    return L(d.A, R.as, R.bk, R.ga, d.B) + L(d.B, R.bs, R.ak, R.gb, d.A);
-  }).join("");
+  if (!d) { box.innerHTML = S.players.length >= 2 ? TIT + `<div class="pz"><div class="pz-wt">Esta semana descansas 😴</div></div>` : ""; return; }
+  const rnN = seen < done ? seen : st.next ? st.next.r : -1, sd = rnN >= 3;
+  const key = w + "|" + (st.next ? st.next.r : "x");
+  if (penSel.key !== key) penSel = { key, s: -1, k: -1 };
   let act = "";
-  if (st.over) {
-    act = st.winner ? `<div class="pn-end win">🏆 ¡Gana ${esc(st.winner.name)}! <b>+1 moneda</b></div>` : `<div class="pn-end">🤝 Empate: nadie gana monedas</div>`;
-  } else if (turn) {
-    const nx = st.next, key = w + "|" + nx.r + "|" + nx.act, sd = nx.r >= 3, zs = sd ? [0, 2] : [0, 1, 2];
-    const sel = penSel && penSel.key === key ? penSel.z : -1;
-    act = `<div class="pn-act"><div class="pn-t">${nx.act === "tirar" ? "⚽ Ronda " + (nx.r + 1) + ": elige dónde tirar" : "🧤 Ronda " + (nx.r + 1) + ": elige dónde parar"}</div>${sd ? '<div class="pn-sd">Muerte súbita: solo izquierda o derecha</div>' : ""}<div class="pn-pitch"><div class="pn-goal${sd ? " sd" : ""}">${zs.map(z => `<button type="button" class="pn-z${sel === z ? " on" : ""}" data-z="${z}" aria-label="${PEN_N[z]}"><span>${nx.act === "tirar" ? "⚽" : "🧤"}</span><em>${PEN_N[z]}</em></button>`).join("")}</div></div><button type="button" class="pn-ok" ${sel < 0 ? "disabled" : ""}>${nx.act === "tirar" ? "Tirar" : "Parar"}</button></div>`;
-  } else if (st.next) {
-    const nx = st.next;
-    act = `<div class="pn-wait">${nx.who.id === m.id ? "Te toca" : "Esperando a"} <b>${nx.who.id === m.id ? "" : esc(nx.who.name)}</b>${nx.who.id === m.id ? "" : " "}(${nx.act === "tirar" ? "tirar" : "parar"} en la ronda ${nx.r + 1})…</div>`;
+  if (seen < done) act = "";
+  else if (st.over) act = st.winner === m ? `<div class="pz-end win">🏆 ¡Duelo ganado!<br>+1 <img src="${COIN_IMG}" alt=""> PredictCoin</div>` : st.winner ? `<div class="pz-end lose">Duelo perdido</div>` : `<div class="pz-end">🤝 Empate</div>`;
+  else if (myTurn) {
+    const zs = sd ? [0, 2] : [0, 1, 2], IC = ["↖", "⬆", "↗"], NM = ["Izquierda", "Centro", "Derecha"];
+    const row = (t, lab, ic) => `<div class="pz-row"><em>${lab}</em><div class="pz-zs${sd ? " sd" : ""}">${zs.map(z => `<button type="button" class="pz-b ${t}${penSel[t] === z ? " on" : ""}" data-t="${t}" data-z="${z}" aria-label="${NM[z]}"><span>${ic}</span>${NM[z]}</button>`).join("")}</div></div>`;
+    act = row("s", "⚽ TU TIRO", "⚽") + row("k", "🧤 TU PARADA", "🧤") + `<div style="text-align:center"><button type="button" class="pn-ok" ${penSel.s >= 0 && penSel.k >= 0 ? "" : "disabled"}>¡Listo!</button></div>`;
+  } else act = `<div class="pz-wt"><b>⚽</b> Tu jugada está lista · esperando al rival…</div>`;
+  if (st.over && seen >= done) {   // duelo ya jugado: solo el resultado y cuándo llega el siguiente
+    const gn = ganadasDe(m); if (penCoinSync !== gn) { penCoinSync = gn; renderSobres(); checkCoins(); }   // la moneda del duelo se da al momento: contador y aviso al terminar, sin cambiar de pestaña
+    const nd = penDias();
+    box.innerHTML = TIT + `<div class="pz"><div class="pz-bd">${penBoardHtml(d, st, seen)}</div>${act}<div class="pz-wt" style="margin-top:14px">Próximo duelo ${nd === 1 ? "mañana" : "en " + nd + " días"}</div></div>`;
+    box.onclick = null;
+    return;
   }
-  box.innerHTML = TIT + `<div class="pn"><div class="pn-h"><small>El ganador se lleva 1 moneda</small></div>
-    <div class="pn-rv">${own ? "Tu duelo de esta semana: te ha tocado contra <b>" + esc(opp.name) + "</b>" : "Duelo de <b>" + esc(who.name) + "</b> esta semana contra <b>" + esc(opp.name) + "</b>"}</div>
-    <div class="pn-vs">${pl(d.A, "tira primero")}<div class="pn-sc">${gA} - ${gB}</div>${pl(d.B, "tira segundo")}</div>
-    ${act}${lines ? `<div class="pn-log">${lines}</div>` : ""}
-    <div class="pn-rule">Cada semana todos tienen un duelo al azar. 3 rondas; si siguen igualados, 2 más tirando solo a izquierda o derecha. Si uno marca y el otro falla, gana. Si no, empate.</div></div>`;
+  box.innerHTML = TIT + `<div class="pz"><div class="pz-sub"><img src="${COIN_IMG}" alt="">Gana el duelo y consigue 1 PredictCoin</div>
+    <div class="pz-bd">${penBoardHtml(d, st, seen)}</div>
+    <div class="pz-rn">${rnN >= 0 ? "Ronda " + (rnN + 1) : ""}</div>${sd ? '<div class="pz-sd">MUERTE SÚBITA</div>' : ""}
+    <div class="pz-stage"><div class="pz-who"></div><div class="pz-goal"></div><div class="pz-gk">🧤</div><div class="pz-ball">⚽</div><div class="pz-res"></div></div>${act}</div>`;
   box.onclick = ev => {
-    const zb = ev.target.closest(".pn-z");
-    if (zb && turn) { penSel = { key: w + "|" + st.next.r + "|" + st.next.act, z: +zb.dataset.z }; renderPen(); return; }
-    if (ev.target.closest(".pn-ok") && turn && penSel && penSel.key === w + "|" + st.next.r + "|" + st.next.act) {
-      const z = penSel.z; penSel = null;
-      if (penPut(penOfKey(m, k), z)) renderPen();
-    }
+    const b = ev.target.closest(".pz-b");
+    if (b && myTurn) { penSel[b.dataset.t] = +b.dataset.z; renderPen(); return; }
+    if (ev.target.closest(".pn-ok") && myTurn && penSel.s >= 0 && penSel.k >= 0) { const s = penSel.s, kk = penSel.k; penSel = { key: "", s: -1, k: -1 }; if (penPut(penOfKey(m, k), s, kk)) renderPen(); }
   };
+  if (seen < done && box.offsetParent !== null) penReplay(box, d, m, w, st, seen);
 }
+if (!window._penIv) window._penIv = setInterval(() => { const b = document.querySelector("#penBox"); if (penUnseen && !penBusy && b && b.offsetParent !== null) renderPen(); }, 1200);
 
 function renderSobres() {
   const box = $("#sobresBox"); if (!box) return;
