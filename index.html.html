@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0c1115">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -77,6 +77,7 @@ section.on{display:block}
 .ptn svg{width:26px;height:26px;display:block}
 .ptn b{display:block;font:400 21px/1.05 var(--h);letter-spacing:.04em;color:var(--c);text-transform:uppercase}
 .ptn span{display:block;margin-top:6px;font-size:12.5px;line-height:1.35;color:var(--text)}
+html,body{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%}   /* sin zoom con pellizco ni doble toque en móvil */
 .pts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
 .pts>div{position:relative;overflow:hidden;border-radius:14px;padding:14px 6px 12px;text-align:center;border:1px solid transparent}
 .pts i{display:block;font-style:normal;font-size:22px;line-height:1;margin-bottom:4px}
@@ -607,6 +608,12 @@ td .crest{width:30px;height:30px}
 #historial .hpt.p0{background:linear-gradient(180deg,rgba(229,72,77,.24),rgba(229,72,77,.05))}
 #historial .hpt.pn{background:rgba(255,255,255,.03)}
 #historial .stats{gap:12px}
+/* Cara a cara: columna de cada jugador con las mismas tarjetas */
+#historial .h2c-hds{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 12px}
+#historial .h2c-hd{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;font:400 17px/1 var(--h);letter-spacing:.03em;text-transform:uppercase;color:var(--cyan)}
+#historial .h2c-hd .crest{width:30px;height:30px;flex:none}
+#historial .h2c-hd span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#historial .h2c-col{display:flex;flex-direction:column;gap:12px;min-width:0}
 #historial .st{--ac:#00b4d8;border-radius:16px;padding:20px 8px 16px;background:radial-gradient(120% 90% at 50% 0%,color-mix(in srgb,var(--ac) 22%,transparent),transparent 65%),linear-gradient(180deg,#18212a,#12181e)}
 #historial .st::after{content:"";position:absolute;left:30%;right:30%;top:0;height:3px;border-radius:0 0 4px 4px;background:var(--ac);box-shadow:0 0 12px var(--ac)}
 #historial .st:nth-child(1){--ac:#f2c230}
@@ -1342,6 +1349,18 @@ nav button.nw::after{top:7px;left:calc(50% + 10px)}
 @media(prefers-reduced-motion:reduce){.pz-stage *,.pzfx *{animation-duration:.01s!important;animation-iteration-count:1!important}.pz-stage *{transition-duration:.01s!important}}
 nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10px);width:11px;height:11px;border-radius:50%;background:#ff3b4a;box-shadow:0 0 0 2px #0c1115,0 0 8px #ff3b4a}
 #penBox .pz{position:relative}#penBox .pz.nw::after{content:"";position:absolute;top:-4px;right:-3px;width:11px;height:11px;border-radius:50%;background:#ff3b4a;box-shadow:0 0 0 2px #0c1115,0 0 8px #ff3b4a}
+/* ===== Retos amistosos de penaltis ===== */
+#historial .pf-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#historial .pf-pen{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:99px;border:1px solid rgba(255,211,92,.6);background:linear-gradient(135deg,rgba(255,211,92,.22),rgba(14,22,28,.7));color:#ffd35c;font:800 12.5px/1 var(--b);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;cursor:pointer;box-shadow:0 0 18px -4px rgba(255,211,92,.55)}
+#historial .pf-pen:active{background:rgba(255,211,92,.3)}
+#historial .pf-pen.dis,#historial .pf-pen:disabled{opacity:.55;cursor:default;box-shadow:none}
+#penAmBox{margin:0 0 18px}#penAmBox:empty{display:none}
+#penAmBox .pz+.pz{margin-top:12px}
+#penAmBox .pz.nw::after{content:"";position:absolute;top:-4px;right:-3px;width:11px;height:11px;border-radius:50%;background:#ff3b4a;box-shadow:0 0 0 2px #0c1115,0 0 8px #ff3b4a}
+.am-who{display:flex;align-items:center;justify-content:center;gap:12px;margin:2px 0 12px}
+.am-who .crest{width:46px;height:46px;flex:none}
+.am-msg{font-size:14.5px;line-height:1.35;text-align:left}.am-msg b{color:var(--text)}.am-msg small{display:block;color:var(--mute);font-size:12px;margin-top:2px}
+.am-bt{display:flex;gap:10px}.am-bt .btn{flex:1;width:auto;margin:0}
 .pv-h{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .pv-ch{flex:none;font:700 24px/1 var(--b);font-style:normal;color:var(--mute);margin-left:2px;transition:transform .2s}.pv.open .pv-ch{transform:rotate(90deg)}
 .pv-bd{display:none}.pv.open .pv-bd{display:block}
@@ -3109,7 +3128,7 @@ function potPuede(t) {
   if (pendMatches().length) return { ok: false, why: "Ya has usado una poción en este partido." };
   return { ok: false, why: openMatches().length ? "Ya has enviado tu predicción de este partido. Solo puedes usarla cuando tengas una predicción pendiente." : "Solo puedes usarla cuando tengas una predicción pendiente. Ahora no hay ningún partido abierto." };
 }
-const shelfHtml = () => `<div id="penBox"></div><div class="pc-sec"><div class="pc-t">Pociones</div><div class="pc" id="pcHost" role="group" aria-label="Estantería de pociones. Toca una poción para ver qué hace."></div><p class="muted pc-h">Toca una poción para ver qué hace y cómo usarla</p></div>`;
+const shelfHtml = () => `<div id="penBox"></div><div id="penAmBox"></div><div class="pc-sec"><div class="pc-t">Pociones</div><div class="pc" id="pcHost" role="group" aria-label="Estantería de pociones. Toca una poción para ver qué hace."></div><p class="muted pc-h">Toca una poción para ver qué hace y cómo usarla</p></div>`;
 // Lo que has visto con la poción visión
 function visSeen(ms) {
   const out = ms.map(m => {
@@ -3852,7 +3871,7 @@ function openChat(mid) {
   chTimer = setInterval(() => { if (!document.hidden) pull(true); }, 4000);   // mientras el chat está abierto se mira el servidor cada pocos segundos
   pull(true);
 }
-function renderJugar() { const box = $("#jugarBox"); draftSave(box); renderJugarBase(); draftLoad(box); mountShelf(); renderPen(); }
+function renderJugar() { const box = $("#jugarBox"); draftSave(box); renderJugarBase(); draftLoad(box); mountShelf(); renderPen(); renderAm(); }
 function renderJugarBase() {
   clearInterval(cdTimer);
   const box = $("#jugarBox"), p = meP(), tit = document.querySelector("#jugar h2");
@@ -4691,6 +4710,18 @@ const hIcon = x => x === 3 ? '<svg viewBox="0 0 24 24" fill="none" stroke="curre
   : x === 1 ? '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M12 3a9 9 0 0 0 0 18Z" fill="currentColor"/></svg>'
   : x === 0 ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 5 19 19M19 5 5 19"/></svg>'
   : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 12H18"/></svg>';
+function stCards(p) {   // las 6 tarjetas de estadísticas de un jugador
+  const t = standings(), i = t.findIndex(q => q.id === p.id), jug = S.matches.filter(m => m.result);
+  const pm = jug.map(m => pts((S.preds[m.id] || {})[p.id], m.result)), ex = pm.filter(x => x === 3).length;
+  const ef = jug.length ? Math.round(pm.reduce((x, y) => x + y, 0) / (3 * jug.length) * 100) + "%" : "0%";
+  const part = jug.filter(m => (S.preds[m.id] || {})[p.id]).length, pc = n => jug.length ? Math.round(n / jug.length * 100) + "%" : "0%";
+  return `<div class="st"><span>Posición actual</span><b>${i >= 0 ? i + 1 + "º" : "—"}</b></div>
+      <div class="st"><span>Puntos totales</span><b>${i >= 0 ? t[i].pt : 0}<small> PT</small></b></div>
+      <div class="st"><span>Plenos</span><b>${pc(ex)}</b></div>
+      <div class="st"><span>Mayor racha</span><b>${rachaRec(p)}<span class="fire" aria-hidden="true">🔥</span></b></div>
+      <div class="st"><span>Efectividad</span><b>${ef}</b></div>
+      <div class="st"><span>Participación</span><b>${pc(part)}</b></div>`;
+}
 function renderHistorial() {
   const box = $("#historialBox"), pl = meP();
   const other = viewId && viewId !== me ? S.players.find(p => p.id === viewId && p.regAt) : null;
@@ -4703,7 +4734,7 @@ function renderHistorial() {
   const tt = standings(), ix = tt.findIndex(p => p.id === pid);
   const colOn = marcoOn(who), fireOn = ix >= 0 && tt[ix].rc >= 3 && !colOn;   // en racha: el recuadro del perfil lleva llamas
   const rk = rachaRec(who);   // mayor racha conseguida (no baja nunca; para la cabecera)
-  const head = (other ? `<div class="pf-top"><button class="pf-back" id="pfBack" aria-label="Volver">‹ Volver</button></div>` : "") + `
+  const head = (other ? `<div class="pf-top"><button class="pf-back" id="pfBack" aria-label="Volver">‹ Volver</button>${penRetoBtn(other)}</div>` : "") + `
     <div class="pf-hero${ix < 0 ? "" : ix < 4 ? " z-ucl" : ix < 6 ? " z-uel" : ix < 8 ? " z-uecl" : ""}${fireOn ? " fire" : ""}${colOn ? " colf" : ""}">${fireOn ? '<span class="pf-fire" aria-hidden="true"><i class="u"></i></span>' : ""}${colOn ? '<span class="pf-col" aria-hidden="true"><i class="w"></i><i class="s s1"></i><i class="s s2"></i><i class="s s3"></i><i class="s s4"></i><i class="s s5"></i></span>' : ""}<div class="pf-crest">${crest(who.team)}</div><div class="pf-name" role="heading" aria-level="2">${esc(who.name)}</div>${ttlHtml(who, "ptl")}
     <div class="pf-badges"><span class="gd">${ix >= 0 ? ix + 1 + "º" : "—"}</span><span>${ix >= 0 ? tt[ix].pt : 0}<small>PT</small></span><span class="fr" title="Mayor racha" aria-label="Mayor racha: ${rk}">${rk}<i aria-hidden="true">🔥</i></span></div></div>` + (other ? `
     <p class="pf-sec">Sus predicciones</p>` : `
@@ -4730,20 +4761,17 @@ function renderHistorial() {
   const part = jug.filter(m => (S.preds[m.id] || {})[pid]).length;
   const racha = rk;   // mayor racha conseguida
   const pc = n => jug.length ? Math.round(n / jug.length * 100) + "%" : "0%";
-  const statsHtml = `<h2 style="margin-top:26px">Estadísticas</h2><div class="stats">
-      <div class="st"><span>Posición actual</span><b>${i >= 0 ? i + 1 + "º" : "—"}</b></div>
-      <div class="st"><span>Puntos totales</span><b>${i >= 0 ? t[i].pt : 0}<small> PT</small></b></div>
-      <div class="st"><span>Plenos</span><b>${pc(ex)}</b></div>
-      <div class="st"><span>Mayor racha</span><b>${racha}<span class="fire" aria-hidden="true">🔥</span></b></div>
-      <div class="st"><span>Efectividad</span><b>${ef}</b></div>
-      <div class="st"><span>Participación</span><b>${pc(part)}</b></div></div>`;   // las mismas estadísticas en el perfil propio y en el de los demás
+  const cmp = !!other && h2hOpen === other.id;   // cara a cara: sus estadísticas en una columna y las tuyas en la otra
+  const statsHtml = cmp
+    ? `<h2 id="stTit" style="margin-top:26px">Estadísticas</h2><div class="h2c-hds">${[pl, who].map(p => `<div class="h2c-hd">${crest(p.team, false)}<span>${esc(p.name)}</span></div>`).join("")}</div><div class="stats h2c">${[pl, who].map(p => `<div class="h2c-col">${stCards(p)}</div>`).join("")}</div>`
+    : `<h2 id="stTit" style="margin-top:26px">Estadísticas</h2><div class="stats">${stCards(who)}</div>`;   // las mismas tarjetas en el perfil propio y en el de los demás
   box.innerHTML = head + list + statsHtml + (other ? h2hBtnHtml(pl, who) : "") + (other ? pocionesOtroHtml(who) + vitrinaHtml(who) + albumVerHtml(who) : vitrinaHtml(who));
   box.querySelectorAll("[data-hd]").forEach(b => b.onclick = () => { const n = rounds[hi + +b.dataset.hd]; if (n == null) return; hv = n; renderHistorial(); });
   bindVitrina(box, who);
   bindPocionesOtro(box, who);
   bindAlbumVer(box, who);
   bindBack();
-  const hb = $("#h2hBtn"); if (hb) hb.onclick = () => { h2hOpen = h2hOpen === who.id ? null : who.id; hb.textContent = h2hOpen === who.id ? "Ocultar cara a cara" : "Cara a cara"; $("#h2hBox").innerHTML = h2hOpen === who.id ? h2hHtml(pl, who) : ""; };
+  const hb = $("#h2hBtn"); if (hb) hb.onclick = () => { h2hOpen = h2hOpen === who.id ? null : who.id; renderHistorial(); const tt = $("#stTit"); if (tt) tt.scrollIntoView({ block: "start" }); };
 }
 
 // Admin
@@ -5831,30 +5859,48 @@ function penOfKey(p, k) {   // duelo guardado de un jugador en una semana (null 
   const e = p && p.pen && p.pen[k], o = e && e.o && pById(e.o); if (!o) return null;
   const w = k[0] === "w" ? +k.slice(1) : k.slice(1); return e.f ? { w, k, A: p, B: o } : { w, k, A: o, B: p };
 }
-function penEnsure(w) {   // empareja a los jugadores que aún no tienen duelo esta semana (si es impar, uno descansa)
-  const k = penKey(w), free = S.players.filter(p => !penOfKey(p, k)).sort((a, b) => (a.id < b.id ? -1 : 1));
-  if (free.length < 2) return false;
-  const rnd = penRng(w * 7919 + penHash(free.map(p => p.id).join("|")));
-  for (let i = free.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [free[i], free[j]] = [free[j], free[i]]; }
-  for (let i = 0; i + 1 < free.length; i += 2) {
-    const a = free[i], b = free[i + 1];
+// Sorteo y calendario de los duelos: no empiezan hasta que la liga está completa (20 jugadores). En ese momento se sortea un orden
+// aleatorio (sale de los ids, así es idéntico en todos los móviles) y cada semana se juega una jornada de un calendario todos-contra-todos
+// (método del círculo): 19 semanas, cada una con un rival distinto, y al terminar se han enfrentado todos contra todos.
+// La semana 20 no tiene rival nuevo: repite el duelo de la primera.
+const penFull = () => S.players.length >= MAX_PLAYERS;
+function penStart() {   // semana del sorteo: la primera con duelo para TODOS los jugadores (los duelos sueltos de antes de estar completa no cuentan)
+  const ws = {};
+  S.players.forEach(p => Object.keys(p.pen || {}).forEach(k => { if (k[0] === "w") { const x = +k.slice(1); ws[x] = (ws[x] || 0) + 1; } }));
+  const all = Object.keys(ws).map(Number).filter(x => ws[x] >= S.players.length).sort((x, y) => x - y);
+  return all.length ? all[0] : null;
+}
+function penEnsure(w) {
+  if (!penFull() || S.players.length % 2) return false;
+  const k = penKey(w), w0 = penStart(), r = w0 === null ? 0 : w - w0; if (r < 0) return false;
+  const L = S.players.slice().sort((a, b) => (a.id < b.id ? -1 : 1)), n = L.length;
+  const rnd = penRng(penHash(L.map(p => p.id).join("|")) + 20261026);   // el sorteo: orden aleatorio fijo
+  for (let i = n - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [L[i], L[j]] = [L[j], L[i]]; }
+  const t = r % (n - 1), rot = L.slice(1), sh = t ? [...rot.slice(rot.length - t), ...rot.slice(0, rot.length - t)] : rot, arr = [L[0], ...sh];
+  let ch = false;
+  for (let i = 0; i < n / 2; i++) {
+    const a = arr[i], b = arr[n - 1 - i];
+    if (penOfKey(a, k) || penOfKey(b, k)) continue;
+    const f = (i + t) % 2 === 0;   // quién tira primero: se va alternando
     a.pen = a.pen || {}; b.pen = b.pen || {};
-    a.pen[k] = { o: b.id, f: 1, s: [], k: [] }; b.pen[k] = { o: a.id, f: 0, s: [], k: [] };
+    a.pen[k] = { o: b.id, f: f ? 1 : 0, s: [], k: [] }; b.pen[k] = { o: a.id, f: f ? 0 : 1, s: [], k: [] };
+    ch = true;
   }
-  return true;
+  return ch;
 }
 const PEN_MAX = 10;   // máximo de rondas de una tanda
 function penState(d) {
   const ea = (d.A.pen && d.A.pen[d.k]) || {}, eb = (d.B.pen && d.B.pen[d.k]) || {};
   const As = ea.s || [], Ak = ea.k || [], Bs = eb.s || [], Bk = eb.k || [];
-  const rounds = []; let winner = null, over = false, next = null;
+  const rounds = []; let winner = null, over = false, next = null, gA = 0, gB = 0;   // gA/gB: goles acumulados
   for (let r = 0; r < PEN_MAX; r++) {   // en cada ronda los dos eligen a la vez (tiro + parada); se resuelve cuando ambos han elegido
     const R = { r, as: As[r], ak: Ak[r], bs: Bs[r], bk: Bk[r], sd: r >= 3 };
     R.aOk = R.as != null && R.ak != null; R.bOk = R.bs != null && R.bk != null; R.done = R.aOk && R.bOk;
     R.ga = R.done ? R.as !== R.bk : null; R.gb = R.done ? R.bs !== R.ak : null;
     rounds.push(R);
     if (!R.done) { next = { r, aOk: R.aOk, bOk: R.bOk }; break; }
-    if (R.ga !== R.gb) { winner = R.ga ? d.A : d.B; over = true; break; }
+    gA += R.ga ? 1 : 0; gB += R.gb ? 1 : 0;
+    if (r >= 2 && gA !== gB) { winner = gA > gB ? d.A : d.B; over = true; break; }   // mínimo 3 rondas; si siguen empatados, muerte súbita (gana quien marque y el otro falle)
     if (r === PEN_MAX - 1) over = true;
   }
   return { rounds, winner, over, next };
@@ -5874,20 +5920,22 @@ function penPut(d, zs, zk) {   // guarda el tiro y la parada del jugador en la r
 function penMerge(cur, inc) {   // las elecciones solo crecen: si el servidor trae menos, se recuperan las que faltan
   let ch = false; cur = cur || {};
   Object.keys(inc || {}).forEach(k => {
-    const i = inc[k]; if (!i) return; const c = cur[k] || (cur[k] = { o: i.o, f: i.f, s: [], k: [] }); if (c !== cur[k]) ch = true;
+    const i = inc[k]; if (!i) return; const isNew = !cur[k], c = cur[k] || (cur[k] = { o: i.o, f: i.f, s: [], k: [] }); if (isNew) ch = true;
+    if (i.x && !c.x) { c.x = 1; ch = true; }   // reto amistoso rechazado
     ["s", "k"].forEach(f => { const a = Array.isArray(i[f]) ? i[f] : []; if (a.length > (c[f] || []).length) { c[f] = a.slice(); ch = true; } });
   });
   return ch ? cur : null;
 }
 // ===== fin lógica del duelo =====
 // ---- Tarjeta del duelo (arriba en la pestaña de perfil: el duelo de la semana de ese jugador y contra quién) ----
+let amNew = false, amUnseen = false, amTok = "", amSel = { key: "", s: -1, k: -1 };   // retos amistosos
 let penTok = "", penNew = false, penCoinSync = null, penSel = { key: "", s: -1, k: -1 }, penBusy = false, penUnseen = false, penAC = null;
 const penTokOf = (d, st, m, w) => w + ":" + st.rounds.filter(R => R.done).length + ":" + (st.next && (d.A === m ? st.next.bOk : st.next.aOk) ? 1 : 0);   // cambia cuando hay algo nuevo en el duelo (semana nueva, ronda resuelta, el rival ya ha jugado)
 function penMark() {   // el jugador ya ha visto la novedad del duelo: se quita el puntito (tarjeta y pestaña)
   const m = meP(); if (!m || !penTok) return;
   avSet(avKey("penal", m.id), penTok); penNew = false;
   document.querySelectorAll("#penBox .pz.nw").forEach(e => e.classList.remove("nw"));
-  const nb = document.querySelector('nav button[data-t="jugar"]'); if (nb) nb.classList.remove("pn-dot");
+  const nb = document.querySelector('nav button[data-t="jugar"]'); if (nb && !amNew) nb.classList.remove("pn-dot");
 }
 const penSeenKey = (m, w) => "pen_seen_" + m.id + "_" + w;
 let penFast = false;   // true = el jugador ha tocado para acelerar (o ha salido de la pestaña): sin animaciones a pantalla y todo más rápido
@@ -5945,7 +5993,7 @@ function penFx(kind, o) {
 function penBoardHtml(d, st, shown, half, bump) {   // half: además del cuadro "shown" completo, cuenta el tiro del local de la ronda siguiente
   const done = st.rounds.filter(R => R.done), rs = done.filter(R => R.r < shown), ex = half ? done[shown] : null, m = meP();
   const gA = rs.filter(R => R.ga).length + (ex && ex.ga ? 1 : 0), gB = rs.filter(R => R.gb).length;
-  const n = st.over && rs.length === done.length ? Math.max(rs.length, 1) : Math.min(PEN_MAX, rs.length + 1);
+  const n = st.over && rs.length === done.length ? Math.max(rs.length, 1) : Math.min(PEN_MAX, Math.max(3, rs.length + 1));
   const dots = k => Array.from({ length: n }, (_, i) => { const R = i < rs.length ? rs[i] : (k === "ga" && ex && i === rs.length ? ex : null), g = R ? R[k] : null, nw = bump && ((R && (i === rs.length - 1 || R === ex)) || (!half && !R && i === rs.length && rs.length > 0)); return `<i class="${g === true ? "g" : g === false ? "x" : ""}${nw ? " n" : ""}"></i>`; }).join("");
   const pl = (p, t, k) => `<div class="pz-p">${p.team ? crest(p.team, false) : ""}<b>${esc(p.name)}</b><small>${t}${p === m ? " · TÚ" : ""}</small><div class="pz-dots">${dots(k)}</div></div>`;
   return `<div class="pz-vs">${pl(d.A, "LOCAL", "ga")}<div class="pz-sc${bump ? " bump" : ""}">${gA} - ${gB}</div>${pl(d.B, "VISITANTE", "gb")}</div>`;
@@ -5999,13 +6047,13 @@ function penWatch(box, ok) {   // da por visto el duelo cuando lleva un momento 
   if (penNew && ok && bd) seenWatch("penal", [bd], penMark); else seenWatch("penal", [], () => {});
 }
 // Botones por pasos: el local primero TIRA y después PARA; el visitante al revés (primero PARA y luego TIRA)
-function penActHtml(d, m, sd, an) {
-  an = an || {};
+function penActHtml(d, m, sd, an, sel) {
+  an = an || {}; sel = sel || penSel;
   const zs = sd ? [0, 2] : [0, 1, 2], IC = ["↖", "⬆", "↗"], NM = ["Izquierda", "Centro", "Derecha"];
   const first = d.A === m ? "s" : "k", second = first === "s" ? "k" : "s";
-  const row = (t, n, cl) => `<div class="pz-row${cl}"><em><i>${n}</i>${t === "s" ? "⚽ TU TIRO" : "🧤 TU PARADA"}</em><div class="pz-zs${sd ? " sd" : ""}">${zs.map(z => `<button type="button" class="pz-b ${t}${penSel[t] === z ? " on" : ""}${an.t === t && an.z === z ? " hot" : ""}" data-t="${t}" data-z="${z}" aria-label="${NM[z]}"><span>${t === "s" ? "⚽" : "🧤"}</span>${NM[z]}<small>${IC[z]}</small></button>`).join("")}</div></div>`;
-  const both = penSel.s >= 0 && penSel.k >= 0;
-  return `<div class="pz-act">${row(first, 1, "")}${penSel[first] >= 0 ? row(second, 2, an.r2 ? " rv" : "") : ""}${both ? `<div class="pz-okw${an.ok ? " rv" : ""}"><button type="button" class="pn-ok">¡Listo!</button></div>` : ""}</div>`;
+  const row = (t, n, cl) => `<div class="pz-row${cl}"><em><i>${n}</i>${t === "s" ? "⚽ TU TIRO" : "🧤 TU PARADA"}</em><div class="pz-zs${sd ? " sd" : ""}">${zs.map(z => `<button type="button" class="pz-b ${t}${sel[t] === z ? " on" : ""}${an.t === t && an.z === z ? " hot" : ""}" data-t="${t}" data-z="${z}" aria-label="${NM[z]}"><span>${t === "s" ? "⚽" : "🧤"}</span>${NM[z]}<small>${IC[z]}</small></button>`).join("")}</div></div>`;
+  const both = sel.s >= 0 && sel.k >= 0;
+  return `<div class="pz-act">${row(first, 1, "")}${sel[first] >= 0 ? row(second, 2, an.r2 ? " rv" : "") : ""}${both ? `<div class="pz-okw${an.ok ? " rv" : ""}"><button type="button" class="pn-ok">¡Listo!</button></div>` : ""}</div>`;
 }
 function renderPen() {
   const box = $("#penBox"), nb = document.querySelector('nav button[data-t="jugar"]');
@@ -6021,11 +6069,11 @@ function renderPen() {
   penUnseen = seen < done;
   penTok = st ? penTokOf(d, st, m, w) : "";
   penNew = !!(m && synced && st && avGet(avKey("penal", m.id)) !== penTok);
-  if (nb) nb.classList.toggle("pn-dot", penNew);
+  if (nb) nb.classList.toggle("pn-dot", penNew || amNew);
   if (!box) return;
   const TIT = eu ? '<h2 class="ja-t">Desempate por penaltis</h2>' : `<h2 class="ja-t">Duelo de penaltis</h2>`;
   if (!m) { box.innerHTML = ""; return; }
-  if (!d) { box.innerHTML = S.players.length >= 2 ? TIT + `<div class="pz"><div class="pz-wt">Esta semana descansas 😴</div></div>` : ""; return; }
+  if (!d) { box.innerHTML = !penFull() ? TIT + `<div class="pz"><div class="pz-wt">⏳ Los duelos empiezan cuando haya <strong>20 participantes</strong> (${S.players.length}/20). Entonces se hará un sorteo con los enfrentamientos.</div></div>` : S.players.length >= 2 ? TIT + `<div class="pz"><div class="pz-wt">Esta semana descansas 😴</div></div>` : ""; return; }
   const rnN = seen < done ? seen : st.next ? st.next.r : -1, sd = rnN >= 3;
   const key = w + "|" + (st.next ? st.next.r : "x");
   if (penSel.key !== key) penSel = { key, s: -1, k: -1 };
@@ -6062,6 +6110,164 @@ function renderPen() {
   if (seen < done && box.offsetParent !== null) penReplay(box, d, m, w, st, seen);
 }
 if (!window._penIv) window._penIv = setInterval(() => { const b = document.querySelector("#penBox"); if (penUnseen && !penBusy && b && b.offsetParent !== null) renderPen(); }, 1200);
+
+// ===== Retos amistosos de penaltis (sin recompensas) =====
+// Desde el perfil de otro jugador se le puede retar a una tanda. El reto es una ficha p.pen["a<hora en base36>"] = { o: rival, f: 1, s: [], k: [] }
+// que solo escribe el retador. El retado la acepta creando SU ficha (f: 0) o la rechaza con x: 1. Cada uno escribe solo en la suya.
+// No dan monedas ni logros: penWins y el sorteo semanal solo miran las fichas "w<semana>".
+const AM_PEND = 48 * 36e5, AM_LIVE = 7 * 864e5, AM_MAX_OUT = 3;   // una solicitud caduca a las 48 h; una tanda sin terminar, a los 7 días
+const amTs = k => parseInt(k.slice(1), 36) || 0;
+const amTokKey = m => avKey("penal_am", m.id);
+function amList(m) {   // retos de este jugador: s = "in" (me retan), "out" (he retado), "on" (aceptado), "no" (rechazado)
+  const res = [], seen = {}, now = Date.now();
+  const one = (k, q) => {
+    if (seen[k] || !q || q === m) return;
+    const a = m.pen && m.pen[k], b = q.pen && q.pen[k];
+    if ((a && a.o !== q.id) || (b && b.o !== m.id)) return;
+    seen[k] = 1;
+    const ts = amTs(k); let s, mine = false;   // mine: el retador soy yo
+    if (a && b) { s = a.x || b.x ? "no" : "on"; mine = a.f === 1; }
+    else if (a) { if (a.f !== 1) return; s = a.x ? "no" : "out"; mine = true; }
+    else { if (!b || b.f !== 1 || b.x) return; s = "in"; }
+    if (now - ts > (s === "on" ? AM_LIVE : AM_PEND)) return;
+    res.push({ k, s, ts, rival: q, mine });
+  };
+  Object.keys(m.pen || {}).forEach(k => { if (k[0] === "a" && m.pen[k]) one(k, pById(m.pen[k].o)); });
+  S.players.forEach(q => { if (q !== m && q.pen) Object.keys(q.pen).forEach(k => { if (k[0] === "a" && q.pen[k] && q.pen[k].o === m.id) one(k, q); }); });
+  return res;
+}
+function amState(m) {
+  const all = amList(m).map(x => {
+    if (x.s !== "on") return x;
+    const d = penOfKey(m, x.k), st = penState(d), done = st.rounds.filter(R => R.done).length;
+    let seen = 0; try { seen = Math.min(+localStorage.getItem(penSeenKey(m, x.k)) || 0, done); } catch (e) {}
+    return { ...x, d, st, done, seen, fin: st.over && seen >= done };
+  });
+  const by = (s, f) => all.filter(x => x.s === s && (!f || f(x))).sort((a, b) => a.ts - b.ts);
+  const inc = by("in"), on = by("on"), act = on.find(x => !x.fin) || null, fin = act ? null : (on.filter(x => x.fin).pop() || null);
+  const outs = by("out"), no = by("no", x => x.mine).pop() || null;
+  const tok = [...inc.map(x => "i" + x.k), act ? "a" + penTokOf(act.d, act.st, m, act.k) : "", no ? "n" + no.k : ""].filter(Boolean).join("|");
+  return { all, inc, act, fin, outs, no, tok, outN: outs.length };
+}
+function amMark() {   // lo nuevo ya se ha visto: fuera el puntito (tarjeta y pestaña Inicio)
+  const m = meP(); if (!m || !amTok) return;
+  avSet(amTokKey(m), amTok); amNew = false;
+  document.querySelectorAll("#penAmBox .pz.nw").forEach(e => e.classList.remove("nw"));
+  const nb = document.querySelector('nav button[data-t="jugar"]'); if (nb && !penNew) nb.classList.remove("pn-dot");
+}
+const amCr = p => (p.team ? crest(p.team, false) : "");
+function amDuelHtml(m, x, nw) {
+  const { d, st, seen, done } = x, rnN = seen < done ? seen : st.next ? st.next.r : -1, sd = rnN >= 3;
+  const mineOk = !!st.next && (d.A === m ? st.next.aOk : st.next.bOk), myTurn = !st.over && !!st.next && !mineOk;
+  const key = x.k + "|" + (st.next ? st.next.r : "x");
+  if (amSel.key !== key) amSel = { key, s: -1, k: -1 };
+  const SUB = '<div class="pz-sub">🤝 Reto amistoso · sin recompensas</div>';
+  let act = "";
+  if (seen < done) act = "";
+  else if (st.over) act = st.winner === m ? '<div class="pz-end win">🏆 ¡Reto ganado!</div>' : st.winner ? '<div class="pz-end lose">Reto perdido</div>' : '<div class="pz-end">🤝 Empate</div>';
+  else if (myTurn) act = penActHtml(d, m, sd, null, amSel);
+  else act = '<div class="pz-wt"><b>⚽</b> Tu jugada está lista · esperando al rival…</div>';
+  if (st.over && seen >= done) return `<div class="pz${nw ? " nw" : ""}" data-amk="${x.k}">${SUB}<div class="pz-bd">${penBoardHtml(d, st, seen)}</div>${act}</div>`;
+  return `<div class="pz${nw ? " nw" : ""}" data-amk="${x.k}">${SUB}<div class="pz-bd">${penBoardHtml(d, st, seen)}</div><div class="pz-rn">${rnN >= 0 ? "Ronda " + (rnN + 1) : ""}</div>${penStage(d.A, d.B)}${act}</div>`;
+}
+function renderAm() {
+  const box = $("#penAmBox"), nb = document.querySelector('nav button[data-t="jugar"]'), m = meP();
+  if (penBusy) return;
+  const ok = !!m && m !== pend && synced && S.players.includes(m), A = ok ? amState(m) : null;
+  amTok = A ? A.tok : "";
+  amNew = !!(ok && amTok && avGet(amTokKey(m)) !== amTok);
+  amUnseen = !!(A && A.act && A.act.seen < A.act.done);
+  if (nb) nb.classList.toggle("pn-dot", penNew || amNew);
+  if (!box) return;
+  if (!A || !(A.inc.length || A.act || A.fin || A.outs.length || A.no)) { box.innerHTML = ""; box.onclick = null; seenWatch("penal_am", [], () => {}); return; }
+  const nw = amNew, SUB = '<div class="pz-sub">🤝 Reto amistoso · sin recompensas</div>';
+  let h = '<h2 class="ja-t">Duelos amistosos</h2>';
+  A.inc.forEach(x => {   // el mensaje de reto: aceptar o rechazar
+    h += `<div class="pz${nw ? " nw" : ""}" data-amk="${x.k}">${SUB}<div class="am-who">${amCr(x.rival)}<div class="am-msg"><b>${esc(x.rival.name)}</b> te reta a una tanda de penaltis<small>Es solo por jugar: no da recompensas</small></div></div>`
+      + `<div class="am-bt"><button type="button" class="btn" data-amok="${x.k}"${A.act ? " disabled" : ""}>Aceptar</button><button type="button" class="btn del" data-amno="${x.k}">Rechazar</button></div>`
+      + (A.act ? '<div class="pz-wt" style="margin-top:10px">Termina tu tanda actual para aceptar</div>' : "") + "</div>";
+  });
+  if (A.act) h += amDuelHtml(m, A.act, nw);
+  else if (A.fin) h += amDuelHtml(m, A.fin, false);
+  A.outs.forEach(x => { h += `<div class="pz">${SUB}<div class="am-who">${amCr(x.rival)}<div class="am-msg">Has retado a <b>${esc(x.rival.name)}</b><small>Esperando a que acepte…</small></div></div></div>`; });
+  if (A.no) h += `<div class="pz${nw ? " nw" : ""}"><div class="pz-wt"><b>${esc(A.no.rival.name)}</b> ha rechazado tu reto</div></div>`;
+  box.innerHTML = h;
+  box.onclick = ev => {
+    const t = ev.target, m2 = meP(); if (!m2 || penBusy) return;
+    if (amNew) amMark();
+    const yes = t.closest("[data-amok]"), no = t.closest("[data-amno]");
+    if (yes) { if (!yes.disabled) amAnswer(yes.dataset.amok, true); return; }
+    if (no) { amAnswer(no.dataset.amno, false); return; }
+    const x2 = amState(m2).act; if (!x2 || x2.seen < x2.done) return;
+    const { d, st } = x2, mineOk = !!st.next && (d.A === m2 ? st.next.aOk : st.next.bOk);
+    if (st.over || !st.next || mineOk) return;
+    const sd = st.next.r >= 3, b = t.closest(".pz-b");
+    if (b) {   // se actualiza solo la zona de botones, igual que en el duelo semanal
+      const tt = b.dataset.t, z = +b.dataset.z, first = d.A === m2 ? "s" : "k", had = amSel[first] >= 0, hadBoth = amSel.s >= 0 && amSel.k >= 0;
+      amSel[tt] = z; penSnd("tap");
+      const both = amSel.s >= 0 && amSel.k >= 0, ac = box.querySelector(".pz-act");
+      if (ac) ac.outerHTML = penActHtml(d, m2, sd, { t: tt, z, r2: !had && amSel[first] >= 0, ok: !hadBoth && both }, amSel);
+      return;
+    }
+    if (t.closest(".pn-ok") && amSel.s >= 0 && amSel.k >= 0) { const s = amSel.s, kk = amSel.k; amSel = { key: "", s: -1, k: -1 }; if (penPut(d, s, kk)) renderAm(); }
+  };
+  const els = nw ? [...box.querySelectorAll(".pz.nw")] : [];
+  if (els.length && !amUnseen) seenWatch("penal_am", els, amMark); else seenWatch("penal_am", [], () => {});
+  if (A.act && A.act.seen < A.act.done && box.offsetParent !== null) amReplay(box, A.act);
+}
+function amAnswer(k, yes) {   // aceptar (se crea mi ficha y empieza la tanda) o rechazar (mi ficha lleva x: 1)
+  const m = meP(); if (!m || !synced || !S.players.includes(m)) return;
+  const A = amState(m), x = A.inc.find(y => y.k === k); if (!x || (yes && A.act)) return;
+  m.pen = m.pen || {}; m.pen[k] = yes ? { o: x.rival.id, f: 0, s: [], k: [] } : { o: x.rival.id, f: 0, s: [], k: [], x: 1 };
+  save(); avSet(amTokKey(m), amState(m).tok); amNew = false; penSnd(yes ? "whistle" : "tap");
+  renderAm(); renderPen(); try { renderHistorial(); } catch (e) {}
+}
+async function amReplay(box, x) {   // reproduce las rondas ya resueltas que este jugador aún no ha visto
+  const { d, st, k } = x, m = meP(), card = box.querySelector('.pz[data-amk="' + k + '"]'); if (!m || !card) return;
+  const stg = card.querySelector(".pz-stage"), bd = () => card.querySelector(".pz-bd"), rn = card.querySelector(".pz-rn"); if (!stg) return;
+  penBusy = true; penFast = false; penHost = stg; stg.onclick = () => { penFast = true; };
+  try {
+    for (let r = x.seen; r < st.rounds.length && st.rounds[r].done; r++) {
+      const R = st.rounds[r]; rn.textContent = "Ronda " + (r + 1);
+      if (box.offsetParent === null) penFast = true;
+      penSnd("round"); await penFx("rd", { n: r + 1, sd: r >= 3, ms: 1500 }); await penSleep(150);
+      await penShot(stg, d.A, d.B, 0, R.as, R.bk, R.ga);
+      bd().innerHTML = penBoardHtml(d, st, r, true, true);
+      await penShot(stg, d.B, d.A, 1, R.bs, R.ak, R.gb);
+      bd().innerHTML = penBoardHtml(d, st, r + 1, false, true);
+      try { localStorage.setItem(penSeenKey(m, k), r + 1); } catch (e) {}
+      await penSleep(450);
+    }
+    if (st.over) { penSnd(st.winner === m ? "win" : "whistle"); await penFx("end", { win: st.winner === m, draw: !st.winner, txt: st.winner === m ? "¡RETO GANADO!" : st.winner ? "RETO PERDIDO" : "EMPATE", sub: "Reto amistoso · sin recompensas", ms: 2900 }); }
+    else if (st.next) { rn.textContent = "Ronda " + (st.next.r + 1); penSnd("round"); await penFx("rd", { n: st.next.r + 1, sd: st.next.r >= 3, ms: 1500 }); }
+  } catch (e) {}
+  try { avSet(amTokKey(m), amState(m).tok); } catch (e) {}
+  penFast = false; penHost = null; penBusy = false; renderAm(); renderPen();
+}
+function penRetoState(q) {   // estado del botón "Jugar penaltis" en el perfil de otro jugador
+  const m = meP(); if (!m || m === pend || !synced || !S.players.includes(m) || !q || q === m) return null;
+  const A = amState(m), x = A.all.find(y => y.rival === q && (y.s === "in" || y.s === "out" || (y.s === "on" && !y.fin)));
+  return { A, x };
+}
+function penRetoBtn(q) {
+  const r = penRetoState(q); if (!r) return "";
+  const { A, x } = r;
+  if (x && x.s === "out") return '<button type="button" class="pf-pen dis" disabled>⏳ Reto enviado</button>';
+  if (x) return `<button type="button" class="pf-pen" data-penreto="${q.id}">⚽ ${x.s === "in" ? "Ver su reto" : "Tanda en curso"}</button>`;
+  if (A.outN >= AM_MAX_OUT) return '<button type="button" class="pf-pen dis" disabled>Retos pendientes: ' + AM_MAX_OUT + "</button>";
+  return `<button type="button" class="pf-pen" data-penreto="${q.id}">⚽ Jugar penaltis</button>`;
+}
+function amReto(id) {   // botón del perfil: envía la solicitud (o lleva a Inicio si ya hay un reto con esa persona)
+  const q = pById(id), r = penRetoState(q); if (!r) return;
+  const m = meP(), { A, x } = r;
+  if (x) { viewId = null; go("jugar"); setTimeout(() => { const t = $("#penAmBox"); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); }, 120); return; }
+  if (A.outN >= AM_MAX_OUT) { toast("Ya tienes " + AM_MAX_OUT + " retos pendientes"); return; }
+  const k = "a" + Date.now().toString(36); m.pen = m.pen || {}; m.pen[k] = { o: q.id, f: 1, s: [], k: [] };
+  save(); penSnd("tap"); toast("Reto enviado a " + q.name);
+  try { renderHistorial(); } catch (e) {} renderAm();
+}
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest("[data-penreto]"); if (b) amReto(b.dataset.penreto); });
+if (!window._amIv) window._amIv = setInterval(() => { const b = document.querySelector("#penAmBox"); if (amUnseen && !penBusy && b && b.offsetParent !== null) renderAm(); }, 1200);
 
 // ===== Repetición pública de los desempates europeos: cualquiera puede ver la tanda ya terminada (semifinal / final) =====
 function euTanda(m) {   // duelo de desempate terminado de un cruce (null si no hay o aún se juega)
@@ -6397,7 +6603,7 @@ function h2hHtml(a, b) {
   const v = (k, u, n) => k === "pos" && !n ? "—" : n + u, w = (d, p, q) => (p - q) * d > 0 ? " class=\"w\"" : "";
   return `<div class="card"><div class="h2h"><div class="hd">Tú</div><div></div><div class="hd">${esc(b.name)}</div>${rows.map(([l, k, u, d]) => `<b${w(d, x[k], y[k])}>${v(k, u, x[k])}</b><span>${l}</span><b${w(d, y[k], x[k])}>${v(k, u, y[k])}</b>`).join("")}</div></div>`;
 }
-function h2hBtnHtml(a, b) { return `<button type="button" class="btn ghost" id="h2hBtn" style="width:100%;margin:14px 0">${h2hOpen === b.id ? "Ocultar cara a cara" : "Cara a cara"}</button><div id="h2hBox">${h2hOpen === b.id ? h2hHtml(a, b) : ""}</div>`; }
+function h2hBtnHtml(a, b) { return `<button type="button" class="btn ghost" id="h2hBtn" style="width:100%;margin:14px 0">${h2hOpen === b.id ? "Ocultar cara a cara" : "Cara a cara"}</button>`; }
 
 // ===== Resumen de temporada (wrapped): sale al cerrarse la jornada final de la liga =====
 const PREMIOS_LIGA = [28, 15.5, 10, 7.5, 5, 4, 3, 2];
@@ -6466,6 +6672,9 @@ $("#wrapTopBtn").onclick = () => { const p = meP(); if (p) openWrapped(p); };
 function render() { applyMaint(); renderEquipo(); if (pend) return; renderCuenta(); renderJugar(); renderEuroPlay(); renderTabla(); renderEuro(); renderHistorial(); renderEuroHist(); renderSobres(); checkRound(); checkCoins(); renderLogros(); renderAvisos(); renderAdmin(); }
 setMe(me);
 go(meP() ? "jugar" : "cuenta");
+// Sin zoom en móvil: iOS Safari ignora user-scalable=no, así que se bloquean también los gestos de pellizco (el doble toque ya lo evita touch-action)
+["gesturestart", "gesturechange", "gestureend"].forEach(t => document.addEventListener(t, e => e.preventDefault(), { passive: false }));
+document.addEventListener("touchmove", e => { if (e.touches && e.touches.length > 1) e.preventDefault(); }, { passive: false });
 boot();
 </script>
 </body>
