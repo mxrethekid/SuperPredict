@@ -1120,6 +1120,13 @@ nav button.nw::after{top:7px;left:calc(50% + 10px)}
 .pv-h{display:flex;align-items:center;gap:10px}
 .pv-n{font:400 20px var(--h);color:var(--mute);min-width:20px;text-align:center}
 .pv-h .crest{width:34px;height:34px;flex:none}
+.pv-h{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.pv-ch{flex:none;font:700 24px/1 var(--b);font-style:normal;color:var(--mute);margin-left:2px;transition:transform .2s}.pv.open .pv-ch{transform:rotate(90deg)}
+.pv-bd{display:none}.pv.open .pv-bd{display:block}
+.pv-p{flex:none;font:400 24px/1 var(--h);letter-spacing:.03em;padding:5px 12px;border-radius:99px;border:1px solid}
+.pv-p.up{color:#8dffbd;background:rgba(46,204,113,.16);border-color:rgba(61,220,132,.7);text-shadow:0 0 10px rgba(61,220,132,.6)}
+.pv-p.dn{color:#ffa097;background:rgba(255,107,94,.16);border-color:rgba(255,107,94,.65)}
+.pv-p.z{color:var(--mute);background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.18)}
 .pv-h b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:17px}.pv.me .pv-h b{color:#19d3ff}
 .pv-t{font:400 26px/1 var(--h);padding:5px 13px;border-radius:12px;background:#0a1014;border:1px solid rgba(0,180,216,.45);color:#fff}
 .pv-t.neg{color:#ff6b5e;border-color:rgba(255,107,94,.5)}.pv-t.zero{color:var(--mute);border-color:var(--line)}
@@ -1185,7 +1192,7 @@ nav button.nw::after{top:7px;left:calc(50% + 10px)}
 .rv-rb{stroke:rgba(255,255,255,.1)}
 .rv-rf{stroke:var(--ac);stroke-linecap:round;stroke-dasharray:var(--c);stroke-dashoffset:var(--c);filter:drop-shadow(0 0 8px var(--ac));animation:rvring 1.4s cubic-bezier(.3,.8,.3,1) .5s forwards}
 @keyframes rvring{to{stroke-dashoffset:var(--o)}}
-.rv-ring .rv-big{font-size:68px}
+.rv-ring .rv-big{font-size:54px;white-space:nowrap}.rv-ring .rv-big small{margin-left:3px}
 .rv-pots{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 4px;max-width:300px}
 .rv-pots>span{opacity:0;animation:rvpop .6s cubic-bezier(.3,1.6,.5,1) forwards}
 .rv-pots .pi{width:34px;height:42px;margin:0 3px}
@@ -1222,7 +1229,7 @@ nav button.nw::after{top:7px;left:calc(50% + 10px)}
 .br-cup.on3 svg{visibility:hidden;animation:none!important}
 .en.wide .br-cup.on3{filter:drop-shadow(0 0 16px rgba(255,200,60,.5))}
 /* Copa de la Súper Predict League: apoyada arriba a la izquierda de la clasificación */
-#tabla .lgc{position:relative;overflow:visible;margin-top:26px}
+#tabla .lgt{position:relative;overflow:visible;margin-top:26px}
 .lg-cup{position:absolute;left:8px;bottom:100%;width:62px;height:82px;margin-bottom:-1px;pointer-events:none;z-index:3}
 .lg-cup canvas.cup3d{position:absolute;left:50%;bottom:0;height:100%;aspect-ratio:.85;transform:translate(-50%,13%);opacity:0;transition:opacity .4s}
 .lg-cup.on3 canvas.cup3d{opacity:1}
@@ -1569,7 +1576,7 @@ nav button.nw::after{top:7px;left:calc(50% + 10px)}
 <section id="tabla">
   <h2>Super Predict League</h2>
   <div id="tablaNav"></div>
-  <div class="card lgc" style="padding:6px 10px"><div class="lg-cup" aria-hidden="true"><canvas class="cup3d" data-cup="spl" data-z="7"></canvas></div><div id="tablaBox"></div></div>
+  <div class="card lgt" style="padding:6px 10px"><div class="lg-cup" aria-hidden="true"><canvas class="cup3d" data-cup="spl" data-z="7"></canvas></div><div id="tablaBox"></div></div>
   <div class="muted" style="margin:12px 0;line-height:1.6"><div>- <b>PG</b>: Puntos ganados en la jornada</div><div>- <b>PT</b>: Puntos totales</div></div>
   <button type="button" class="btn ghost" id="evolBtn" style="width:100%;margin:0 0 14px" aria-expanded="false" aria-controls="evolCard" hidden>Ver evolución de posiciones</button>
   <div class="card" id="evolCard" style="margin-bottom:18px" hidden><h3 style="text-align:center;color:var(--cyan)">Evolución de posiciones</h3><div id="evolBox"></div></div>
@@ -3242,7 +3249,7 @@ function openPreds(mid) {
   if (!m || !m.result || !rs.includes(m.round) || document.querySelector(".pv-ov, .rv-ov")) return;
   const res = m.result, d = jornadaData(m.round, rs), last = d.ms[d.ms.length - 1].id === m.id;
   const box = (g, rg) => `<span class="pv-b ${g === rg ? "ok" : "ko"}">${g}</span>`;
-  const line = (h, a, lab, cnt) => `<div class="pv-r">${lab ? `<div class="pv-lb">${lab}${cnt ? "<em>Cuenta</em>" : ""}</div>` : ""}<div class="pv-bx">${crest(m.home, false)}${box(h, res.h)}<span class="pv-x">–</span>${box(a, res.a)}${crest(m.away, false)}</div></div>`;
+  const line = (h, a, lab, cnt) => `<div class="pv-r">${lab ? `<div class="pv-lb">${lab}</div>` : ""}<div class="pv-bx">${crest(m.home, false)}${box(h, res.h)}<span class="pv-x">–</span>${box(a, res.a)}${crest(m.away, false)}</div></div>`;
   const DESC = { doble: "puntos ×2", clon: "2 predicciones", salva: "+1 si no aciertas" };
   const cards = d.rows.map(x => {
     const en = x.per.find(z => z.m.id === m.id), q = en.q, e = effPred(q), b = en.b, ext = en.t - b, bn = last ? x.bn : 0;
@@ -3255,12 +3262,10 @@ function openPreds(mid) {
     const cf = q && q.mods && q.mods.length ? `<div class="pv-cf">${potIcon("cambia")}<span><b>${esc((pById(q.mods[0].by) || { name: "Un rival" }).name)}</b> le cambió la predicción (${esc(modTxt(m, q.mods[0]))}). Antes: ${predTxt({ h: q.h, a: q.a, h2: q.h2, a2: q.a2 })}</span></div>` : "";
     const pots = x.pots.filter(o => o.mid === m.id).map(o => `<span class="pv-c pot">${potIcon(o.t)}<span>${esc(POCIONES[o.t].nom)}${o.x ? " → " + esc(o.x) : ""}</span>${DESC[o.t] ? `<small>${DESC[o.t]}</small>` : ""}</span>`).join("");
     const ch = [];
-    if (q) ch.push(b === 3 ? ["ok", "🎯 Pleno", ""] : b === 1 ? ["ok", "Acierto", ""] : ["", "Sin acierto", ""]);
-    if (q && q.pot === "doble") ch.push(b > 0 ? ["pt", "Doble ×2", "+" + b] : ["neg", "Doble sin acierto", "−1"]);
-    if (q && q.pot === "salva" && ext > 0) ch.push(["pt", "Salvavidas", "+" + ext]);
-    if (bn) ch.push(["rx", "🔥 Racha", "+" + bn]);
+    if (bn) ch.push(["rx", "🔥 Racha", "+" + bn]);   // puntos extra por racha, debajo de las pociones
+    const tp = en.t, pbadge = `<span class="pv-p ${tp > 0 ? "up" : tp < 0 ? "dn" : "z"}">${tp > 0 ? "+" + tp : tp < 0 ? "−" + Math.abs(tp) : "0"}</span>`;   // puntos de este partido, arriba a la derecha
     const chips = ch.map(c => `<span class="pv-c ${c[0]}"><span>${c[1]}</span>${c[2] ? `<b>${c[2]}</b>` : ""}</span>`).join("");
-    return `<div class="pv${x.p.id === me ? " me" : ""}"><div class="pv-h">${x.p.team ? crest(x.p.team, false) : ""}<b>${esc(x.p.name)}</b></div><div class="pv-sc">${sc}</div>${cf}${pots ? `<div class="pv-pl">${pots}</div>` : ""}${chips ? `<div class="pv-pt">${chips}</div>` : ""}</div>`;
+    return `<div class="pv${x.p.id === me ? " me" : ""}"><div class="pv-h" role="button" tabindex="0" aria-expanded="false">${x.p.team ? crest(x.p.team, false) : ""}<b>${esc(x.p.name)}</b>${pbadge}<i class="pv-ch" aria-hidden="true">›</i></div><div class="pv-bd"><div class="pv-sc">${sc}</div>${cf}${pots ? `<div class="pv-pl">${pots}</div>` : ""}${chips ? `<div class="pv-pt">${chips}</div>` : ""}</div></div>`;
   }).join("");
   const ov = document.createElement("div"); ov.className = "pv-ov";
   ov.innerHTML = `<div class="pv-md" role="dialog" aria-modal="true" aria-label="Predicciones de la jornada ${m.round}"><button class="pm-x" type="button" aria-label="Cerrar">✕</button>
@@ -3273,6 +3278,10 @@ function openPreds(mid) {
   document.addEventListener("keydown", key);
   ov.onclick = ev => { if (ev.target === ov) close(); };
   ov.querySelector(".pm-x").onclick = close;
+  ov.querySelectorAll(".pv-h").forEach(h => {   // cada jugador sale plegado (solo nombre y puntos); al tocarlo se despliega su predicción
+    const tg = () => { const c = h.parentElement; c.classList.toggle("open"); h.setAttribute("aria-expanded", c.classList.contains("open") ? "true" : "false"); };
+    h.onclick = tg; h.onkeydown = ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); tg(); } };
+  });
 }
 // ---- Resumen animado de la jornada: las estadísticas salen de una en una (toca para avanzar, mantén para pausar) ----
 function openResumen(r) {
@@ -3290,7 +3299,7 @@ function openResumen(r) {
     S_("#19d3ff", "➕", "Suma total de puntos", `<div class="rv-big">${cu(d.sum, d.sum)}<small>PT</small></div>`, "Entre todos los jugadores"),
     S_("#5fd8f2", "📊", "Media por jugador", `<div class="rv-big">${cu(d.avgN, d.avg, 1)}<small>PT</small></div>`, "Puntos de media por jugador"),
     S_("#3ddc84", "🎯", "Plenos", `<div class="rv-big">${cu(d.plenos, d.plenos)}</div>`, d.plenos === 0 ? "Nadie clavó el resultado" : d.plenos === 1 ? "Resultado exacto acertado" : "Resultados exactos acertados"),
-    S_("#34c8a0", "", "Participación", `<div class="rv-ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="rv-rb"/><circle cx="60" cy="60" r="52" class="rv-rf" style="--c:${RING.toFixed(1)};--o:${(RING * (1 - d.partN / 100)).toFixed(1)}"/></svg><div class="rv-big">${cu(d.partN, d.partN + "%", 0)}<small>%</small></div></div>`, `${d.enviados} de ${d.posibles} predicciones enviadas`),
+    S_("#34c8a0", "", "Participación", `<div class="rv-ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="rv-rb"/><circle cx="60" cy="60" r="52" class="rv-rf" style="--c:${RING.toFixed(1)};--o:${(RING * (1 - d.partN / 100)).toFixed(1)}"/></svg><div class="rv-big">${cu(d.partN, d.partN, 0)}<small>%</small></div></div>`, `${d.enviados} de ${d.posibles} predicciones enviadas`),
     S_("#ff7a1a", "🧪", "Pociones gastadas", `<div class="rv-big">${cu(d.nPot, d.nPot)}</div>` + (d.potTipos.length ? `<div class="rv-pots">${d.potTipos.slice(0, 10).map((t, i) => `<span style="animation-delay:${(.6 + i * .12).toFixed(2)}s">${potIcon(t)}</span>`).join("")}</div>` : ""), d.nPot === 0 ? "Nadie gastó pociones" : ""),
     d.up
       ? S_("#a06bff", "🚀", "Mayor subida", `<div class="rv-who">${who({ team: upP && upP.team, name: d.up.name })}</div><div class="rv-big rv-up"><span>▲</span>${cu(d.up.mv, d.up.mv)}</div>`, d.up.mv === 1 ? "puesto ganado en la clasificación" : "puestos ganados en la clasificación")
@@ -5433,7 +5442,7 @@ const TITULOS = [
   { id: "l19", n: "El Despistao", d: "Olvida enviar alguna predicción", k: "dsp", v: 1 },
   { id: "l20", n: "Vidente de Mercadillo", d: "Pronostica un 2-0 o más para un equipo que acaba perdiendo el partido", k: "vm", v: 1 },
   { id: "l21", n: "Profeta del Empate", d: "Acierta 3 empates exactos (1-1 o 0-0) en la temporada", k: "emp", v: 3 },
-  { id: "l22", n: "El Coleccionista", d: "Completa todo el álbum de cromos y consigue el Marco Coleccionista", k: "alb", v: 1 }
+  { id: "l22", n: "El Coleccionista", d: "Consigue los 40 cromos del álbum", k: "alb", v: 40 }
 ];
 const TIENDA = ["Menos hablar y más predecir", "Esto es futbol papa", "Chilling", "Yo solo pasaba por aquí", "Estamos trabajando en ello",
   "Sin comentarios", "Fui vidente en otra vida", "La culpa es del césped", "Se me subieron los gemelos", "El VAR me tiene manía",
@@ -5490,7 +5499,7 @@ function statsDe(p) {
     if (me.pg > 0 && st.every(q => q.id === p.id || q.pg === 0)) s.vi++;
     if (i > 0 && me.mv > s.rm) s.rm = me.mv;
   });
-  s.alb = CROMOS.length && !faltan(p).length ? 1 : 0;   // álbum completo
+  s.alb = CROMOS.length - faltan(p).length;   // cromos del álbum conseguidos (el logro pide los 40)
   return s;
 }
 function renderTitulos() {   // tienda (pestaña Sobres, entre abrir sobres y el álbum)
