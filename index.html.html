@@ -2131,11 +2131,26 @@ function localApi(body) {
   }
   return Promise.resolve({ state: st });
 }
+// Reloj común: para que los dos móviles de un duelo arranquen la animación a la vez, se compara el reloj de este móvil con el del servidor
+// (cabecera Date, en segundos enteros: cada respuesta acota el desfase y al cruzarlas sale una estimación fina). Solo se corrige si el reloj
+// del móvil va claramente mal (más de 1,5 s); si no, se usa tal cual (los móviles se ponen en hora solos).
+let clockOff = 0, clkLo = -Infinity, clkHi = Infinity;
+const srvNow = () => Date.now() + (Math.abs(clockOff) > 1500 ? clockOff : 0);
+function clockSample(r, t0, t1) {
+  try {
+    const d = Date.parse(r.headers.get("date") || ""), age = +r.headers.get("age") || 0; if (!d || age) return;
+    const L = (t0 + t1) / 2, lo = d - L, hi = d + 1000 - L;
+    if (lo > clkHi + 60 || hi < clkLo - 60) { clkLo = lo; clkHi = hi; } else { clkLo = Math.max(clkLo, lo); clkHi = Math.min(clkHi, hi); }
+    clockOff = Math.round((clkLo + clkHi) / 2);
+  } catch (e) {}
+}
 async function api(body) {
   if (LOCAL) return localApi(body);
   const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 12000);
   try {
+    const t0 = Date.now();
     const r = await fetch("/api", body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal: ctrl.signal } : { cache: "no-store", signal: ctrl.signal });
+    clockSample(r, t0, Date.now());
     if (!r.ok) throw new Error("http " + r.status);
     return await r.json();
   } finally { clearTimeout(t); }
@@ -3871,7 +3886,13 @@ function openChat(mid) {
   chTimer = setInterval(() => { if (!document.hidden) pull(true); }, 4000);   // mientras el chat está abierto se mira el servidor cada pocos segundos
   pull(true);
 }
-function renderJugar() { const box = $("#jugarBox"); draftSave(box); renderJugarBase(); draftLoad(box); mountShelf(); renderPen(); renderAm(); }
+function renderJugar() {
+  const box = $("#jugarBox"), y = window.scrollY, keep = penBusy ? [$("#penBox"), $("#penAmBox")] : null;   // con una animación en marcha se conservan los duelos tal cual (no se vacían ni se pierde el escenario)
+  draftSave(box); renderJugarBase(); draftLoad(box); mountShelf();
+  if (keep) ["#penBox", "#penAmBox"].forEach((sel, i) => { const nw = $(sel); if (keep[i] && nw && nw !== keep[i]) nw.replaceWith(keep[i]); });
+  renderPen(); renderAm();
+  if (Math.abs(window.scrollY - y) > 2) window.scrollTo({ top: y, behavior: "instant" });   // reconstruir la pestaña no debe mover la pantalla
+}
 function renderJugarBase() {
   clearInterval(cdTimer);
   const box = $("#jugarBox"), p = meP(), tit = document.querySelector("#jugar h2");
@@ -4918,7 +4939,87 @@ async function delRound(r) {
 // temporada en curso: las ya cerradas quedan en p.hist y p.tb es el número de temporada con el que empieza la cuenta (lo fija el admin; por defecto 1)
 const histLen = p => Array.isArray(p.hist) ? p.hist.length : 0;
 const temporada = () => Math.max(1, ...S.players.map(p => (Number.isInteger(p.tb) && p.tb > 0 ? p.tb : 1) + histLen(p)));
+// ===== Simulación de temporada (solo para hacer pruebas) =====
+// Rellena la liga hasta 20 participantes con usuarios inventados (p.sim = 1) y les da predicciones, resultados y puntos de varias jornadas.
+// Todo lo simulado se quita con «Nueva temporada» (jugadores, partidos y predicciones); los jugadores reales no se tocan.
+const simOn = () => S.players.some(p => p.sim);
+const SIM_NOM = ["Sim Marta", "Sim Lucas", "Sim Elena", "Sim Pablo", "Sim Carla", "Sim Hugo", "Sim Irene", "Sim Dani", "Sim Nuria", "Sim Alex", "Sim Paula", "Sim Sergio", "Sim Laura", "Sim Raúl", "Sim Sofía", "Sim Iván", "Sim Clara", "Sim Mario", "Sim Alba", "Sim Diego", "Sim Rocío", "Sim Jorge"];
+function simBuild(nJ) {
+  const now = Date.now(), DAY = 864e5, rz = n => Math.floor(Math.random() * n);
+  const shuf = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = rz(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const G = () => { const x = Math.random(); return x < .28 ? 0 : x < .62 ? 1 : x < .84 ? 2 : x < .95 ? 3 : 4; };
+  const other = v => { let y; do { y = G(); } while (y === v); return y; };
+  const guess = (r, sk) => {   // sk = acierto del jugador: más alto, más plenos y más aciertos de un equipo
+    const x = Math.random();
+    if (x < .10 * sk) return { h: r.h, a: r.a };
+    if (x < .40 * sk) return Math.random() < .5 ? { h: r.h, a: other(r.a) } : { h: other(r.h), a: r.a };
+    return { h: other(r.h), a: other(r.a) };
+  };
+  const nn = new Set(S.players.map(q => q.name.toLowerCase())), taken = new Set(S.players.map(q => q.team).filter(Boolean));
+  const names = shuf(SIM_NOM).filter(x => !nn.has(x.toLowerCase())), teams = shuf(CONFIG.ligas.flatMap(l => l.equipos || [])).filter(t => !taken.has(t));
+  const free = Math.min(MAX_PLAYERS - S.players.length, names.length, teams.length);
+  const fk = Array.from({ length: free }, (_, i) => ({ id: uid(), name: names[i], pin: "sim", regAt: now - 60 * DAY + i * 60000, team: teams[i], paid: true, sim: 1 }));
+  const pl = [...S.players.filter(q => q.regAt), ...fk];   // también juegan (con predicciones y puntos simulados) los jugadores reales ya registrados
+  const sk = {}; pl.forEach(q => { sk[q.id] = .5 + Math.random() * 1.5; });
+  const pot = {};   // cada poción, una vez por jugador y en una jornada al azar
+  pl.forEach(q => { pot[q.id] = {}; shuf(["doble", "salva", "clon"]).forEach(t => { if (Math.random() < .6) pot[q.id][1 + rz(nJ)] = t; }); });
+  const ko = ts => { const d = new Date(ts); d.setHours(20, 0, 0, 0); return d.toISOString(); };
+  const eq = CONFIG.equipos, ms = [];
+  for (let i = 1; i <= Math.min(nJ + 1, CONFIG.jornadas); i++) {
+    const played = i <= nJ, h = eq[rz(eq.length)]; let a; do { a = eq[rz(eq.length)]; } while (a === h);
+    const t = played ? now - 2 * DAY - (nJ - i) * 7 * DAY : now + 2 * DAY;
+    ms.push({ id: uid(), round: i, home: h, away: a, kickoff: ko(t), result: played ? { h: G(), a: G() } : null });
+  }
+  const preds = {};
+  ms.forEach(m => {
+    const P = preds[m.id] = {}, tk = new Date(m.kickoff).getTime() - CIERRE_MS;
+    pl.forEach(q => {
+      if (!m.result && !q.sim) return;   // en la jornada abierta los reales la pronostican ellos
+      if (Math.random() < (m.result ? .07 : .4)) return;   // algunos se saltan una jornada; en la abierta aún faltan por enviar
+      const r = m.result || { h: G(), a: G() }, g = guess(r, sk[q.id]), v = { h: g.h, a: g.a, t: tk - 3e5 - rz(2 * DAY) };
+      const pt = m.result && pot[q.id][m.round];
+      if (pt) { v.pot = pt; if (pt === "clon") { const g2 = guess(r, sk[q.id]); v.h2 = g2.h; v.a2 = g2.a; } }
+      P[q.id] = v;
+    });
+  });
+  return { fk, ms, preds };
+}
+async function simular() {
+  const fail = t => { AD.msg = t; AD.cls = "err"; renderAdmin(); };
+  const n = parseInt($("#simN").value);
+  if (simOn()) return fail("Ya hay una simulación en marcha. Pulsa «Nueva temporada» para quitarla.");
+  if (isNaN(n) || n < 1 || n > CONFIG.jornadas) return fail(`Pon un número de jornadas entre 1 y ${CONFIG.jornadas}.`);
+  const np = Object.keys(S.preds).filter(k => k !== MKEY).length;
+  if (S.matches.length || np) return fail("Para simular hace falta la temporada vacía (sin jornadas). Pulsa antes «Nueva temporada».");
+  const free = MAX_PLAYERS - S.players.length;
+  if (free < 1) return fail(`La liga ya tiene ${MAX_PLAYERS} participantes: no hay hueco para usuarios inventados.`);
+  if (!(await ask(`¿Simular la temporada? Se añadirán ${free} usuarios inventados (la liga quedará completa) con ${n} jornada${n === 1 ? "" : "s"} jugadas, predicciones y puntos${n < CONFIG.jornadas ? ", y una jornada abierta" : ""}. Los participantes reales registrados también tendrán predicciones y puntos simulados (se les pueden quedar rachas, logros o monedas de prueba: para limpiarlo del todo, bórralos desde Participantes). Se verá en todos los móviles hasta que pulses «Nueva temporada», que quita jugadores inventados, jornadas y predicciones.`, "Simular"))) return;
+  const { fk, ms, preds } = simBuild(n);
+  S.players.push(...fk); S.matches.push(...ms); Object.assign(S.preds, preds);
+  save(); AD.view = null; AD.round = null; AD.open = false; AD.res = null; AD.det = null;
+  AD.msg = `Simulación creada: ${fk.length} usuarios inventados (y los reales registrados) con ${n} jornadas jugadas. Se quita con «Nueva temporada».`; AD.cls = "ok";
+  render();
+}
+function simQuitar() {   // deja la liga como estaba antes de simular
+  const ids = new Set(S.players.filter(q => q.sim).map(q => q.id));
+  ids.forEach(id => goneAdd(id));
+  S.players = S.players.filter(q => !ids.has(q.id));
+  S.players.forEach(q => {   // duelos que se hubieran sorteado contra los inventados
+    if (q.pen) { Object.keys(q.pen).forEach(k => { if (q.pen[k] && ids.has(q.pen[k].o)) delete q.pen[k]; }); if (!Object.keys(q.pen).length) delete q.pen; }
+    delete q.vis;
+  });
+  S.matches = []; { const mk = S.preds[MKEY]; S.preds = mk ? { [MKEY]: mk } : {}; }
+  return ids.size;
+}
 async function nuevaTemporada() {
+  if (simOn()) {   // con una simulación en marcha, este botón la quita (no cuenta como temporada nueva ni guarda historial)
+    const n = S.players.filter(q => q.sim).length, nr = new Set(leagueMs().map(m => m.round)).size;
+    if (!(await ask(`Hay una simulación en marcha. ¿Quitarla? Se borrarán los ${n} usuarios inventados, las ${nr} jornada${nr === 1 ? "" : "s"} simuladas y todas las predicciones. No cuenta como temporada nueva: el número de temporada y los participantes reales se quedan como estaban. No se puede deshacer.`, "Quitar simulación"))) return;
+    simQuitar(); save();
+    AD.view = null; AD.round = null; AD.open = false; AD.res = null; AD.det = null; tv = null; hv = null;
+    AD.msg = `Simulación quitada (${n} usuarios inventados). La temporada vuelve a estar vacía.`; AD.cls = "ok";
+    render(); return;
+  }
   const n = temporada(), played = calcRounds().length > 0, nr = new Set(leagueMs().map(m => m.round)).size, np = Object.keys(S.preds).filter(k => k !== MKEY).reduce((a, k) => a + Object.keys(S.preds[k]).length, 0);
   const txt = `¿Empezar la temporada ${n + 1}? Se borrarán ${nr} jornada${nr === 1 ? "" : "s"} y ${np} ${np === 1 ? "predicción" : "predicciones"}, la clasificación volverá a cero y todos pasarán a "Sin pagar". Se mantienen los participantes, sus escudos y sus trofeos${played ? `, y se guarda la posición final de cada uno en la temporada ${n}` : ""}. Si quieres una copia de seguridad, expórtala antes desde Participantes. No se puede deshacer.`;
   if (!(await ask(txt, "Nueva temporada"))) return;
@@ -4993,14 +5094,20 @@ function adJornada(el) {
     ${rs.length ? "" : `<p class="muted" style="text-align:center;margin-top:18px">Aún no hay jornadas. Crea la primera con el botón de arriba.</p>`}
     <div class="card" style="margin-top:22px"><h3>Temporada ${temporada()}</h3>
       <p class="muted">Cuando acabe la temporada, empieza una nueva: jornadas y clasificación a cero, y se conservan participantes y trofeos.</p>
-      <button class="btn del" id="newSeason" style="width:100%">Nueva temporada</button>
+      <button class="btn del" id="newSeason" style="width:100%">${simOn() ? "Quitar simulación (nueva temporada)" : "Nueva temporada"}</button>
       <label for="seasonN">Número de temporada actual</label>
       <div class="row" style="align-items:center"><input id="seasonN" type="number" inputmode="numeric" min="1" max="99" value="${temporada()}" aria-label="Número de temporada" style="flex:1;min-width:0"><button class="btn ghost" id="setSeason" style="margin:0">Cambiar número</button></div></div>
+    <div class="card" style="margin-top:22px"><h3>🧪 Simulación de pruebas</h3>
+      ${simOn() ? `<p class="muted">Simulación en marcha: ${S.players.filter(q => q.sim).length} usuarios inventados y ${leagueMs().length} jornadas. Se ve en todos los móviles. Para quitarla pulsa <b>Nueva temporada</b> (no cuenta como temporada nueva).</p>`
+      : `<p class="muted">Completa la liga con usuarios inventados y les da predicciones, resultados y puntos de varias jornadas, también a los jugadores reales ya registrados, para probar la clasificación, los duelos, etc. Solo con la temporada vacía. Se quita con «Nueva temporada».</p>
+      <label for="simN">Jornadas ya jugadas (1–${CONFIG.jornadas})</label><input id="simN" type="number" inputmode="numeric" min="1" max="${CONFIG.jornadas}" value="10" aria-label="Jornadas ya jugadas" style="width:100%">
+      <button class="btn" id="simGo" style="width:100%">Simular temporada</button>`}</div>
     <div class="card" style="margin-top:22px"><h3>Álbum de cromos</h3>
       <p class="muted">Borra todos los cromos del álbum de todos los usuarios. Las monedas ya gastadas en sobres no se devuelven, ni se recuperan los sobres gratis ya abiertos.</p>
       <button class="btn del" id="resetCromos" style="width:100%">Borrar cromos de todos</button></div>`;
 
   $("#newSeason").onclick = nuevaTemporada;
+  if ($("#simGo")) $("#simGo").onclick = simular;
   $("#setSeason").onclick = async () => {
     const n = parseInt($("#seasonN").value), mh = Math.max(0, ...S.players.map(histLen)), fail = t => { AD.msg = t; AD.cls = "err"; renderAdmin(); };
     if (!S.players.length) return fail("Necesitas al menos un participante para guardar el número de temporada.");
@@ -5097,7 +5204,7 @@ function adParts(el) {
   const paid = S.players.filter(p => p.paid).length, cu = parseFloat(CONFIG.cuota);
   el.innerHTML = `<div class="card"><h3>Participantes (${S.players.length})</h3>
     <p class="muted" style="margin-bottom:6px">${paid} de ${S.players.length} han pagado la suscripción${isNaN(cu) ? "" : " · " + (paid * cu).toLocaleString("es-ES") + " € recaudados"}</p>
-    ${S.players.length ? S.players.map(p => `<div class="item" style="flex-wrap:wrap"><span class="pl" style="flex:1 1 100%">${p.team ? crest(p.team, false) : ""}<span>${esc(p.name)} <span class="muted">· ${p.pin ? "registrado" : "pendiente de registro"}${p.team ? " · " + esc(p.team) : ""}</span></span></span><span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><button class="btn ${p.paid ? "" : "ghost"}" style="margin:0;padding:6px 10px;font-size:13px" data-pay="${p.id}">${p.paid ? "Pagado ✓" : "Sin pagar"}</button>${p.pinEnc ? `<button class="btn ghost" style="margin:0;padding:6px 10px;font-size:13px" data-vp="${p.id}">Ver PIN</button>` : (p.pin ? '<span class="muted" style="font-size:13px">PIN aún sin guardar (se guarda cuando entre)</span>' : "")}<button class="btn del" data-dp="${p.id}">Eliminar</button></span></div>`).join("") : '<p class="muted" style="margin-top:10px">Todavía no hay participantes.</p>'}</div>
+    ${S.players.length ? S.players.map(p => `<div class="item" style="flex-wrap:wrap"><span class="pl" style="flex:1 1 100%">${p.team ? crest(p.team, false) : ""}<span>${esc(p.name)} <span class="muted">· ${p.sim ? "simulado" : p.pin ? "registrado" : "pendiente de registro"}${p.team ? " · " + esc(p.team) : ""}</span></span></span><span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><button class="btn ${p.paid ? "" : "ghost"}" style="margin:0;padding:6px 10px;font-size:13px" data-pay="${p.id}">${p.paid ? "Pagado ✓" : "Sin pagar"}</button>${p.pinEnc ? `<button class="btn ghost" style="margin:0;padding:6px 10px;font-size:13px" data-vp="${p.id}">Ver PIN</button>` : (p.pin ? '<span class="muted" style="font-size:13px">PIN aún sin guardar (se guarda cuando entre)</span>' : "")}<button class="btn del" data-dp="${p.id}">Eliminar</button></span></div>`).join("") : '<p class="muted" style="margin-top:10px">Todavía no hay participantes.</p>'}</div>
     <div class="card"><h3>Copia de seguridad</h3>
     <p class="muted">Los datos se guardan en el servidor y los ven todos. Exporta una copia de seguridad o impórtala para restaurarla.</p>
     <div class="row"><button class="btn ghost" id="exp">Exportar</button><button class="btn ghost" id="imp">Importar</button></div>
@@ -5891,11 +5998,12 @@ function penEnsure(w) {
 const PEN_MAX = 10;   // máximo de rondas de una tanda
 function penState(d) {
   const ea = (d.A.pen && d.A.pen[d.k]) || {}, eb = (d.B.pen && d.B.pen[d.k]) || {};
-  const As = ea.s || [], Ak = ea.k || [], Bs = eb.s || [], Bk = eb.k || [];
+  const As = ea.s || [], Ak = ea.k || [], Bs = eb.s || [], Bk = eb.k || [], At = ea.t || [], Bt = eb.t || [];
   const rounds = []; let winner = null, over = false, next = null, gA = 0, gB = 0;   // gA/gB: goles acumulados
   for (let r = 0; r < PEN_MAX; r++) {   // en cada ronda los dos eligen a la vez (tiro + parada); se resuelve cuando ambos han elegido
     const R = { r, as: As[r], ak: Ak[r], bs: Bs[r], bk: Bk[r], sd: r >= 3 };
     R.aOk = R.as != null && R.ak != null; R.bOk = R.bs != null && R.bk != null; R.done = R.aOk && R.bOk;
+    R.at = R.done && Number.isFinite(At[r]) && Number.isFinite(Bt[r]) ? Math.max(At[r], Bt[r]) : null;   // momento en que eligió el segundo (null en duelos antiguos)
     R.ga = R.done ? R.as !== R.bk : null; R.gb = R.done ? R.bs !== R.ak : null;
     rounds.push(R);
     if (!R.done) { next = { r, aOk: R.aOk, bOk: R.bOk }; break; }
@@ -5915,14 +6023,33 @@ function penPut(d, zs, zk) {   // guarda el tiro y la parada del jugador en la r
   const nx = penState(d).next; if (!nx || (d.A === m ? nx.aOk : nx.bOk)) return false;
   const ok = z => z >= 0 && z <= 2 && !(nx.r >= 3 && z === 1); if (!ok(zs) || !ok(zk)) return false;
   const e = m.pen && m.pen[d.k]; if (!e || e.s.length !== nx.r || e.k.length !== nx.r) return false;
-  e.s.push(zs); e.k.push(zk); save(); return true;
+  e.s.push(zs); e.k.push(zk);
+  e.t = Array.isArray(e.t) ? e.t : []; while (e.t.length < nx.r) e.t.push(null); e.t.push(srvNow());   // cuándo eligió: con la del rival fija el instante común de arranque
+  save(); return true;
+}
+// Los participantes inventados (p.sim) juegan solos sus duelos de penaltis contra el jugador real y aceptan sus retos amistosos.
+// Solo actúa en el móvil de ese jugador real y solo si hay una simulación en marcha. Devuelve true si ha cambiado algo.
+function simBots() {
+  const m = meP(); if (!m || !synced || !S.players.some(q => q.sim)) return false;
+  let ch = false; const rz = n => Math.floor(Math.random() * n);
+  Object.keys(m.pen || {}).forEach(k => {
+    const e = m.pen[k]; if (!e || e.x) return; const q = pById(e.o); if (!q || !q.sim) return;
+    q.pen = q.pen || {};
+    if (!q.pen[k]) { if (k[0] === "a" && e.f === 1) { q.pen[k] = { o: m.id, f: 0, s: [], k: [], t: [] }; ch = true; } else return; }
+    const d = penOfKey(m, k); if (!d) return;
+    const st = penState(d), nx = st.next; if (st.over || !nx || (d.A === q ? nx.aOk : nx.bOk)) return;
+    const qe = q.pen[k]; if (qe.s.length !== nx.r || qe.k.length !== nx.r) return;
+    const z = () => nx.r >= 3 ? [0, 2][rz(2)] : rz(3);
+    qe.s.push(z()); qe.k.push(z()); qe.t = Array.isArray(qe.t) ? qe.t : []; while (qe.t.length < nx.r) qe.t.push(null); qe.t.push(srvNow()); ch = true;
+  });
+  return ch;
 }
 function penMerge(cur, inc) {   // las elecciones solo crecen: si el servidor trae menos, se recuperan las que faltan
   let ch = false; cur = cur || {};
   Object.keys(inc || {}).forEach(k => {
     const i = inc[k]; if (!i) return; const isNew = !cur[k], c = cur[k] || (cur[k] = { o: i.o, f: i.f, s: [], k: [] }); if (isNew) ch = true;
     if (i.x && !c.x) { c.x = 1; ch = true; }   // reto amistoso rechazado
-    ["s", "k"].forEach(f => { const a = Array.isArray(i[f]) ? i[f] : []; if (a.length > (c[f] || []).length) { c[f] = a.slice(); ch = true; } });
+    ["s", "k", "t"].forEach(f => { const a = Array.isArray(i[f]) ? i[f] : []; if (a.length > (c[f] || []).length) { c[f] = a.slice(); ch = true; } });
   });
   return ch ? cur : null;
 }
@@ -5938,6 +6065,17 @@ function penMark() {   // el jugador ya ha visto la novedad del duelo: se quita 
   const nb = document.querySelector('nav button[data-t="jugar"]'); if (nb && !amNew) nb.classList.remove("pn-dot");
 }
 const penSeenKey = (m, w) => "pen_seen_" + m.id + "_" + w;
+let penWait = false, amWait = false;   // este jugador ya eligió y espera al rival (se mira el servidor más a menudo)
+const PEN_LEAD = 3000;   // margen entre que eligen los dos y arranca la animación en ambos móviles (da tiempo a que le llegue al otro)
+async function penSync(R, rn) {   // espera al instante común de arranque; si llegamos tarde (o el reloj no cuadra) no espera
+  if (!R || R.at == null || penFast) return;
+  const go = R.at + PEN_LEAD; let left = go - srvNow();
+  if (left <= 0 || left > PEN_LEAD + 1500) return;
+  while ((left = go - srvNow()) > 0 && !penFast) {
+    if (rn) rn.textContent = "¡Los dos listos! " + Math.ceil(left / 1000);
+    await new Promise(r => setTimeout(r, Math.min(left, 150)));
+  }
+}
 let penFast = false;   // true = el jugador ha tocado para acelerar (o ha salido de la pestaña): sin animaciones a pantalla y todo más rápido
 const penSleep = ms => new Promise(r => setTimeout(r, penFast ? ms * .3 : ms));
 const PEN_COL = [["#1b74e8", "#0b2f73"], ["#e5484d", "#6e1015"]];   // camiseta y pantalón: local azul, visitante rojo
@@ -6026,8 +6164,8 @@ async function penReplay(box, d, m, w, st, seen) {   // reproduce las rondas ya 
   stg.onclick = () => { penFast = true; };
   try {
     for (let r = seen; r < st.rounds.length && st.rounds[r].done; r++) {
-      const R = st.rounds[r]; rn.textContent = "Ronda " + (r + 1);
-      if (box.offsetParent === null) penFast = true;
+      const R = st.rounds[r]; if (box.offsetParent === null) penFast = true;
+      await penSync(R, rn); rn.textContent = "Ronda " + (r + 1);
       penSnd("round"); await penFx("rd", { n: r + 1, sd: r >= 3, ms: 1500 }); await penSleep(150);
       await penShot(stg, d.A, d.B, 0, R.as, R.bk, R.ga);
       bd().innerHTML = penBoardHtml(d, st, r, true, true);
@@ -6049,17 +6187,19 @@ function penWatch(box, ok) {   // da por visto el duelo cuando lleva un momento 
 // Botones por pasos: el local primero TIRA y después PARA; el visitante al revés (primero PARA y luego TIRA)
 function penActHtml(d, m, sd, an, sel) {
   an = an || {}; sel = sel || penSel;
-  const zs = sd ? [0, 2] : [0, 1, 2], IC = ["↖", "⬆", "↗"], NM = ["Izquierda", "Centro", "Derecha"];
+  const zs = sd ? [0, 2] : [0, 1, 2], IC = ["↖", "↑", "↗"], NM = ["Izquierda", "Centro", "Derecha"];
   const first = d.A === m ? "s" : "k", second = first === "s" ? "k" : "s";
   const row = (t, n, cl) => `<div class="pz-row${cl}"><em><i>${n}</i>${t === "s" ? "⚽ TU TIRO" : "🧤 TU PARADA"}</em><div class="pz-zs${sd ? " sd" : ""}">${zs.map(z => `<button type="button" class="pz-b ${t}${sel[t] === z ? " on" : ""}${an.t === t && an.z === z ? " hot" : ""}" data-t="${t}" data-z="${z}" aria-label="${NM[z]}"><span>${t === "s" ? "⚽" : "🧤"}</span>${NM[z]}<small>${IC[z]}</small></button>`).join("")}</div></div>`;
   const both = sel.s >= 0 && sel.k >= 0;
   return `<div class="pz-act">${row(first, 1, "")}${sel[first] >= 0 ? row(second, 2, an.r2 ? " rv" : "") : ""}${both ? `<div class="pz-okw${an.ok ? " rv" : ""}"><button type="button" class="pn-ok">¡Listo!</button></div>` : ""}</div>`;
 }
-function renderPen() {
+function renderPen() { const y = window.scrollY; _renderPen(); if (Math.abs(window.scrollY - y) > 2) window.scrollTo({ top: y, behavior: "instant" }); }   // al empezar la animación la pantalla se queda donde estaba
+function _renderPen() {
   const box = $("#penBox"), nb = document.querySelector('nav button[data-t="jugar"]');
   if (penBusy) return;
   const m = meP(); let w = semTienda(Date.now()), k = penKey(w);
   if (m && synced && (penEnsure(w) | eEnsurePen())) save();
+  if (simBots()) save();
   const eu = m && eDuelOf(m); if (eu) { w = eu.id; k = eKey(eu); }   // un desempate europeo pendiente pasa por delante del duelo semanal
   const d = m && penOfKey(m, k), st = d && penState(d);
   const done = st ? st.rounds.filter(R => R.done).length : 0;
@@ -6067,13 +6207,14 @@ function renderPen() {
   const mineOk = !!st && !!st.next && (d.A === m ? st.next.aOk : st.next.bOk);
   const myTurn = !!st && !st.over && !!st.next && !mineOk;
   penUnseen = seen < done;
+  penWait = !!st && !st.over && !!st.next && mineOk && seen >= done;
   penTok = st ? penTokOf(d, st, m, w) : "";
   penNew = !!(m && synced && st && avGet(avKey("penal", m.id)) !== penTok);
   if (nb) nb.classList.toggle("pn-dot", penNew || amNew);
   if (!box) return;
   const TIT = eu ? '<h2 class="ja-t">Desempate por penaltis</h2>' : `<h2 class="ja-t">Duelo de penaltis</h2>`;
   if (!m) { box.innerHTML = ""; return; }
-  if (!d) { box.innerHTML = !penFull() ? TIT + `<div class="pz"><div class="pz-wt">⏳ Los duelos empiezan cuando haya <strong>20 participantes</strong> (${S.players.length}/20). Entonces se hará un sorteo con los enfrentamientos.</div></div>` : S.players.length >= 2 ? TIT + `<div class="pz"><div class="pz-wt">Esta semana descansas 😴</div></div>` : ""; return; }
+  if (!d) { box.innerHTML = !penFull() ? "" : S.players.length >= 2 ? TIT + `<div class="pz"><div class="pz-wt">Esta semana descansas 😴</div></div>` : ""; return; }
   const rnN = seen < done ? seen : st.next ? st.next.r : -1, sd = rnN >= 3;
   const key = w + "|" + (st.next ? st.next.r : "x");
   if (penSel.key !== key) penSel = { key, s: -1, k: -1 };
@@ -6109,6 +6250,15 @@ function renderPen() {
   penWatch(box, seen >= done);
   if (seen < done && box.offsetParent !== null) penReplay(box, d, m, w, st, seen);
 }
+// Mientras este jugador espera al rival (y está mirando el duelo) se mira el servidor cada poco, para que la animación arranque a la vez en los dos móviles
+const penSig = () => S.players.map(q => Object.keys(q.pen || {}).map(k => { const e = q.pen[k] || {}; return k + (e.s || []).length + (e.k || []).length + (e.x ? 1 : 0); }).join(",")).join("|");
+if (!window._penPoll) window._penPoll = setInterval(async () => {
+  if ((!penWait && !amWait) || penBusy || document.hidden || window._penPolling) return;
+  const sec = $("#jugar"); if (!sec || !sec.classList.contains("on")) return;
+  window._penPolling = true;
+  try { const b = penSig(); await pull(true); if (!penBusy && penSig() !== b) { renderPen(); renderAm(); } } catch (e) {}
+  window._penPolling = false;
+}, 1200);
 if (!window._penIv) window._penIv = setInterval(() => { const b = document.querySelector("#penBox"); if (penUnseen && !penBusy && b && b.offsetParent !== null) renderPen(); }, 1200);
 
 // ===== Retos amistosos de penaltis (sin recompensas) =====
@@ -6161,7 +6311,7 @@ function amDuelHtml(m, x, nw) {
   const mineOk = !!st.next && (d.A === m ? st.next.aOk : st.next.bOk), myTurn = !st.over && !!st.next && !mineOk;
   const key = x.k + "|" + (st.next ? st.next.r : "x");
   if (amSel.key !== key) amSel = { key, s: -1, k: -1 };
-  const SUB = '<div class="pz-sub">🤝 Reto amistoso · sin recompensas</div>';
+  const SUB = '<div class="pz-sub">🤝 Reto amistoso</div>';
   let act = "";
   if (seen < done) act = "";
   else if (st.over) act = st.winner === m ? '<div class="pz-end win">🏆 ¡Reto ganado!</div>' : st.winner ? '<div class="pz-end lose">Reto perdido</div>' : '<div class="pz-end">🤝 Empate</div>';
@@ -6170,20 +6320,23 @@ function amDuelHtml(m, x, nw) {
   if (st.over && seen >= done) return `<div class="pz${nw ? " nw" : ""}" data-amk="${x.k}">${SUB}<div class="pz-bd">${penBoardHtml(d, st, seen)}</div>${act}</div>`;
   return `<div class="pz${nw ? " nw" : ""}" data-amk="${x.k}">${SUB}<div class="pz-bd">${penBoardHtml(d, st, seen)}</div><div class="pz-rn">${rnN >= 0 ? "Ronda " + (rnN + 1) : ""}</div>${penStage(d.A, d.B)}${act}</div>`;
 }
-function renderAm() {
+function renderAm() { const y = window.scrollY; _renderAm(); if (Math.abs(window.scrollY - y) > 2) window.scrollTo({ top: y, behavior: "instant" }); }
+function _renderAm() {
   const box = $("#penAmBox"), nb = document.querySelector('nav button[data-t="jugar"]'), m = meP();
   if (penBusy) return;
+  if (simBots()) save();
   const ok = !!m && m !== pend && synced && S.players.includes(m), A = ok ? amState(m) : null;
   amTok = A ? A.tok : "";
   amNew = !!(ok && amTok && avGet(amTokKey(m)) !== amTok);
   amUnseen = !!(A && A.act && A.act.seen < A.act.done);
+  amWait = !!(A && A.act && !A.act.st.over && !!A.act.st.next && (A.act.d.A === m ? A.act.st.next.aOk : A.act.st.next.bOk) && A.act.seen >= A.act.done);
   if (nb) nb.classList.toggle("pn-dot", penNew || amNew);
   if (!box) return;
   if (!A || !(A.inc.length || A.act || A.fin || A.outs.length || A.no)) { box.innerHTML = ""; box.onclick = null; seenWatch("penal_am", [], () => {}); return; }
-  const nw = amNew, SUB = '<div class="pz-sub">🤝 Reto amistoso · sin recompensas</div>';
+  const nw = amNew, SUB = '<div class="pz-sub">🤝 Reto amistoso</div>';
   let h = '<h2 class="ja-t">Duelos amistosos</h2>';
   A.inc.forEach(x => {   // el mensaje de reto: aceptar o rechazar
-    h += `<div class="pz${nw ? " nw" : ""}" data-amk="${x.k}">${SUB}<div class="am-who">${amCr(x.rival)}<div class="am-msg"><b>${esc(x.rival.name)}</b> te reta a una tanda de penaltis<small>Es solo por jugar: no da recompensas</small></div></div>`
+    h += `<div class="pz${nw ? " nw" : ""}" data-amk="${x.k}">${SUB}<div class="am-who">${amCr(x.rival)}<div class="am-msg"><b>${esc(x.rival.name)}</b> te reta a una tanda de penaltis</div></div>`
       + `<div class="am-bt"><button type="button" class="btn" data-amok="${x.k}"${A.act ? " disabled" : ""}>Aceptar</button><button type="button" class="btn del" data-amno="${x.k}">Rechazar</button></div>`
       + (A.act ? '<div class="pz-wt" style="margin-top:10px">Termina tu tanda actual para aceptar</div>' : "") + "</div>";
   });
@@ -6228,8 +6381,8 @@ async function amReplay(box, x) {   // reproduce las rondas ya resueltas que est
   penBusy = true; penFast = false; penHost = stg; stg.onclick = () => { penFast = true; };
   try {
     for (let r = x.seen; r < st.rounds.length && st.rounds[r].done; r++) {
-      const R = st.rounds[r]; rn.textContent = "Ronda " + (r + 1);
-      if (box.offsetParent === null) penFast = true;
+      const R = st.rounds[r]; if (box.offsetParent === null) penFast = true;
+      await penSync(R, rn); rn.textContent = "Ronda " + (r + 1);
       penSnd("round"); await penFx("rd", { n: r + 1, sd: r >= 3, ms: 1500 }); await penSleep(150);
       await penShot(stg, d.A, d.B, 0, R.as, R.bk, R.ga);
       bd().innerHTML = penBoardHtml(d, st, r, true, true);
