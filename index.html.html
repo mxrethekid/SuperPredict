@@ -391,6 +391,9 @@ td .crest{width:30px;height:30px}
 #myPos.fire::before,#myPos.fire::after{content:"";position:absolute;left:40px;right:0;bottom:0;z-index:-1;pointer-events:none;background-repeat:repeat-x;transform-origin:50% 100%;opacity:var(--fo);-webkit-mask-image:linear-gradient(90deg,transparent,#000 26px);mask-image:linear-gradient(90deg,transparent,#000 26px)}
 #myPos.fire::before{height:54%;background-image:var(--fR-u);background-size:56px 100%;background-position:0 100%}
 #myPos.fire::after{height:38%;background-image:var(--fY-u),var(--fO-u);background-size:16px 62%,29px 100%;background-position:3px 100%,6px 100%}
+/* Marcos de fuego sin bordes: solo el brillo interior y las llamas */
+#tabla tr.rfire td,#tabla tr.rfire td:first-child,#tabla tr.rfire td:last-child{border-top-color:var(--line);box-shadow:inset 0 0 16px rgba(255,100,20,.38)}
+#myPos.fire{border-color:var(--line);box-shadow:inset 0 0 14px rgba(255,110,20,.35)}
 /* Recuadro del perfil: llamas por todo el borde, hacia fuera (3 capas: roja, naranja y núcleo amarillo) */
 #historial .pf-hero.fire{overflow:hidden;border-color:rgba(255,160,50,.9);background:radial-gradient(120% 90% at 50% 100%,rgba(255,90,20,.42),transparent 65%),radial-gradient(120% 90% at 50% 0%,rgba(255,150,40,.22),transparent 60%),linear-gradient(180deg,#221913,#14100d);box-shadow:0 0 34px -6px rgba(255,110,25,.9),0 0 60px -14px rgba(255,70,20,.7),inset 0 0 26px rgba(255,100,20,.28)}
 #historial .pf-hero.fire::before{border-radius:inherit}
@@ -582,7 +585,7 @@ td .crest{width:30px;height:30px}
 #tabla th{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6f8594}
 #tabla td{border-top-color:rgba(255,255,255,.07)}
 #tabla td .pl>span{font-weight:600}
-#tabla tr.mine{background:linear-gradient(90deg,rgba(0,180,216,.24),rgba(0,180,216,.12))}
+#tabla tr.mine{background:linear-gradient(90deg,rgba(0,180,216,.42),rgba(0,180,216,.24))}
 #tabla>.muted{padding:12px 16px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#18212a,#12181e)}
 #tabla .badges{flex-wrap:nowrap;gap:6px;justify-content:space-between}
 #tabla .badge{flex:1 1 auto;min-width:0;text-align:center;white-space:nowrap;font-size:clamp(9px,2.8vw,11.5px);padding:5px clamp(4px,1.4vw,8px);border:1px solid rgba(255,255,255,.2);box-shadow:0 4px 14px -6px rgba(0,0,0,.8)}
@@ -767,7 +770,7 @@ td .crest{width:30px;height:30px}
 #historial .pf-badges .fr{border-color:rgba(255,140,30,.6);color:#ffb347;box-shadow:inset 0 0 14px rgba(255,140,30,.1),0 0 18px -6px rgba(255,140,30,.7)}
 #historial .pf-badges .fr i{font-style:normal;font-size:18px;filter:drop-shadow(0 0 8px rgba(255,140,30,.8))}
 /* Títulos de sección del usuario: mismo estilo que "Sus predicciones" */
-#jugar>h2,#tabla>h2,#historial>h2,#historial #historialBox>h2,#historial #logrosBox>h2,#evolCard h3{
+#jugar>h2,#tabla>h2,#euroTop>h2,#euroBox>h2,#historial>h2,#historial #historialBox>h2,#historial #logrosBox>h2,#evolCard h3{
   font:700 17px/1.3 var(--b)!important;letter-spacing:.12em!important;text-transform:uppercase;text-align:center;
   color:var(--mute)!important;-webkit-text-fill-color:currentColor!important;background:none!important;
   -webkit-background-clip:border-box;background-clip:border-box;filter:none!important;text-shadow:none!important;
@@ -1129,6 +1132,12 @@ nav button.nw::after{top:7px;left:calc(50% + 10px)}
 .br .en.wide .en-m .crest{width:46px;height:46px}
 .br .en.wide .en-m b{font-size:19px}
 .br .en.wide .en-m em{font-size:14px;max-width:110px}
+/* Partido real: VS centrado, escudos a la misma distancia y el nombre debajo de cada escudo */
+.en-m{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;column-gap:8px}
+.en-m span{flex-direction:column;justify-content:center;text-align:center;gap:6px}
+.en-m b{text-align:center}
+.en-m em{max-width:100%;text-align:center}
+.br .en.wide .en-m em,.en.wide .en-m em{max-width:100%;white-space:normal;line-height:1.2;overflow:visible}
 .br .en.wide .en-d{font-size:12.5px;margin-top:6px}
 .br-champ{margin:0 0 12px}
 /* ===== Jornadas anteriores (tarjeta con botones), Predicciones y Resumen animado ===== */
@@ -1649,6 +1658,12 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 @keyframes ecsep{to{background-position:-200% 0}}
 .ecard .tdb.tdi{position:absolute;top:12px;right:12px;margin:0;z-index:3;color:#fff;filter:drop-shadow(0 1px 4px #000)}
 @media (prefers-reduced-motion:reduce){.ecard,.ecard::after,.en::after,.en-p.win,.ecr,.eu-sep{animation:none}}
+/* Marco Coleccionista sin bordes: solo brillo interior */
+@keyframes colGlow{0%{box-shadow:inset 0 0 16px rgba(255,77,141,.38)}16.67%{box-shadow:inset 0 0 16px rgba(255,177,61,.38)}33.33%{box-shadow:inset 0 0 16px rgba(230,255,77,.38)}50%{box-shadow:inset 0 0 16px rgba(77,255,154,.38)}66.67%{box-shadow:inset 0 0 16px rgba(77,200,255,.38)}83.33%{box-shadow:inset 0 0 16px rgba(154,107,255,.38)}100%{box-shadow:inset 0 0 16px rgba(255,77,141,.38)}}
+@keyframes colGlowMy{0%{border-color:var(--line);box-shadow:inset 0 0 14px rgba(255,77,141,.35)}16.67%{border-color:var(--line);box-shadow:inset 0 0 14px rgba(255,177,61,.35)}33.33%{border-color:var(--line);box-shadow:inset 0 0 14px rgba(230,255,77,.35)}50%{border-color:var(--line);box-shadow:inset 0 0 14px rgba(77,255,154,.35)}66.67%{border-color:var(--line);box-shadow:inset 0 0 14px rgba(77,200,255,.35)}83.33%{border-color:var(--line);box-shadow:inset 0 0 14px rgba(154,107,255,.35)}100%{border-color:var(--line);box-shadow:inset 0 0 14px rgba(255,77,141,.35)}}
+#tabla tr.rcol td,#tabla tr.rcol td:first-child,#tabla tr.rcol td:last-child{box-shadow:inset 0 0 16px rgba(255,77,141,.38)}
+#myPos.colf{border-color:var(--line);box-shadow:inset 0 0 14px rgba(255,77,141,.35)}
+@media(prefers-reduced-motion:no-preference){#tabla tr.rcol td,#tabla tr.rcol td:first-child,#tabla tr.rcol td:last-child{animation:colGlow 7s linear infinite}#myPos.colf{animation:colGlowMy 7s linear infinite}}
 </style>
 </head>
 <body>
@@ -3887,7 +3902,8 @@ function openChat(mid) {
   pull(true);
 }
 function renderJugar() {
-  const box = $("#jugarBox"), y = window.scrollY, keep = penBusy ? [$("#penBox"), $("#penAmBox")] : null;   // con una animación en marcha se conservan los duelos tal cual (no se vacían ni se pierde el escenario)
+  if (penBusy) { jugarDirty = true; return; }   // con una animación de duelo en marcha no se reconstruye nada (reinsertar el escenario reiniciaba las animaciones y se repetían); se redibuja al terminar
+  const box = $("#jugarBox"), y = window.scrollY, keep = null;   // con una animación en marcha se conservan los duelos tal cual (no se vacían ni se pierde el escenario)
   draftSave(box); renderJugarBase(); draftLoad(box); mountShelf();
   if (keep) ["#penBox", "#penAmBox"].forEach((sel, i) => { const nw = $(sel); if (keep[i] && nw && nw !== keep[i]) nw.replaceWith(keep[i]); });
   renderPen(); renderAm();
@@ -3983,7 +3999,8 @@ function renderEquipo() {
 // Tabla
 let tv = null;   // jornada que se está viendo (null = la última)
 // Gráfica de evolución de posiciones por jornada (todos los participantes)
-let evolOpen = false;
+let evolOpen = false, evolSX = null, evolEnd = true;
+const EVOL_SCROLL_FROM = 7;   // desde esta jornada la gráfica se desliza en horizontal
 function renderEvol() {
   const card = $("#evolCard"), box = $("#evolBox"), btn = $("#evolBtn"), rs = calcRounds();
   const final = standings(), n = final.length;
@@ -3992,33 +4009,53 @@ function renderEvol() {
   btn.setAttribute("aria-expanded", String(evolOpen)); btn.textContent = evolOpen ? "Ocultar evolución de posiciones" : "Ver evolución de posiciones";
   if (!evolOpen) return;
   const order = [...final].sort((x, y) => x.regAt - y.regAt).map(p => p.id);
-  const col = id => `hsl(${(order.indexOf(id) * 137.5) % 360} 72% 60%)`;
+  const hue = id => (order.indexOf(id) * 137.5) % 360;
+  const col = id => id === me ? `hsl(${hue(id)} 100% 74%)` : `hsl(${hue(id)} 72% 60%)`;   // tu línea, más luminosa
   const pos = {};   // id -> [posición en cada jornada]
   rs.forEach(r => standings(r).forEach((p, i) => { (pos[p.id] = pos[p.id] || []).push(i + 1); }));
-  const W = 360, L = 30, R = 20, T = 18, B = 34, H = Math.max(180, T + B + (n - 1) * 32);
+  const scroll = rs.length >= EVOL_SCROLL_FROM, STEP = 50, T = 18, B = 34, H = Math.max(180, T + B + (n - 1) * 32);
+  const L = scroll ? 14 : 30, R = scroll ? 26 : 20, W = scroll ? L + R + (rs.length - 1) * STEP : 360;
   const X = i => rs.length === 1 ? (L + W - R) / 2 : L + i * (W - L - R) / (rs.length - 1);
   const Y = q => n === 1 ? (T + H - B) / 2 : T + (q - 1) * (H - T - B) / (n - 1);
-  let g = "";
-  for (let q = 1; q <= n; q++) g += `<line x1="${L}" x2="${W - R}" y1="${Y(q)}" y2="${Y(q)}" stroke="var(--line)" stroke-width="1"/><text x="${L - 8}" y="${Y(q) + 3.5}" text-anchor="end" font-size="10" fill="var(--mute)">${q}º</text>`;
-  const step = Math.ceil(rs.length / 10);
+  const hasMe = final.some(p => p.id === me);
+  const defs = `<defs><filter id="evGlow" filterUnits="userSpaceOnUse" x="-20" y="-20" width="${W + 40}" height="${H + 40}"><feGaussianBlur stdDeviation="3.5"/></filter></defs>`;
+  let g = "", axis = "";
+  for (let q = 1; q <= n; q++) {
+    g += `<line x1="${scroll ? 0 : L}" x2="${scroll ? W : W - R}" y1="${Y(q)}" y2="${Y(q)}" stroke="var(--line)" stroke-width="1"/>`;
+    const lab = `<text x="${scroll ? 22 : L - 8}" y="${Y(q) + 3.5}" text-anchor="end" font-size="10" fill="var(--mute)">${q}º</text>`;
+    if (scroll) axis += lab; else g += lab;
+  }
+  const step = scroll ? 1 : Math.ceil(rs.length / 10);
   rs.forEach((r, i) => { if (i % step === 0 || i === rs.length - 1) g += `<text x="${X(i)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="var(--mute)">${r}</text>`; });
   const order2 = [...final].sort((a, b) => (a.id === me) - (b.id === me));
   const lines = order2.map(p => {
-    const ps = pos[p.id] || [], c = col(p.id), w = p.id === me ? 3 : 2, last = ps.length - 1, hasCrest = !!(p.team && CONFIG.escudos[p.team]);
+    const isMe = p.id === me, ps = pos[p.id] || [], c = col(p.id), w = isMe ? 3.5 : 2, last = ps.length - 1, hasCrest = !!(p.team && CONFIG.escudos[p.team]);
     const pts_ = ps.map((q, i) => `${X(i)},${Y(q)}`).join(" ");
-    return `<g>${ps.length > 1 ? `<polyline points="${pts_}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"/>` : ""}${ps.map((q, i) => (i === last && hasCrest) ? "" : `<circle cx="${X(i)}" cy="${Y(q)}" r="${p.id === me ? 5 : 4}" fill="${c}" stroke="var(--panel)" stroke-width="1.5"><title>${esc(p.name)} · Jornada ${rs[i]} · ${q}º</title></circle>`).join("")}</g>`;
+    const glow = isMe && ps.length > 1 ? `<polyline points="${pts_}" fill="none" stroke="${c}" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" opacity=".75" filter="url(#evGlow)"/>` : "";
+    const poly = ps.length > 1 ? `<polyline points="${pts_}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"/>` : "";
+    const dots = ps.map((q, i) => (i === last && hasCrest) ? "" : `<circle cx="${X(i)}" cy="${Y(q)}" r="${isMe ? 5.5 : 4}" fill="${c}" stroke="${isMe ? "#fff" : "var(--panel)"}" stroke-width="1.5"><title>${esc(p.name)} · Jornada ${rs[i]} · ${q}º</title></circle>`).join("");
+    return `<g${hasMe && !isMe ? ' opacity=".55"' : ""}>${glow}${poly}${dots}</g>`;   // el resto se atenúa para que destaque la tuya
   }).join("");
   // Escudo de cada jugador en el último punto de su línea (encima de todas las líneas)
   const marks = order2.map(p => {
     const ps = pos[p.id] || []; if (!ps.length || !(p.team && CONFIG.escudos[p.team])) return "";
-    const i = ps.length - 1, x = X(i), y = Y(ps[i]), sz = p.id === me ? 28 : 24, c = col(p.id);
-    return `<g><circle cx="${x}" cy="${y}" r="${sz / 2 + 2}" fill="var(--panel)" stroke="${p.id === me ? "var(--cyan)" : c}" stroke-width="${p.id === me ? 2 : 1.5}"/><image href="${esc(CONFIG.escudos[p.team])}" x="${x - sz / 2 + 2}" y="${y - sz / 2 + 2}" width="${sz - 4}" height="${sz - 4}" preserveAspectRatio="xMidYMid meet"><title>${esc(p.name)} · ${ps[i]}º</title></image></g>`;
+    const i = ps.length - 1, x = X(i), y = Y(ps[i]), isMe = p.id === me, sz = isMe ? 28 : 24, c = col(p.id);
+    return `<g>${isMe ? `<circle cx="${x}" cy="${y}" r="${sz / 2 + 5}" fill="none" stroke="var(--cyan)" stroke-width="4" opacity=".6" filter="url(#evGlow)"/>` : ""}<circle cx="${x}" cy="${y}" r="${sz / 2 + 2}" fill="var(--panel)" stroke="${isMe ? "var(--cyan)" : c}" stroke-width="${isMe ? 2 : 1.5}"/><image href="${esc(CONFIG.escudos[p.team])}" x="${x - sz / 2 + 2}" y="${y - sz / 2 + 2}" width="${sz - 4}" height="${sz - 4}" preserveAspectRatio="xMidYMid meet"><title>${esc(p.name)} · ${ps[i]}º</title></image></g>`;
   }).join("");
-  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Evolución de posiciones por jornada" style="display:block;margin-top:8px">${g}${lines}${marks}</svg>
-    <div class="muted" style="text-align:center;font-size:13px;margin-top:2px">Jornada</div>
-    <div style="display:grid;grid-auto-flow:column;grid-template-rows:repeat(${Math.min(7, Math.ceil(n / 3))},auto);grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 8px;margin:16px 0 0">${final.map(p => `<div class="pl" style="font-size:14px;gap:8px;min-width:0"><span style="flex:0 0 26px;display:flex;align-items:center;justify-content:center">${crest(p.team)}</span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;${p.id === me ? "font-weight:700" : ""}">${esc(p.name)}</span></div>`).join("")}</div>`;
+  const legend = `<div style="display:grid;grid-auto-flow:column;grid-template-rows:repeat(${Math.min(7, Math.ceil(n / 3))},auto);grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 8px;margin:16px 0 0">${final.map(p => `<div class="pl" style="font-size:14px;gap:8px;min-width:0"><span style="flex:0 0 26px;display:flex;align-items:center;justify-content:center">${crest(p.team)}</span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;${p.id === me ? "font-weight:700" : ""}">${esc(p.name)}</span></div>`).join("")}</div>`;
+  const ttl = "Evolución de posiciones por jornada";
+  box.innerHTML = (scroll
+    ? `<div style="display:flex;align-items:flex-start;margin-top:8px"><svg width="30" height="${H}" viewBox="0 0 30 ${H}" aria-hidden="true" style="flex:0 0 30px;display:block">${axis}</svg><div id="evolScroll" tabindex="0" role="group" aria-label="${ttl} (desliza para ver todas las jornadas)" style="flex:1 1 auto;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;padding-bottom:4px"><svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${ttl}" style="display:block;max-width:none">${defs}${g}${lines}${marks}</svg></div></div>
+    <div class="muted" style="text-align:center;font-size:13px;margin-top:2px">Jornada · desliza ↔ para ver todas</div>`
+    : `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${ttl}" style="display:block;margin-top:8px">${defs}${g}${lines}${marks}</svg>
+    <div class="muted" style="text-align:center;font-size:13px;margin-top:2px">Jornada</div>`) + legend;
+  const sc = $("#evolScroll");
+  if (sc) {
+    sc.scrollLeft = (evolSX == null || evolEnd) ? sc.scrollWidth : evolSX;   // por defecto, en la última jornada
+    sc.addEventListener("scroll", () => { evolSX = sc.scrollLeft; evolEnd = sc.scrollLeft + sc.clientWidth >= sc.scrollWidth - 4; }, { passive: true });
+  }
 }
-$("#evolBtn").onclick = () => { evolOpen = !evolOpen; renderEvol(); if (evolOpen) $("#evolCard").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "nearest" }); };
+$("#evolBtn").onclick = () => { evolOpen = !evolOpen; if (!evolOpen) { evolSX = null; evolEnd = true; } renderEvol(); if (evolOpen) $("#evolCard").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "nearest" }); };
 function renderTabla() {
   renderEvol();
   { const wb = $("#wrapTopBtn"); if (wb) wb.hidden = !meP() || !calcRounds().includes(CONFIG.jornadas); }
@@ -4069,7 +4106,8 @@ function setupMyPos(t) {
   const box = $("#myPos"), sec = $("#tabla");
   if (myOff) { myOff(); myOff = null; }
   const i = t.findIndex(x => x.id === me), row = $("#tablaBox").querySelector("tr.mine");
-  if (i < 0 || !row) { box.hidden = true; box.classList.remove("fire", "colf"); sec.classList.remove("hasMy"); return; }
+  const over = calcRounds().includes(CONFIG.jornadas);   // liga terminada: la barra fija "mi posición" se desactiva
+  if (over || i < 0 || !row) { box.hidden = true; box.classList.remove("fire", "colf"); sec.classList.remove("hasMy"); return; }
   const p = t[i];
   box.classList.toggle("colf", marcoOn(p)); box.classList.toggle("fire", p.rc >= 3 && !marcoOn(p));   // racha: la barra se llena de llamas
   box.innerHTML = `<span class="mp-pos mp-c">${i + 1}º</span><div class="mp-pl">${p.team ? crest(p.team, false) : ""}<span class="mp-name">${esc(p.name)}</span></div><span class="mp-pg mp-c ${p.pg > 0 ? "pg-up" : p.pg < 0 ? "pg-dn" : "pg-0"}">${p.pg > 0 ? "+" + p.pg : p.pg < 0 ? p.pg : "0"}</span><span class="mp-pt mp-c">${p.pt}</span><span class="mp-mv mp-c">${mvIcon(p.mv)}</span>`;
@@ -5267,6 +5305,8 @@ const CSEEN = KEY + "_coinsSeen";
 let coinSeen = null;
 function checkCoins() {
   const p = meP(); if (!p) return;
+  let hold = false; try { hold = penCoinHold(); } catch (e) {}   // moneda de un duelo cuya animación aún no ha terminado: el aviso espera a la pantalla de «duelo ganado»
+  if (hold) return;
   if (!coinSeen) { try { coinSeen = JSON.parse(localStorage.getItem(CSEEN)) || {}; } catch (e) { coinSeen = {}; } }
   const g = ganadasDe(p), prev = coinSeen[p.id];
   if (prev !== undefined && g > prev) { const d = g - prev; toastLater(`¡Has conseguido ${d} PredictCoin${d === 1 ? "" : "s"}!`); }
@@ -6056,6 +6096,20 @@ function penMerge(cur, inc) {   // las elecciones solo crecen: si el servidor tr
 // ===== fin lógica del duelo =====
 // ---- Tarjeta del duelo (arriba en la pestaña de perfil: el duelo de la semana de ese jugador y contra quién) ----
 let amNew = false, amUnseen = false, amTok = "", amSel = { key: "", s: -1, k: -1 };   // retos amistosos
+let penCoinGo = false, jugarDirty = false;   // penCoinGo: ya ha salido la pantalla de duelo ganado (el aviso de la moneda puede salir); jugarDirty: había que redibujar Jugar mientras sonaba una animación
+function penCoinHold() {
+  if (penBusy && !penCoinGo) return true;   // animación de un duelo en marcha
+  const m = meP(); if (!m || !m.pen) return false;
+  const w = semTienda(Date.now()), d = penOfKey(m, penKey(w)); if (!d) return false;
+  const st = penState(d); if (st.winner !== m) return false;
+  let seen = 0; try { seen = +localStorage.getItem(penSeenKey(m, w)) || 0; } catch (e) {}
+  return seen < st.rounds.filter(R => R.done).length;   // ganó el duelo pero aún no ha visto la animación
+}
+function penEndJugar() {   // al acabar cualquier animación de duelo: se suelta el aviso de la moneda y se redibuja lo que quedó pendiente
+  penCoinGo = false;
+  try { checkCoins(); } catch (e) {}
+  if (jugarDirty) { jugarDirty = false; renderJugar(); } else { renderPen(); }
+}
 let penTok = "", penNew = false, penCoinSync = null, penSel = { key: "", s: -1, k: -1 }, penBusy = false, penUnseen = false, penAC = null;
 const penTokOf = (d, st, m, w) => w + ":" + st.rounds.filter(R => R.done).length + ":" + (st.next && (d.A === m ? st.next.bOk : st.next.aOk) ? 1 : 0);   // cambia cuando hay algo nuevo en el duelo (semana nueva, ronda resuelta, el rival ya ha jugado)
 function penMark() {   // el jugador ya ha visto la novedad del duelo: se quita el puntito (tarjeta y pestaña)
@@ -6121,6 +6175,7 @@ function penFx(kind, o) {
       if (o.win) for (let i = 0; i < 46; i++) cf += `<span class="cf" style="left:${Math.random() * 100}%;background:${cs[i % 5]};--dx:${Math.random() * 120 - 60}px;--d:${(1.8 + Math.random() * 1.6).toFixed(2)}s;--dl:${(Math.random() * 1.2).toFixed(2)}s"></span>`;
       h = `<div class="fx-rays w"></div>${cf}<div class="fx-end ${o.win ? "w" : o.draw ? "d" : "l"}"><i>${o.win ? "🏆" : o.draw ? "🤝" : "😔"}</i><b>${o.txt || (o.win ? "¡DUELO GANADO!" : o.draw ? "EMPATE" : "DUELO PERDIDO")}</b><small>${o.sub != null ? o.sub : (o.win ? "+1 PredictCoin" : o.name ? "Gana " + esc(o.name) : "")}</small></div>`;
     }
+    host.querySelectorAll(".pzfx").forEach(x => x.remove());
     const el = document.createElement("div"); el.className = "pzfx " + cls; el.setAttribute("aria-hidden", "true"); el.innerHTML = h; host.appendChild(el);
     if (kind === "tira") penSnd("swoosh");
     let done = false; const fin = () => { if (done) return; done = true; el.classList.add("out"); setTimeout(() => el.remove(), 200); res(); };
@@ -6160,7 +6215,9 @@ async function penShot(stg, sP, kP, ss, zs, zk, goal) {
   else { await penSleep(350); await penFx("res", { goal, sP, kP, ss, ms: 2300 }); await penSleep(250); }
 }
 async function penReplay(box, d, m, w, st, seen) {   // reproduce las rondas ya resueltas que este jugador aún no ha visto
-  penBusy = true; penFast = false; const stg = box.querySelector(".pz-stage"), bd = () => box.querySelector(".pz-bd"), rn = box.querySelector(".pz-rn");
+  if (penBusy) return;
+  const stg = box.querySelector(".pz-stage"), bd = () => box.querySelector(".pz-bd"), rn = box.querySelector(".pz-rn"); if (!stg) return;
+  penBusy = true; penFast = false; penCoinGo = false;
   stg.onclick = () => { penFast = true; };
   try {
     for (let r = seen; r < st.rounds.length && st.rounds[r].done; r++) {
@@ -6174,11 +6231,16 @@ async function penReplay(box, d, m, w, st, seen) {   // reproduce las rondas ya 
       try { localStorage.setItem(penSeenKey(m, w), r + 1); } catch (e) {}
       await penSleep(450);
     }
-    if (st.over) { penSnd(st.winner === m ? "win" : "whistle"); await penFx("end", { win: st.winner === m, draw: !st.winner, name: st.winner && st.winner.name, ms: 2900 }); }
+    if (st.over) {
+      penSnd(st.winner === m ? "win" : "whistle");
+      const fx = penFx("end", { win: st.winner === m, draw: !st.winner, name: st.winner && st.winner.name, ms: 2900 });
+      penCoinGo = true; try { checkCoins(); } catch (e) {}   // el aviso de la PredictCoin sale justo cuando aparece «¡Duelo ganado! +1»
+      await fx;
+    }
     else if (st.next) { rn.textContent = "Ronda " + (st.next.r + 1); penSnd("round"); await penFx("rd", { n: st.next.r + 1, sd: st.next.r >= 3, ms: 1500 }); }
-  } catch (e) {}
+  } catch (e) { try { localStorage.setItem(penSeenKey(m, w), st.rounds.filter(R => R.done).length); } catch (e2) {} }   // si algo falla, la tanda se da por vista: no se repite en bucle
   try { avSet(avKey("penal", m.id), penTokOf(d, st, m, w)); } catch (e) {}   // lo acaba de ver en la animación
-  penFast = false; penBusy = false; renderPen();
+  penFast = false; penBusy = false; penEndJugar();
 }
 function penWatch(box, ok) {   // da por visto el duelo cuando lleva un momento en pantalla (o al tocarlo), igual que la tienda y los partidos
   const bd = box.querySelector(".pz-bd");
@@ -6378,7 +6440,8 @@ function amAnswer(k, yes) {   // aceptar (se crea mi ficha y empieza la tanda) o
 async function amReplay(box, x) {   // reproduce las rondas ya resueltas que este jugador aún no ha visto
   const { d, st, k } = x, m = meP(), card = box.querySelector('.pz[data-amk="' + k + '"]'); if (!m || !card) return;
   const stg = card.querySelector(".pz-stage"), bd = () => card.querySelector(".pz-bd"), rn = card.querySelector(".pz-rn"); if (!stg) return;
-  penBusy = true; penFast = false; penHost = stg; stg.onclick = () => { penFast = true; };
+  if (penBusy) return;
+  penBusy = true; penFast = false; penCoinGo = false; penHost = stg; stg.onclick = () => { penFast = true; };
   try {
     for (let r = x.seen; r < st.rounds.length && st.rounds[r].done; r++) {
       const R = st.rounds[r]; if (box.offsetParent === null) penFast = true;
@@ -6393,9 +6456,11 @@ async function amReplay(box, x) {   // reproduce las rondas ya resueltas que est
     }
     if (st.over) { penSnd(st.winner === m ? "win" : "whistle"); await penFx("end", { win: st.winner === m, draw: !st.winner, txt: st.winner === m ? "¡RETO GANADO!" : st.winner ? "RETO PERDIDO" : "EMPATE", sub: "Reto amistoso · sin recompensas", ms: 2900 }); }
     else if (st.next) { rn.textContent = "Ronda " + (st.next.r + 1); penSnd("round"); await penFx("rd", { n: st.next.r + 1, sd: st.next.r >= 3, ms: 1500 }); }
-  } catch (e) {}
+  } catch (e) { try { localStorage.setItem(penSeenKey(m, k), st.rounds.filter(R => R.done).length); } catch (e2) {} }   // si algo falla, la tanda se da por vista: no se repite en bucle
   try { avSet(amTokKey(m), amState(m).tok); } catch (e) {}
-  penFast = false; penHost = null; penBusy = false; renderAm(); renderPen();
+  penFast = false; penHost = null; penBusy = false; penCoinGo = false;
+  try { checkCoins(); } catch (e) {}
+  if (jugarDirty) { jugarDirty = false; renderJugar(); } else { renderAm(); renderPen(); }
 }
 function penRetoState(q) {   // estado del botón "Jugar penaltis" en el perfil de otro jugador
   const m = meP(); if (!m || m === pend || !synced || !S.players.includes(m) || !q || q === m) return null;
@@ -6458,7 +6523,9 @@ function euReplay(mid) {
         penSnd("win"); await penFx("end", { win: true, txt: fin ? "¡CAMPEÓN!" : "¡PASA A LA FINAL!", sub: W ? esc(W.name) + " · " + how : "", ms: 2900 });
       }
     } catch (e) {}
-    penFast = false; penBusy = false; penHost = null; running = false;
+    penFast = false; penBusy = false; penHost = null; running = false; penCoinGo = false;
+    try { checkCoins(); } catch (e) {}
+    if (jugarDirty) { jugarDirty = false; renderJugar(); }
     if (!dead) { rs.innerHTML = `<div class="pz-end win">🏆 ${fin ? "Campeón" : "Pasa a la final"}: <b>${W ? esc(W.name) : ""}</b></div>`; sk.textContent = "↻ Ver otra vez"; }
   };
   const onKey = e => { if (e.key === "Escape") cerrar(); };
