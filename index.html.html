@@ -4899,6 +4899,62 @@ function elegirEquipo(titulo, sel, otro, cb) {
   const on = list.querySelector(".tpr.on"); if (on) on.scrollIntoView({ block: "center" });
 }
 
+// Calendario de la semana (5 grandes ligas + Champions) para elegir partido con un toque. Los datos vienen de la función /calendario (football-data.org)
+const planoCal = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+function nombreApp(t) {   // nombre del equipo en la app (el de la lista) a partir del que devuelve la API; si no está en la lista, se usa el de la API
+  const ns = [t.name, t.short, t.tla].map(planoCal).filter(Boolean);
+  let best = "", bs = 0;
+  todosEquipos().forEach(e => {
+    const a = planoCal(e); let sc = 0;
+    if (ns.includes(a)) sc = 3; else if (ns.some(n => (" " + n + " ").includes(" " + a + " "))) sc = 2;
+    if (sc > bs) { bs = sc; best = e; }
+  });
+  return best || t.short || t.name;
+}
+function elegirDelCalendario(cb) {
+  if (document.getElementById("tpDlg")) return;
+  const LG = { PD: "laliga", PL: "premier", BL1: "bundesliga", SA: "seriea", FL1: "ligue1" };
+  const ligas = CONFIG.ligas.filter(l => l.equipos.length);
+  let lg = "", all = [], desde = toLocal(new Date().toISOString()).slice(0, 10), cargando = false, err = "";
+  const o = document.createElement("div"); o.id = "tpDlg"; o.setAttribute("role", "dialog"); o.setAttribute("aria-modal", "true"); o.setAttribute("aria-label", "Calendario de partidos");
+  o.innerHTML = `<div class="tp-h"><b>Calendario</b><button type="button" class="tp-x" aria-label="Cerrar">✕</button></div>
+    <div class="tpl" role="group" aria-label="Filtrar por competición"><button type="button" class="lg all on" data-lg="">Todas</button>${ligas.map(l => `<button type="button" class="lg" data-lg="${l.id}" aria-label="${esc(l.nombre)}" title="${esc(l.nombre)}"><img class="${l.claro ? "cl" : ""}" src="${l.logo}" alt=""></button>`).join("")}<button type="button" class="lg all" data-lg="CL">Champions</button></div>
+    <div class="tp-l" id="tpL"></div>`;
+  document.body.appendChild(o); document.documentElement.classList.add("pko-lock");
+  const list = o.querySelector("#tpL"), chips = [...o.querySelectorAll("[data-lg]")];
+  const paint = () => {
+    const vis = all.filter(m => !lg || (lg === "CL" ? m.comp === "CL" : LG[m.comp] === lg));
+    let html = "", dia = "";
+    vis.forEach((m, i) => {
+      const k = new Date(m.kickoff), d = k.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
+      if (d !== dia) { dia = d; html += `<div class="tp-g">${esc(d)}</div>`; }
+      html += `<button type="button" class="tpr" data-k="${esc(m.kickoff)}" data-h="${esc(m.h)}" data-a="${esc(m.a)}">${crest(m.h)}<span style="font-size:15px;text-align:center">${esc(m.h)} – ${esc(m.a)}${m.comp === "CL" ? " 🏆" : ""}</span>${crest(m.a)}<small>${k.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}</small></button>`;
+    });
+    if (!vis.length && !cargando) html = `<p class="muted" style="text-align:center;margin:34px 0">${err ? esc(err) : "No hay partidos en estos días"}</p>`;
+    html += cargando ? `<p class="muted" style="text-align:center;margin:20px 0">Cargando…</p>` : `<button type="button" class="btn ghost" id="calMas" style="width:100%;margin-top:14px">Ver 7 días más</button>`;
+    list.innerHTML = html;
+    const mas = list.querySelector("#calMas"); if (mas) mas.onclick = cargar;
+  };
+  const cargar = async () => {
+    if (cargando) return; cargando = true; err = ""; paint();
+    try {
+      const r = await fetch("/.netlify/functions/calendario?from=" + desde);
+      if (!r.ok) throw new Error("http " + r.status);
+      const j = await r.json(); if (j.error) throw new Error(j.error);
+      all = all.concat((j.matches || []).map(m => ({ comp: m.comp, kickoff: m.kickoff, h: nombreApp(m.home), a: nombreApp(m.away) })));
+      desde = new Date(Date.parse(desde + "T00:00:00Z") + 7 * 864e5).toISOString().slice(0, 10);
+    } catch (e) { err = "No se pudo cargar el calendario (solo funciona en la web publicada)."; }
+    cargando = false; paint();
+  };
+  const onKey = e => { if (e.key === "Escape") cerrar(); };
+  const cerrar = () => { window.removeEventListener("keydown", onKey); o.remove(); if (!document.getElementById("pko") && !document.getElementById("albk")) document.documentElement.classList.remove("pko-lock"); };
+  window.addEventListener("keydown", onKey);
+  o.querySelector(".tp-x").onclick = cerrar;
+  chips.forEach(b => b.onclick = () => { lg = b.dataset.lg; chips.forEach(c => c.classList.toggle("on", c === b)); paint(); });
+  list.onclick = e => { const b = e.target.closest(".tpr"); if (!b) return; const v = { kickoff: b.dataset.k, home: b.dataset.h, away: b.dataset.a }; cerrar(); cb(v); };
+  cargar();
+}
+
 function renderAdmin() {
   const box = $("#adminBox");
   if (!unlocked) {
@@ -5131,6 +5187,7 @@ function adJornada(el) {
     ${AD.msg ? `<p class="msg ${AD.cls}">${AD.msg}</p>` : ""}
     ${AD.open ? `<div class="card" id="formJ" style="margin-top:12px">
       <label for="jr" style="margin-top:0">Número de jornada</label><select id="jr" aria-label="Número de jornada">${Array.from({ length: CONFIG.jornadas }, (_, i) => i + 1).map(n => `<option value="${n}" ${n === AD.round ? "selected" : ""}>Jornada ${n}</option>`).join("")}</select>
+      <button type="button" class="btn ghost" id="calJ" style="width:100%;margin-top:14px">📅 Elegir del calendario</button>
       <div class="tsel" style="margin-top:14px">${crest(d.home)}<button type="button" class="tpb" id="selH" aria-haspopup="dialog" aria-label="Equipo local: ${d.home ? esc(d.home) : "sin elegir"}"><span class="${d.home ? "" : "ph"}">${d.home ? esc(d.home) : "Elegir equipo local"}</span><i aria-hidden="true">▾</i></button></div>
       <div class="vs">VS</div>
       <div class="tsel">${crest(d.away)}<button type="button" class="tpb" id="selA" aria-haspopup="dialog" aria-label="Equipo visitante: ${d.away ? esc(d.away) : "sin elegir"}"><span class="${d.away ? "" : "ph"}">${d.away ? esc(d.away) : "Elegir equipo visitante"}</span><i aria-hidden="true">▾</i></button></div>
@@ -5181,6 +5238,7 @@ function adJornada(el) {
     $("#selH").onclick = () => elegirEquipo("Equipo local", d.home, d.away, v => { AD.closing = $("#jc").value; AD.d.home = v; renderAdmin(); if (!AD.d.away && $("#selA")) $("#selA").click(); });   // tras elegir el local se abre el visitante
     $("#selA").onclick = () => elegirEquipo("Equipo visitante", d.away, d.home, v => { AD.closing = $("#jc").value; AD.d.away = v; renderAdmin(); });
     $("#cancelJ").onclick = () => { AD.open = false; AD.msg = ""; renderAdmin(); };
+    $("#calJ").onclick = () => elegirDelCalendario(v => { AD.d.home = v.home; AD.d.away = v.away; AD.closing = toLocal(v.kickoff); renderAdmin(); });
     $("#saveJ").onclick = () => {
       AD.closing = $("#jc").value;
       const fail = t => { AD.msg = t; AD.cls = "err"; renderAdmin(); }, r = AD.round;
