@@ -4903,6 +4903,8 @@ function elegirEquipo(titulo, sel, otro, cb) {
 const planoCal = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
 function nombreApp(t) {   // nombre del equipo en la app (el de la lista) a partir del que devuelve la API; si no está en la lista, se usa el de la API
   const ns = [t.name, t.short, t.tla].map(planoCal).filter(Boolean);
+  const ALIAS = { "leverkusen": "Bayer Leverkusen", "bayer 04 leverkusen": "Bayer Leverkusen", "stade rennais": "Rennes", "stade rennais fc": "Rennes", "santander": "Racing de Santander", "racing santander": "Racing de Santander", "real racing club": "Racing de Santander", "real racing club de santander": "Racing de Santander", "olympique lyonnais": "Lyon", "olympique de marseille": "Marseille", "stade brestois 29": "Brest" };   // nombres de la API que no se parecen al de la lista
+  const al = ns.map(n => ALIAS[n]).find(Boolean); if (al && todosEquipos().includes(al)) return al;
   let best = "", bs = 0;
   todosEquipos().forEach(e => {
     const a = planoCal(e); let sc = 0;
