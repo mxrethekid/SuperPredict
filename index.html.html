@@ -3153,19 +3153,19 @@ const cdRow = (closed, kick) => `<div class="cd ${closed ? "off" : ""}"><div><di
 let cdTimer = null;
 // Predicciones de los demás: solo se ven cuando se cierran las apuestas (1 h antes). Antes, solo con la poción Visión.
 const omtRow = m => `<div class="omt">${crest(m.home)}<span>${esc(m.home)} vs ${esc(m.away)}</span>${crest(m.away)}</div>`;
-function othersCard(ms) {
+function othersCard(ms, vis) {   // vis: tras enviar con la poción Visión: lista normal, pero solo se ve la predicción del rival espiado
   const ps = S.players.filter(x => x.regAt).sort((x, y) => (y.id === me) - (x.id === me) || x.name.localeCompare(y.name));
   return `<div class="card oc"><h3>Predicciones</h3>` + ms.map(m => {
-    const pm = S.preds[m.id] || {}, mi = effPred(pm[me]), same = x => { const q = effPred(pm[x.id]); return !!(mi && q && q.h === mi.h && q.a === mi.a); }, dup = ps.some(x => x.id !== me && same(x));
+    const pm = S.preds[m.id] || {}, mi = effPred(pm[me]), same = x => { const q = effPred(pm[x.id]); return !!(mi && q && q.h === mi.h && q.a === mi.a); }, dup = !vis && ps.some(x => x.id !== me && same(x));
     const sent = ps.filter(x => pm[x.id]).length, canCb = !potUsada(me, "cambia") && isClosed(m) && !started(m);
     return (ms.length > 1 ? omtRow(m) : "") +
       `<div class="osub">${sent} de ${ps.length} ${ps.length === 1 ? "participante" : "participantes"}</div>` +
-      [...ps].sort((x, y) => (y.id === me) - (x.id === me) || (y.id !== me && same(y)) - (x.id !== me && same(x)) || x.name.localeCompare(y.name)).map(x => {
-        const q = pm[x.id], e = effPred(q), hl = dup && x.id !== me && same(x);
+      [...ps].sort((x, y) => (y.id === me) - (x.id === me) || (vis ? (visVista(me, m.id) === y.id) - (visVista(me, m.id) === x.id) : (y.id !== me && same(y)) - (x.id !== me && same(x))) || x.name.localeCompare(y.name)).map(x => {
+        const q = pm[x.id], e = effPred(q), hl = dup && x.id !== me && same(x), hid = vis && x.id !== me && visVista(me, m.id) !== x.id;
         const cb = "";
-        const sc = q ? (e.h2 != null ? `<b class="os dos">${e.h} - ${e.a}</b><b class="os dos">${e.h2} - ${e.a2}</b>` : `<b class="os">${e.h} - ${e.a}</b>`) : `<b class="os none">-</b>`;
-        const nt = q && q.mods && q.mods.length ? `<div class="mdn">${potIcon("cambia")} ${esc((pById(q.mods[0].by) || { name: "Un rival" }).name)} ha cambiado esta predicción: ${esc(modTxt(m, q.mods[0]))}</div>` : "";
-        return `<div data-pid="${x.id}" class="orow${x.id === me ? " me" : ""}${hl ? " same" : ""}">${x.team ? crest(x.team, false) : ""}<span class="on">${esc(x.name)}${q && q.pot ? potTag({ pot: q.pot }) : ""}</span>${sc}${cb}${nt}</div>`;
+        const sc = hid ? `<b class="os none">${q ? "?" : "-"}</b>` : q ? (e.h2 != null ? `<b class="os dos">${e.h} - ${e.a}</b><b class="os dos">${e.h2} - ${e.a2}</b>` : `<b class="os">${e.h} - ${e.a}</b>`) : `<b class="os none">-</b>`;
+        const nt = !hid && q && q.mods && q.mods.length ? `<div class="mdn">${potIcon("cambia")} ${esc((pById(q.mods[0].by) || { name: "Un rival" }).name)} ha cambiado esta predicción: ${esc(modTxt(m, q.mods[0]))}</div>` : "";
+        return `<div data-pid="${x.id}" class="orow${x.id === me ? " me" : ""}${hl ? " same" : ""}">${x.team ? crest(x.team, false) : ""}<span class="on">${esc(x.name)}${!hid && q && q.pot ? potTag({ pot: q.pot }) : ""}</span>${sc}${cb}${nt}</div>`;
       }).join("");
   }).join("") + `</div>`;
 }
@@ -3205,12 +3205,8 @@ function potPuede(t) {
 const shelfHtml = () => `<div id="penBox"></div><div id="penAmBox"></div><div class="pc-sec"><div class="pc-t">Pociones</div><div class="pc" id="pcHost" role="group" aria-label="Estantería de pociones. Toca una poción para ver qué hace."></div><p class="muted pc-h">Toca una poción para ver qué hace y cómo usarla</p></div>`;
 // Lo que has visto con la poción visión
 function visSeen(ms) {
-  const out = ms.map(m => {
-    const id = visVista(me, m.id); if (!id) return "";
-    const r = pById(id), q = (S.preds[m.id] || {})[id];
-    return (ms.length > 1 ? omtRow(m) : "") + `<div class="orow">${r && r.team ? crest(r.team, false) : ""}<span class="on">${esc(r ? r.name : "Rival")}</span><b class="os">${predTxt(effPred(q))}</b></div>`;
-  }).join("");
-  return out ? `<div class="card oc vc"><h3>${icoSvg("vision")} Visión</h3><div class="osub">Lo que ha puesto tu rival (solo lo ves tú)</div>${out}</div>` : "";
+  const vm = ms.filter(m => visVista(me, m.id));
+  return vm.length ? othersCard(vm, true) : "";
 }
 const DK = i => { const k = i.getAttributeNames().find(n => /^data-p[ha]$/.test(n)); return k ? k + ":" + i.getAttribute(k) : null; };
 function draftSave(box) { if (!box) return; box.querySelectorAll("input[data-ph],input[data-pa]").forEach(i => { const k = DK(i); if (k && !i.disabled) DRAFT[k] = i.value; }); }
