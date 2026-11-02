@@ -75,7 +75,8 @@ export default async (req) => {
     }
     await guardar("equipos", tm);
 
-    const clave = `datos5:${eh ? eh.id : "x" + N(nombres.home)}-${ea ? ea.id : "x" + N(nombres.away)}`;
+    const ko = Date.parse(q.get("kickoff") || "");   // hora del partido en la app: sirve para saber de qué competición es
+    const clave = `datos6:${eh ? eh.id : "x" + N(nombres.home)}-${ea ? ea.id : "x" + N(nombres.away)}:${Number.isFinite(ko) ? new Date(ko).toISOString().slice(0, 10) : "s"}`;
     const debug = q.get("debug") === "1";
     const hit = debug ? null : await leer(clave);
     if (hit && Date.now() - hit.t < TTL_DATOS) return Response.json(hit.data, { headers: { "cache-control": "public, max-age=600" } });
@@ -89,7 +90,12 @@ export default async (req) => {
     };
     const [mh, ma] = [await partidos(eh), await partidos(ea)];
     const entre = (m) => eh && ea && ((m.homeTeam.id === eh.id && m.awayTeam.id === ea.id) || (m.homeTeam.id === ea.id && m.awayTeam.id === eh.id));
-    const proximo = mh.filter(entre).filter((m) => m.status !== "FINISHED" && m.status !== "AWARDED").sort((a, b) => Date.parse(a.utcDate) - Date.parse(b.utcDate))[0];
+    // El partido de la API que es este mismo (los dos equipos, hora más cercana a la de la app, máx. 36 h); da la competición.
+    // Sin hora de la app, se usa el próximo partido pendiente entre ambos.
+    const entreMs = mh.filter(entre);
+    const proximo = Number.isFinite(ko)
+      ? entreMs.map((m) => ({ m, dif: Math.abs(Date.parse(m.utcDate) - ko) })).filter((x) => x.dif <= 36 * H).sort((a, b) => a.dif - b.dif).map((x) => x.m)[0]
+      : entreMs.filter((m) => m.status !== "FINISHED" && m.status !== "AWARDED").sort((a, b) => Date.parse(a.utcDate) - Date.parse(b.utcDate))[0];
     const compCode = proximo && proximo.competition ? proximo.competition.code : null;
 
     const ahora = Date.now();
@@ -101,23 +107,18 @@ export default async (req) => {
         const loc = m.homeTeam.id === t.id, ft = m.score.fullTime, gf = loc ? ft.home : ft.away, ga = loc ? ft.away : ft.home;
         return { d: m.utcDate, r: gf > ga ? "G" : gf < ga ? "P" : "E", gf, ga, opp: (loc ? m.awayTeam : m.homeTeam).shortName || (loc ? m.awayTeam : m.homeTeam).name, loc, comp: m.competition && m.competition.code };
       });
-      const recS = compCode ? rec.filter((r) => r.comp === compCode) : rec;   // medias solo de la competición del partido (si se conoce); la forma usa todas
+      const recS = compCode ? rec.filter((r) => r.comp === compCode) : rec;   // forma y estadísticas solo de la competición del partido (si se conoce)
       const n = recS.length;
       let stats = null;
       if (n) {
-        const sede = recS.filter((r) => r.loc === (lado === "home")), nv = sede.length;   // partidos jugando en casa (si es el local) o fuera (si es el visitante)
-        const cuenta = {};
-        recS.forEach((r) => { const k = r.gf + "-" + r.ga; cuenta[k] = (cuenta[k] || 0) + 1; });
-        let top = null;   // marcador más repetido (goles del equipo - goles del rival); si empatan, el más reciente
-        for (let i = recS.length - 1; i >= 0; i--) { const k = recS[i].gf + "-" + recS[i].ga; if (!top || cuenta[k] > top.n) top = { s: k, n: cuenta[k] }; }
+        const gft = recS.reduce((a, r) => a + r.gf, 0), gat = recS.reduce((a, r) => a + r.ga, 0);
         stats = {
-          gf: recS.reduce((a, r) => a + r.gf, 0) / n, ga: recS.reduce((a, r) => a + r.ga, 0) / n,
+          gf: gft / n, ga: gat / n, gft, gat,   // medias por partido y totales de la temporada
           win: Math.round(recS.filter((r) => r.r === "G").length / n * 100),
-          cs: Math.round(recS.filter((r) => r.ga === 0).length / n * 100),
-          gfv: nv ? sede.reduce((a, r) => a + r.gf, 0) / nv : null, gav: nv ? sede.reduce((a, r) => a + r.ga, 0) / nv : null, nv, top,
+          cs: recS.filter((r) => r.ga === 0).length,   // porterías a cero (número)
         };
       }
-      return { id: t.id, n, form: rec.slice(-5), stats, all: rec };
+      return { id: t.id, n, form: recS.slice(-5), stats, all: rec };
     };
     const home = resumen(eh, mh, "home", compCode), away = resumen(ea, ma, "away", compCode);
 
@@ -125,7 +126,7 @@ export default async (req) => {
     let h2h = [];
     if (eh && ea) {
       const cand = mh.filter(entre).sort((a, b) => Date.parse(b.utcDate) - Date.parse(a.utcDate));
-      const fut = cand.find((m) => m.status !== "FINISHED") || cand[0];
+      const fut = proximo || cand.find((m) => m.status !== "FINISHED") || cand[0];
       let lista = [];
       if (fut) { try { lista = (await call(`/matches/${fut.id}/head2head?limit=10`)).matches || []; } catch (e) { if (e.status === 429) throw e; } }
       if (!lista.length) lista = cand;
@@ -140,7 +141,7 @@ export default async (req) => {
 
     if (debug) return Response.json({ season, equipos: { home: eh, away: ea }, compCode, home, away, h2h });
     delete home.all; delete away.all;
-    const data = { season, home, away, h2h: { matches: h2h, hw: cuenta.h, d: cuenta.d, aw: cuenta.a }, falta: { home: !eh, away: !ea } };
+    const data = { season, comp: compCode, home, away, h2h: { matches: h2h, hw: cuenta.h, d: cuenta.d, aw: cuenta.a }, falta: { home: !eh, away: !ea } };
     await guardar(clave, { t: Date.now(), data });
     return Response.json(data, { headers: { "cache-control": "public, max-age=600" } });
   } catch (e) {
