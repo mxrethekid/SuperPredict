@@ -6,12 +6,22 @@ import { getStore } from "@netlify/blobs";
 export const config = { schedule: "*/15 * * * *" };
 
 const N = (s) => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
-// 3 = el nombre coincide exacto con el de la API, 2 = lo contiene, 0 = no coincide
+const T = (s) => N(s).split(" ").filter(Boolean);
+// Equipos cuyo nombre en la API no se parece al de la app (nombre de la app, normalizado → nombres de la API, normalizados).
+// Debe ser el mismo listado que ALIAS en el selector de Calendario del index.
+const ALIAS = {
+  "racing de santander": ["santander", "racing santander", "real racing club de santander", "racing club de santander"],
+  "bayer leverkusen": ["leverkusen", "bayer 04 leverkusen", "b04"],
+  "rennes": ["stade rennais", "stade rennais fc", "stade rennais fc 1901", "rennais", "ren"],
+};
+// 3 = el nombre coincide exacto con el de la API (o es un alias), 2 = lo contiene, 1 = tiene todas sus palabras, 0 = no coincide
 const score = (app, t) => {
   if (!t) return 0;
   const a = N(app), names = [N(t.name), N(t.shortName), N(t.tla)].filter(Boolean);
-  if (names.includes(a)) return 3;
-  return names.some((n) => (" " + n + " ").includes(" " + a + " ")) ? 2 : 0;
+  if (names.includes(a) || (ALIAS[a] || []).some((x) => names.includes(x))) return 3;
+  if (names.some((n) => (" " + n + " ").includes(" " + a + " "))) return 2;
+  const ta = T(a);
+  return ta.length && names.some((n) => ta.every((w) => T(n).includes(w))) ? 1 : 0;
 };
 const day = (ms) => new Date(ms).toISOString().slice(0, 10);
 
@@ -40,7 +50,7 @@ export default async () => {
     let best = null, bs = 0;
     for (const x of matches) {
       const h = score(m.home, x.homeTeam), a = score(m.away, x.awayTeam);
-      if (h < 2 || a < 2 || Math.abs(Date.parse(x.utcDate) - Date.parse(m.kickoff)) > 2 * 864e5) continue;
+      if (h < 1 || a < 1 || Math.abs(Date.parse(x.utcDate) - Date.parse(m.kickoff)) > 2 * 864e5) continue;
       if (h + a > bs) { bs = h + a; best = x; }
     }
     const s = best && best.score && best.score.fullTime;
