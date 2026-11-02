@@ -3963,12 +3963,13 @@ document.addEventListener("click", e => { const b = e.target.closest && e.target
 function openForma(mid) {
   const m = S.matches.find(x => x.id === mid); if (!m || document.getElementById("fmDlg")) return;
   const COMP = { PD: "LaLiga", PL: "Premier", BL1: "Bundesliga", SA: "Serie A", FL1: "Ligue 1", CL: "Champions" };
+  const NOMBRE = { PD: "LaLiga", PL: "Premier League", BL1: "Bundesliga", SA: "Serie A", FL1: "Ligue 1", CL: "Champions League" };
   const f1 = v => (Math.round(v * 10) / 10).toFixed(1).replace(".", ","), pc = v => v + "%";
   const fecha = iso => new Date(iso).toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "2-digit" });
   const o = document.createElement("div"); o.id = "fmDlg"; o.setAttribute("role", "dialog"); o.setAttribute("aria-modal", "true"); o.setAttribute("aria-label", "Forma del equipo");
   o.innerHTML = `<div class="fm-hd"><b>Forma del equipo</b><button type="button" class="fm-x" aria-label="Cerrar">✕</button></div><div class="fm-b" id="fmB"></div>`;
   document.body.appendChild(o); document.documentElement.classList.add("pko-lock");
-  const box = o.querySelector("#fmB"), key = m.home + "|" + m.away;
+  const box = o.querySelector("#fmB"), key = m.home + "|" + m.away + "|" + (m.kickoff || "");
   const onKey = e => { if (e.key === "Escape") cerrar(); };
   const cerrar = () => { window.removeEventListener("keydown", onKey); o.remove(); if (!document.getElementById("pko") && !document.getElementById("albk") && !document.getElementById("tpDlg")) document.documentElement.classList.remove("pko-lock"); };
   window.addEventListener("keydown", onKey);
@@ -3983,15 +3984,14 @@ function openForma(mid) {
       return `<div class="fm-m"><time datetime="${esc(x.d)}">${fecha(x.d)}</time><div class="c">${crest(loc)}<span class="sc ${gl}">${x.hs} - ${x.as}</span>${crest(vis)}</div><em>${esc(COMP[x.comp] || x.comp || "")}</em></div>`;
     }).join("");
     const ha = d.home.stats, aw = d.away.stats;
-    const mets = [["Goles a favor por partido", "gf", f1, true], ["Goles en contra por partido", "ga", f1, false], ["Victorias", "win", pc, true], ["Porterías a cero", "cs", pc, true], ["Goles a favor (en casa / fuera)", "gfv", f1, true], ["Goles en contra (en casa / fuera)", "gav", f1, false]];
-    const tp = x => x && x.top ? `<div><b>${esc(x.top.s)}</b><small>${x.top.n} ${x.top.n === 1 ? "vez" : "veces"}</small></div>` : "<div><b>–</b></div>";
-    const topRow = (ha && ha.top) || (aw && aw.top) ? `<div class="fm-c"><div class="fm-cl">Marcador más repetido (a favor - en contra)</div><div class="fm-tp">${tp(ha)}${tp(aw)}</div></div>` : "";
+    const ent = v => String(v);
+    const mets = [["Goles a favor por partido", "gf", f1, true], ["Goles en contra por partido", "ga", f1, false], ["Victorias", "win", pc, true], ["Porterías a cero (total)", "cs", ent, true], ["Goles a favor en la temporada", "gft", ent, true], ["Goles en contra en la temporada", "gat", ent, false]];
     const comp = (ha || aw) ? mets.map(([lab, k, fm, mejorAlto]) => {
       const a = ha ? ha[k] : null, b = aw ? aw[k] : null, ok = a != null && b != null;
       const pa = ok && a + b > 0 ? a / (a + b) * 100 : 50;
       const best = ok && mejorAlto != null && a !== b ? ((a > b) === mejorAlto ? "h" : "a") : "";
       return `<div class="fm-c"><div class="fm-cl">${lab}</div><div class="fm-cb"><b class="${best === "h" ? "best" : ""}">${a != null ? fm(a) : "–"}</b><div class="fm-bar"><i class="h" style="width:${pa}%"></i><i class="a" style="width:${100 - pa}%"></i></div><b class="${best === "a" ? "best" : ""}">${b != null ? fm(b) : "–"}</b></div></div>`;
-    }).join("") + topRow : '<p class="muted" style="text-align:center">No hay datos suficientes de estos equipos.</p>';
+    }).join("") : '<p class="muted" style="text-align:center">No hay datos suficientes de estos equipos.</p>';
     const aviso = (d.falta && (d.falta.home || d.falta.away)) ? `<p class="fm-note">No se encontró en la API: ${[d.falta.home ? esc(m.home) : "", d.falta.away ? esc(m.away) : ""].filter(Boolean).join(" ni ")}.</p>` : "";
     box.innerHTML = `<div class="fm-vs">${equipo(m.home, d.home)}<div class="fm-v">VS</div>${equipo(m.away, d.away)}</div>
       <p class="fm-note">Últimos 5 partidos · el más reciente, a la derecha</p>
@@ -4001,14 +4001,13 @@ function openForma(mid) {
       <div class="fm-sec">Comparativa</div>
       <div class="fm-leg"><span><i style="background:#19d3ff"></i>${esc(m.home)}</span><span><i style="background:#ff9d2e"></i>${esc(m.away)}</span></div>
       ${comp}
-      <p class="fm-note">${ha || aw ? `«En casa / fuera» compara a ${esc(m.home)} jugando de local con ${esc(m.away)} jugando de visitante.` : ""}</p>
-      <p class="fm-note">${d.home.n || d.away.n ? `Estadísticas de toda la temporada: ${d.home.n || 0} partidos de ${esc(m.home)} y ${d.away.n || 0} de ${esc(m.away)}.` : ""}</p>${aviso}`;
+      <p class="fm-note">${(ha || aw) && d.comp ? `Datos de ${NOMBRE[d.comp] || d.comp} ${String(d.season).slice(2)}/${String(d.season + 1).slice(2)}` : ""}</p>${aviso}`;
   };
   const cargar = async () => {
     if (FORMA_C[key]) { pintar(FORMA_C[key]); return; }
     box.innerHTML = '<p class="muted" style="text-align:center;margin:60px 0">Cargando datos…</p>';
     try {
-      const r = await fetch("/.netlify/functions/forma?home=" + encodeURIComponent(m.home) + "&away=" + encodeURIComponent(m.away)), j = await r.json().catch(() => ({}));
+      const r = await fetch("/.netlify/functions/forma?home=" + encodeURIComponent(m.home) + "&away=" + encodeURIComponent(m.away) + "&kickoff=" + encodeURIComponent(m.kickoff || "")), j = await r.json().catch(() => ({}));
       if (!document.getElementById("fmDlg")) return;
       if (!r.ok) throw new Error(j.error || "No se pudieron cargar los datos (" + r.status + ").");
       FORMA_C[key] = j; pintar(j);
