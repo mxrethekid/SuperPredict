@@ -1167,9 +1167,9 @@ nav button.nw::after{top:7px;left:calc(50% + 10px)}
 .chb i{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--bad);color:#fff;font:700 11px/18px var(--b,inherit);font-style:normal;text-align:center;box-sizing:border-box}
 .chb.fmb{right:auto;left:12px}
 #fmDlg{position:fixed;inset:0;z-index:70;background:var(--bg);display:flex;flex-direction:column;overscroll-behavior:none;touch-action:none}
-#fmDlg .fm-hd{flex:none;z-index:2;background:var(--bg);position:relative;display:flex;align-items:center;justify-content:center;min-height:44px;padding:calc(14px + env(safe-area-inset-top,0px)) 64px 10px}
+#fmDlg .fm-hd{position:relative;display:flex;align-items:center;justify-content:center;min-height:44px;padding:calc(14px + env(safe-area-inset-top,0px)) 64px 10px}
 #fmDlg .fm-hd b{font:700 17px/1.3 var(--b);letter-spacing:.12em;text-transform:uppercase;text-align:center;color:var(--mute)}
-#fmDlg .fm-x{position:absolute;right:16px;top:calc(12px + env(safe-area-inset-top,0px));width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:18px;line-height:1;cursor:pointer}
+#fmDlg .fm-x{z-index:3;position:absolute;right:16px;top:calc(12px + env(safe-area-inset-top,0px));width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:18px;line-height:1;cursor:pointer}
 #fmDlg .fm-b{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;touch-action:pan-y;padding:8px 16px calc(28px + env(safe-area-inset-bottom,0px))}
 .fm-vs{display:grid;grid-template-columns:1fr 44px 1fr;gap:6px;align-items:start}
 .fm-t{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;min-width:0}
@@ -3967,16 +3967,17 @@ function openForma(mid) {
   const f1 = v => (Math.round(v * 10) / 10).toFixed(1).replace(".", ","), pc = v => v + "%";
   const fecha = iso => new Date(iso).toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "2-digit" });
   const o = document.createElement("div"); o.id = "fmDlg"; o.setAttribute("role", "dialog"); o.setAttribute("aria-modal", "true"); o.setAttribute("aria-label", "Forma del equipo");
-  o.innerHTML = `<div class="fm-hd"><b>Forma del equipo</b><button type="button" class="fm-x" aria-label="Cerrar">✕</button></div><div class="fm-b" id="fmB"></div>`;
+  o.innerHTML = `<button type="button" class="fm-x" aria-label="Cerrar">✕</button><div class="fm-b" id="fmSc"><div class="fm-hd"><b>Forma del equipo</b></div><div id="fmB"></div></div>`;
   document.body.appendChild(o); document.documentElement.classList.add("pko-lock");
   const box = o.querySelector("#fmB"), key = m.home + "|" + m.away + "|" + (m.kickoff || "");
   const onKey = e => { if (e.key === "Escape") cerrar(); };
   const cerrar = () => { window.removeEventListener("keydown", onKey); o.remove(); if (!document.getElementById("pko") && !document.getElementById("albk") && !document.getElementById("tpDlg")) document.documentElement.classList.remove("pko-lock"); };
   window.addEventListener("keydown", onKey);
   o.querySelector(".fm-x").onclick = cerrar;
-  // El título queda fijo: la página de detrás no se mueve (ni rebota) al arrastrar; solo se desplaza el contenido
+  // El título va dentro de la zona que se desplaza (se va al bajar); la X queda fija. La página de detrás no se mueve.
   o.addEventListener("touchmove", e => { if (!e.target.closest(".fm-b")) e.preventDefault(); }, { passive: false });
-  box.addEventListener("touchstart", () => { const mx = box.scrollHeight - box.clientHeight; if (mx > 2) { if (box.scrollTop <= 0) box.scrollTop = 1; else if (box.scrollTop >= mx) box.scrollTop = mx - 1; } }, { passive: true });
+  const sc = o.querySelector("#fmSc");
+  sc.addEventListener("touchstart", () => { const mx = sc.scrollHeight - sc.clientHeight; if (mx > 2) { if (sc.scrollTop <= 0) sc.scrollTop = 1; else if (sc.scrollTop >= mx) sc.scrollTop = mx - 1; } }, { passive: true });
 
   const equipo = (nom, t, cls) => `<div class="fm-t">${crest(nom)}<b>${esc(nom)}</b><div class="fm-f" aria-label="Últimos partidos de ${esc(nom)}">${t && t.form && t.form.length ? t.form.map(r => `<div class="fm-r ${r.r}" title="${esc((r.loc ? "" : "en ") + r.opp)}"><b>${r.r}</b><small>${r.gf}-${r.ga}</small></div>`).join("") : '<span class="muted" style="font-size:13px">Sin datos</span>'}</div></div>`;
   const pintar = d => {
