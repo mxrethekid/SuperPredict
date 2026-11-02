@@ -4928,6 +4928,61 @@ function elegirEquipo(titulo, sel, otro, cb) {
   const on = list.querySelector(".tpr.on"); if (on) on.scrollIntoView({ block: "center" });
 }
 
+// Selector de próximos partidos (admin): los pide a la función de Netlify "calendario" y rellena equipos y hora con un toque.
+// Los nombres de equipo se convierten a los de la lista de la app con la misma lógica que usa "resultados" para casar los resultados.
+function elegirPartido(cb) {
+  if (document.getElementById("tpDlg")) return;
+  const N = t => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+  const teams = CONFIG.ligas.flatMap(l => l.equipos);
+  const map = t => { const ns = [N(t.name), N(t.short), N(t.tla)].filter(Boolean); let best = null, bs = 0; teams.forEach(a => { const n = N(a), sc = ns.includes(n) ? 3 : ns.some(x => (" " + x + " ").includes(" " + n + " ")) ? 2 : 0; if (sc > bs) { bs = sc; best = a; } }); return bs >= 2 ? best : null; };
+  const COMP = { PD: "LaLiga", PL: "Premier", BL1: "Bundesliga", SA: "Serie A", FL1: "Ligue 1", CL: "Champions" };
+  const iso = ms => new Date(ms).toISOString().slice(0, 10);
+  let from = iso(Date.now() - new Date().getTimezoneOffset() * 6e4), comp = "", data = [], tok = 0, err = "";
+  const o = document.createElement("div"); o.id = "tpDlg"; o.setAttribute("role", "dialog"); o.setAttribute("aria-modal", "true"); o.setAttribute("aria-label", "Calendario");
+  o.innerHTML = `<div class="tp-h"><b>Calendario</b><button type="button" class="tp-x" aria-label="Cerrar">✕</button></div>
+    <div class="tp-s" style="display:flex;align-items:center;gap:8px"><button type="button" class="btn ghost" id="cwP" style="margin:0;padding:10px 14px" aria-label="Semana anterior">‹</button><div id="cwT" style="flex:1;text-align:center;font:600 15px var(--b)"></div><button type="button" class="btn ghost" id="cwN" style="margin:0;padding:10px 14px" aria-label="Semana siguiente">›</button></div>
+    <div class="tpl" role="group" aria-label="Filtrar por competición"><button type="button" class="lg all on" data-c="">Todas</button>${Object.keys(COMP).map(c => `<button type="button" class="lg all" data-c="${c}">${COMP[c]}</button>`).join("")}</div>
+    <div class="tp-l" id="tpL"></div>`;
+  document.body.appendChild(o); document.documentElement.classList.add("pko-lock");
+  const list = o.querySelector("#tpL"), chips = [...o.querySelectorAll("[data-c]")], lab = o.querySelector("#cwT");
+  const paint = (loading) => {
+    const a = new Date(from + "T00:00:00Z"), b = new Date(a.getTime() + 6 * 864e5), f = d => d.toLocaleDateString("es-ES", { day: "numeric", month: "short", timeZone: "UTC" });
+    lab.textContent = f(a) + " – " + f(b);
+    if (loading) { list.innerHTML = '<p class="muted" style="text-align:center;margin:34px 0">Cargando partidos…</p>'; return; }
+    if (err) { list.innerHTML = `<p class="msg err" style="margin:24px 0;text-align:center">${esc(err)}</p>`; return; }
+    const ms = data.filter(m => !comp || m.comp === comp);
+    if (!ms.length) { list.innerHTML = '<p class="muted" style="text-align:center;margin:34px 0">No hay partidos esta semana.</p>'; return; }
+    let html = "", dia = "";
+    ms.forEach((m, i) => {
+      const d = new Date(m.kickoff).toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
+      if (d !== dia) { dia = d; html += `<div class="tp-g">${esc(d)}</div>`; }
+      const h = map(m.home), w = map(m.away), ok = !!(h && w), hr = new Date(m.kickoff).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+      html += `<button type="button" class="tpr" data-i="${data.indexOf(m)}"${ok ? "" : " disabled"}>${crest(h || "")}${crest(w || "")}<span>${esc(h || m.home.short || m.home.name)} – ${esc(w || m.away.short || m.away.name)}</span><small>${ok ? hr + " · " + (COMP[m.comp] || m.comp || "") : "Equipo no está en la lista"}</small></button>`;
+    });
+    list.innerHTML = html;
+  };
+  const load = async () => {
+    const my = ++tok; err = ""; paint(true);
+    try {
+      const r = await fetch("/.netlify/functions/calendario?from=" + from), j = await r.json().catch(() => ({}));
+      if (my !== tok) return;
+      if (!r.ok) err = j.error || "No se pudo cargar el calendario (" + r.status + ").";
+      else data = j.matches || [];
+    } catch (e) { if (my !== tok) return; err = "No se pudo cargar el calendario. Revisa la conexión."; }
+    paint(false);
+  };
+  const onKey = e => { if (e.key === "Escape") cerrar(); };
+  const cerrar = () => { tok++; window.removeEventListener("keydown", onKey); o.remove(); if (!document.getElementById("pko") && !document.getElementById("albk")) document.documentElement.classList.remove("pko-lock"); };
+  window.addEventListener("keydown", onKey);
+  o.querySelector(".tp-x").onclick = cerrar;
+  const shift = n => { from = iso(Date.parse(from + "T00:00:00Z") + n * 7 * 864e5); load(); };
+  o.querySelector("#cwP").onclick = () => shift(-1);
+  o.querySelector("#cwN").onclick = () => shift(1);
+  chips.forEach(b => b.onclick = () => { comp = b.dataset.c; chips.forEach(c => c.classList.toggle("on", c === b)); paint(false); });
+  list.onclick = e => { const b = e.target.closest(".tpr"); if (!b || b.disabled) return; const m = data[+b.dataset.i]; if (!m) return; cerrar(); cb({ home: map(m.home), away: map(m.away), kickoff: m.kickoff }); };
+  load();
+}
+
 function renderAdmin() {
   const box = $("#adminBox");
   if (!unlocked) {
@@ -5159,6 +5214,7 @@ function adJornada(el) {
   el.innerHTML = `<button class="btn" id="togJ" style="width:100%;margin-top:0;display:flex;justify-content:space-between;align-items:center" aria-expanded="${AD.open}" aria-controls="formJ"><span>Crear nuevo partido</span><span aria-hidden="true">${AD.open ? "▴" : "▾"}</span></button>
     ${AD.msg ? `<p class="msg ${AD.cls}">${AD.msg}</p>` : ""}
     ${AD.open ? `<div class="card" id="formJ" style="margin-top:12px">
+      <button type="button" class="btn ghost" id="selCal" style="width:100%;margin:0 0 14px">📅 Calendario</button>
       <label for="jr" style="margin-top:0">Número de jornada</label><select id="jr" aria-label="Número de jornada">${Array.from({ length: CONFIG.jornadas }, (_, i) => i + 1).map(n => `<option value="${n}" ${n === AD.round ? "selected" : ""}>Jornada ${n}</option>`).join("")}</select>
       <div class="tsel" style="margin-top:14px">${crest(d.home)}<button type="button" class="tpb" id="selH" aria-haspopup="dialog" aria-label="Equipo local: ${d.home ? esc(d.home) : "sin elegir"}"><span class="${d.home ? "" : "ph"}">${d.home ? esc(d.home) : "Elegir equipo local"}</span><i aria-hidden="true">▾</i></button></div>
       <div class="vs">VS</div>
@@ -5209,6 +5265,7 @@ function adJornada(el) {
     $("#jc").onchange = e => { AD.closing = e.target.value; };
     $("#selH").onclick = () => elegirEquipo("Equipo local", d.home, d.away, v => { AD.closing = $("#jc").value; AD.d.home = v; renderAdmin(); if (!AD.d.away && $("#selA")) $("#selA").click(); });   // tras elegir el local se abre el visitante
     $("#selA").onclick = () => elegirEquipo("Equipo visitante", d.away, d.home, v => { AD.closing = $("#jc").value; AD.d.away = v; renderAdmin(); });
+    $("#selCal").onclick = () => elegirPartido(v => { AD.d.home = v.home; AD.d.away = v.away; AD.closing = toLocal(v.kickoff); renderAdmin(); });
     $("#cancelJ").onclick = () => { AD.open = false; AD.msg = ""; renderAdmin(); };
     $("#saveJ").onclick = () => {
       AD.closing = $("#jc").value;
