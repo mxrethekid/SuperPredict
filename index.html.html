@@ -4934,7 +4934,18 @@ function elegirPartido(cb) {
   if (document.getElementById("tpDlg")) return;
   const N = t => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
   const teams = CONFIG.ligas.flatMap(l => l.equipos);
-  const map = t => { const ns = [N(t.name), N(t.short), N(t.tla)].filter(Boolean); let best = null, bs = 0; teams.forEach(a => { const n = N(a), sc = ns.includes(n) ? 3 : ns.some(x => (" " + x + " ").includes(" " + n + " ")) ? 2 : 0; if (sc > bs) { bs = sc; best = a; } }); return bs >= 2 ? best : null; };
+  // Alias de equipos cuyo nombre en la API no se parece al de la app. Mismo criterio que en resultados.mjs.
+  const ALIAS = { "racing de santander": ["santander", "racing santander", "real racing club de santander", "racing club de santander"], "bayer leverkusen": ["leverkusen", "bayer 04 leverkusen", "b04"], "rennes": ["stade rennais", "stade rennais fc", "stade rennais fc 1901", "rennais", "ren"] };
+  const T = x => N(x).split(" ").filter(Boolean);
+  const map = t => {
+    const ns = [N(t.name), N(t.short), N(t.tla)].filter(Boolean); let best = null, bs = 0;
+    teams.forEach(a => {
+      const n = N(a), ta = T(n);
+      const sc = ns.includes(n) || (ALIAS[n] || []).some(x => ns.includes(x)) ? 3 : ns.some(x => (" " + x + " ").includes(" " + n + " ")) ? 2 : ns.some(x => ta.length && ta.every(w => T(x).includes(w))) ? 1 : 0;
+      if (sc > bs) { bs = sc; best = a; }
+    });
+    return bs >= 1 ? best : null;
+  };
   const COMP = { PD: "LaLiga", PL: "Premier", BL1: "Bundesliga", SA: "Serie A", FL1: "Ligue 1", CL: "Champions" };
   const iso = ms => new Date(ms).toISOString().slice(0, 10);
   let from = iso(Date.now() - new Date().getTimezoneOffset() * 6e4), comp = "", data = [], tok = 0, err = "";
