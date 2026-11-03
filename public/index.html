@@ -2779,7 +2779,7 @@ function eNode(c, st, admin, wide) {
     return `<div class="en-p${win === id ? " win" : res && win ? " lose" : ""}${id === me ? " me" : ""}">${crest(p.team)}<span class="en-n">${esc(p.name)}</span>${sd}${res ? `<b class="en-x">${pr ? pr.h + "-" + pr.a : "–"}</b>` : ""}</div>`;
   };
   const mline = m
-    ? `<div class="en-m"><span>${crest(m.home)}<em>${esc(m.home)}</em></span><b>${res ? res.h + " – " + res.a : "vs"}</b><span><em>${esc(m.away)}</em>${crest(m.away)}</span></div><div class="en-d">${res ? (ec.w === null ? "Desempate por penaltis" : "Finalizado") : fmt(m.kickoff)}</div>`
+    ? `<div class="en-m"><span title="${esc(m.home)}">${crest(m.home)}</span><b>${res ? res.h + " – " + res.a : "vs"}</b><span title="${esc(m.away)}">${crest(m.away)}</span></div><div class="en-d">${res ? (ec.w === null ? "Desempate por penaltis" : "Finalizado") : fmt(m.kickoff)}</div>`
     : `<div class="en-d none">${admin ? "Partido sin añadir" : "Partido por anunciar"}</div>`;
   const rp = !admin && res && ec.pen && ec.w !== null && euTanda(m) ? `<button type="button" class="eu-rp" data-euv="${esc(String(m.id))}">▶ Ver penaltis</button>` : "";
   if (wide) setTimeout(mountCups, 0);   // la copa 3D se monta cuando el cuadro ya está en la página
@@ -4186,6 +4186,7 @@ function votMount() {
   const box = $("#jugarBox"), p = meP(); if (!box || !p) return;
   const f = votFase(); votSig = votSg(f);
   if (f.cerrada) votCierre();
+  if (leagueMs().some(m => m.round === CONFIG.jornadas)) { const o = document.getElementById("votBox"); if (o) o.remove(); return; }   // jornada final ya creada: no hay más votaciones
   if (!f.ab) return;
   const old = document.getElementById("votBox"); if (old) old.remove();
   const el = document.createElement("div"); el.id = "votBox";
@@ -4283,12 +4284,58 @@ async function votCierre() {   // al cerrarse la votación, el partido ganador p
     S.matches.push(m); save(); renderJugar(); toast("Partido elegido: " + g.h + " – " + g.a);
   } catch (e) {} finally { votBusy = false; }
 }
+// ===== Competiciones europeas automáticas =====
+// Cuando la última jornada (la 20) está calculada, se crean solos los partidos con el mismo criterio que la votación semanal (votTop):
+// semana siguiente a la jornada 20 → Semifinal 1 = mejor partido, Semifinal 2 = 2.º, Final Europa League = 3.º, Final Conference = 4.º;
+// la semana después → Final de Champions = mejor partido (sin finalistas hasta que se calculen las semis: ya se ve cuál será).
+// Ids fijos: si varios móviles lo hacen a la vez no se duplica. Si el admin ya ha puesto partidos a mano, no se toca nada de ese grupo.
+const EU_AUTO = [["champions", "sf1"], ["champions", "sf2"], ["europa", "final"], ["conference", "final"]];
+let euBusy = false, euNext = 0;
+const euMon = d => new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7));   // lunes de esa semana, 00:00
+async function euCand(w0) {   // partidos de esa semana (lunes a domingo) aún pronosticables, de mejor a peor
+  const p2 = n => String(n).padStart(2, "0"), ymd = x => x.getFullYear() + "-" + p2(x.getMonth() + 1) + "-" + p2(x.getDate());
+  const r = await fetch("/.netlify/functions/calendario?from=" + ymd(w0)), j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || "calendario " + r.status);
+  const a = w0.getTime(), b = new Date(w0.getFullYear(), w0.getMonth(), w0.getDate() + 7).getTime(), min = Date.now() + CIERRE_MS, seen = new Set();
+  return votTop((j.matches || []).map(m => { const h = votMap(m.home), x = votMap(m.away), ms = Date.parse(m.kickoff); return h && x && ms >= a && ms < b && ms > min ? { k: h + "|" + x + "|" + ms, h, a: x, t: new Date(ms).toISOString(), c: m.comp || "" } : null; })
+    .filter(c => c && !seen.has(c.k) && seen.add(c.k)));
+}
+async function euAuto() {
+  if (euBusy || VOT_TEST || !synced || !meP() || Date.now() < euNext) return;
+  const need1 = () => !EU_AUTO.some(([c, k]) => eMatch(c, k)), need2 = () => !eMatch("champions", "final") && eMatch("champions", "sf1") && eMatch("champions", "sf2");
+  const fin = calcRounds().includes(CONFIG.jornadas), ult = leagueMs().filter(m => m.round === CONFIG.jornadas).map(m => Date.parse(m.kickoff)).filter(Boolean);
+  const go1 = fin && ult.length && need1();
+  if (!go1 && !need2()) return;
+  euBusy = true;
+  let ch = false;
+  const mk = (c, k, g, pl) => { const id = "eu_" + c + "_" + k; if (S.matches.some(x => x.id === id)) return; S.matches.push({ id, comp: c, stage: k, round: EU_ROUND[c][k], home: g.h, away: g.a, kickoff: g.t, result: null, pl }); ch = true; };
+  const sem = d => { const m = euMon(d); return new Date(m.getFullYear(), m.getMonth(), m.getDate() + 7); };   // lunes de la semana siguiente
+  try {
+    if (go1) {   // semifinales y finales de Europa League y Conference: semana siguiente a la jornada 20
+      try {
+        const l = await euCand(sem(new Date(Math.max(...ult))));
+        if (l.length >= EU_AUTO.length && need1()) EU_AUTO.forEach(([c, k], i) => { const s = eSlot(c, COMPS[c].st.find(t => t.k === k)); if (s.pl.every(Boolean)) mk(c, k, l[i], s.pl.slice()); });
+        else if (l.length < EU_AUTO.length) euNext = Date.now() + 3e5;
+      } catch (e) { euNext = Date.now() + 3e5; }
+    }
+    if (need2()) {   // final de Champions: en cuanto existen las dos semifinales (creadas solas o a mano), con el mejor partido de la semana siguiente a ellas
+      try {
+        const ks = ["sf1", "sf2"].map(k => Date.parse(eMatch("champions", k).kickoff)).filter(Boolean);
+        const l = ks.length ? await euCand(sem(new Date(Math.max(...ks)))) : [];
+        if (l.length && need2()) mk("champions", "final", l[0], null);
+        else if (!l.length) euNext = Date.now() + 3e5;
+      } catch (e) { euNext = Date.now() + 3e5; }
+    }
+    if (ch) { save(); try { renderEuro(); renderJugar(); } catch (e) {} toast("Competiciones europeas: partidos creados"); }
+  } finally { euBusy = false; }
+}
 setInterval(() => {
   if (document.hidden) return;
   const f = votFase(), s = votSg(f);
   if (votSig && s !== votSig && meP()) renderJugar();
   votSig = s;
   if (f.cerrada) votCierre();
+  euAuto();   // liga terminada: crea los partidos europeos
 }, 20000);
 function renderJugarBase() {
   clearInterval(cdTimer);
