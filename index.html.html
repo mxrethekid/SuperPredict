@@ -4107,6 +4107,7 @@ function renderJugar() {
 const VOT_COMP = { PD: ["LL", "#ff5a52", "LaLiga"], PL: ["PL", "#b07dff", "Premier League"], BL1: ["BL", "#ff8a5c", "Bundesliga"], SA: ["SA", "#4f9bff", "Serie A"], FL1: ["L1", "#38d996", "Ligue 1"], CL: ["CL", "#19d3ff", "Champions League"] };
 const VOT_BIG = ["real madrid", "barcelona", "atletico", "manchester city", "manchester united", "liverpool", "arsenal", "chelsea", "tottenham", "bayern", "dortmund", "leverkusen", "juventus", "inter", "milan", "napoli", "roma", "atalanta", "paris", "marseille", "monaco"];
 const VOT_INI = "2026-11-06";   // primera votación
+let VOT_TEST = null;   // modo prueba del admin: solo en este móvil y sin guardar nada
 const votN = t => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
 const votBig = n => VOT_BIG.some(b => (" " + votN(n) + " ").includes(" " + b + " "));
 // Desempate: el «mejor» partido = equipos grandes + Champions
@@ -4131,6 +4132,10 @@ const votCtl = w => { let b = { r: 0, c: 0, x: 0, t: -1 }; S.players.forEach(q =
 const votCk = f => f.w + "|" + f.close, votSg = f => (f.ab ? "a" : f.can ? "x" : "c") + f.w + "." + f.r + "." + f.close;
 const votCierreTxt = f => { const d = new Date(f.close); return d.toLocaleDateString("es-ES", { weekday: "long" }) + " a las " + d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }); };
 function votFase(now = Date.now()) {
+  if (VOT_TEST) {   // prueba: votación abierta ahora, con los partidos de los próximos 7 días; nada se guarda
+    const d = new Date(now), p3 = n => String(n).padStart(2, "0"), fin = new Date(d.getFullYear(), d.getMonth(), d.getDate() + (7 - d.getDay()) % 7, 23, 59, 59, 999);
+    return { w: "test", open: now, close: fin.getTime(), desde: d.getFullYear() + "-" + p3(d.getMonth() + 1) + "-" + p3(d.getDate()), ab: true, cerrada: false, can: false, r: 0 };
+  }
   const d = new Date(now), back = (d.getDay() - 5 + 7) % 7;
   const fri = new Date(d.getFullYear(), d.getMonth(), d.getDate() - back, 14, 0, 0, 0);
   if (fri.getTime() > now) fri.setDate(fri.getDate() - 7);   // viernes antes de las 14:00: aún cuenta la votación anterior
@@ -4142,11 +4147,13 @@ function votFase(now = Date.now()) {
 let VOT_C = null;
 async function votCand(f) {   // todos los partidos de la semana siguiente (lunes a domingo) de las competiciones de la API cuyos dos equipos están en la app
   if (VOT_C && VOT_C.k === votCk(f) && Date.now() - VOT_C.t < 108e5) return VOT_C.list;
-  const r = await fetch("/.netlify/functions/calendario?from=" + f.desde), j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(j.error || "No se pudo cargar el calendario (" + r.status + ").");
-  const seen = new Set(), min = f.close + CIERRE_MS;
-  const list = (j.matches || []).map(m => { const h = votMap(m.home), a = votMap(m.away), ms = Date.parse(m.kickoff); return h && a && ms > min ? { k: h + "|" + a + "|" + ms, h, a, t: new Date(ms).toISOString(), c: m.comp || "" } : null; })
+  let r = { ok: false }, j = {};
+  try { r = await fetch("/.netlify/functions/calendario?from=" + f.desde); j = await r.json().catch(() => ({})); } catch (e) { if (!VOT_TEST) throw e; }
+  if (!r.ok && !VOT_TEST) throw new Error(j.error || "No se pudo cargar el calendario (" + r.status + ").");
+  const seen = new Set(), min = VOT_TEST ? Date.now() : f.close + CIERRE_MS;
+  let list = (j.matches || []).map(m => { const h = votMap(m.home), a = votMap(m.away), ms = Date.parse(m.kickoff); return h && a && ms > min ? { k: h + "|" + a + "|" + ms, h, a, t: new Date(ms).toISOString(), c: m.comp || "" } : null; })
     .filter(c => c && !seen.has(c.k) && seen.add(c.k)).sort((x, y) => Date.parse(x.t) - Date.parse(y.t));
+  if (VOT_TEST && !list.length) { const eq = CONFIG.ligas.flatMap(l => l.equipos); list = []; for (let i = 0; i + 1 < eq.length && list.length < 6; i += 2) { const ms = Date.now() + (list.length + 1) * 864e5; list.push({ k: eq[i] + "|" + eq[i + 1] + "|" + ms, h: eq[i], a: eq[i + 1], t: new Date(ms).toISOString(), c: "" }); } }   // ejemplos si no hay partidos
   VOT_C = { k: votCk(f), t: Date.now(), list };
   return list;
 }
@@ -4163,7 +4170,8 @@ function votMount() {
   votPaint(el, f, p);
 }
 function votPaint(el, f, p) {
-  const hd = '<h2 class="ja-t">VOTACIÓN SIGUIENTE JORNADA</h2>', v = p.vot && p.vot.w === f.w && (p.vot.r || 0) === f.r ? p.vot : null;
+  el.onclick = e => { if (e.target.id === "vtOff") votPrueba(); };   // quitar el modo prueba
+  const hd = '<h2 class="ja-t">VOTACIÓN SIGUIENTE JORNADA</h2>' + (VOT_TEST ? '<p class="muted vt-n">🧪 Modo prueba: solo lo ves tú y no se guarda nada. <button type="button" class="btn ghost" id="vtOff" style="margin:8px auto 0;display:block">Quitar prueba</button></p>' : ""), v = VOT_TEST ? VOT_TEST.v : p.vot && p.vot.w === f.w && (p.vot.r || 0) === f.r ? p.vot : null;
   if (v && !VOT_UI.edit) {
     el.innerHTML = hd + `<div class="card vt-ok"><b>Votación hecha ✅</b><div class="muted" style="margin-top:4px">Tu voto: ${esc(v.h)} – ${esc(v.a)}</div><button type="button" class="btn ghost" id="vtChg">Cambiar voto</button></div>`;
     el.querySelector("#vtChg").onclick = () => { VOT_UI.edit = true; votMount(); };
@@ -4189,27 +4197,35 @@ function votPaint(el, f, p) {
   lst.onclick = e => {
     const b = e.target.closest(".vt-r"); if (!b) return;
     const c = cand.find(x => x.k === b.dataset.k); if (!c) return;
+    if (VOT_TEST) { VOT_TEST.v = c; VOT_UI.edit = false; VOT_UI.st = 0; toast("Votación hecha ✅ (prueba)"); votMount(); return; }
     if (Date.now() > f.close) { toast("La votación ya se ha cerrado."); renderJugar(); return; }
     p.vot = { w: f.w, r: f.r, k: c.k, h: c.h, a: c.a, t: c.t, c: c.c };
     VOT_UI.edit = false; VOT_UI.st = 0; save(); toast("Votación hecha ✅"); votMount();
   };
 }
 
+const votFaseReal = () => { const t0 = VOT_TEST; VOT_TEST = null; try { return votFase(); } finally { VOT_TEST = t0; } };   // la votación real aunque la prueba esté activa
 function votAdminHtml() {
-  const f = votFase(), act = f.w >= VOT_INI, vm = S.matches.find(m => m.vw === f.w), reg = S.players.filter(q => q.regAt);
+  const f = votFaseReal(), act = f.w >= VOT_INI, vm = S.matches.find(m => m.vw === f.w), reg = S.players.filter(q => q.regAt);
   const nV = reg.filter(q => q.vot && q.vot.w === f.w && (q.vot.r || 0) === f.r).length;
   const est = !act ? "La primera votación se abre el viernes 6/11 a las 14:00." : f.can ? "Cancelada: no se elegirá partido esta semana." : f.ab ? `Abierta · cierra el ${votCierreTxt(f)} · han votado ${nV}/${reg.length}` : vm ? `Cerrada · partido elegido: ${vm.home} – ${vm.away}` : "Cerrada · aún sin partido elegido.";
-  return `<div class="card" style="margin-top:22px"><h3>🗳️ Votación siguiente jornada</h3><p class="muted">${esc(est)}</p>${act ? `<div class="adb">${f.ab ? '<button class="btn del" id="votCan">Cancelar votación</button>' : ""}<button class="btn ghost" id="votRep">Repetir votación</button></div>` : ""}</div>`;
+  return `<div class="card" style="margin-top:22px"><h3>🗳️ Votación siguiente jornada</h3><p class="muted">${esc(est)}</p><div class="adb"><button class="btn ghost" id="votTst">${VOT_TEST ? "Quitar prueba" : "🧪 Probar votación"}</button></div>${VOT_TEST ? '<p class="muted">Prueba activa: ve a Inicio. Solo la ves tú y no se guarda nada.</p>' : ""}${act ? `<div class="adb">${f.ab ? '<button class="btn del" id="votCan">Cancelar votación</button>' : ""}<button class="btn ghost" id="votRep">Repetir votación</button></div>` : ""}</div>`;
+}
+function votPrueba() {   // activa o quita la votación de prueba (solo en este móvil)
+  VOT_TEST = VOT_TEST ? null : { v: null }; VOT_C = null; VOT_UI.edit = false; VOT_UI.err = ""; VOT_UI.loading = false; VOT_UI.st = 0;
+  if (!VOT_TEST) { const b = document.getElementById("votBox"); if (b) b.remove(); }
+  if ($("#votTst")) { AD.msg = VOT_TEST ? "Votación de prueba activada: ve a Inicio para verla. Solo la ves tú." : "Prueba quitada."; AD.cls = "ok"; render(); }
+  else renderJugar();
 }
 function votCtlSet(f, o) { const t = Date.now(); S.players.forEach(q => { q.vctl = { w: f.w, r: o.r, c: o.c, x: o.x || 0, t }; }); save(); }
 async function votCancelar() {
-  const f = votFase(); if (!f.ab) return;
+  const f = votFaseReal(); if (!f.ab) return;
   if (!(await ask("¿Cancelar la votación de esta semana? Se descartan los votos y no se elegirá ningún partido.", "Cancelar votación"))) return;
   votCtlSet(f, { r: f.r, c: 1, x: votCtl(f.w).x });
   AD.msg = "Votación cancelada."; AD.cls = "ok"; render();
 }
 async function votRepetir() {
-  const f = votFase(); if (f.w < VOT_INI) return;
+  const f = votFaseReal(); if (f.w < VOT_INI) return;
   const vm = S.matches.find(m => m.vw === f.w);
   if (vm && vm.result) { AD.msg = "No se puede repetir: el partido elegido ya tiene resultado."; AD.cls = "err"; render(); return; }
   const np = vm ? Object.keys(S.preds[vm.id] || {}).length : 0, tarde = Date.now() > f.close;
@@ -4232,7 +4248,7 @@ async function votGanador(f) {
   return L[0].c;
 }
 async function votCierre() {   // al cerrarse la votación, el partido ganador pasa a ser el partido de la semana
-  if (votBusy || !synced || !meP()) return;
+  if (votBusy || VOT_TEST || !synced || !meP()) return;
   const f = votFase(); if (!f.cerrada || f.w < VOT_INI) return;   // la primera votación es la del viernes 6/11: no se crea nada por semanas anteriores
   const id = "vt" + f.w + (f.r ? "r" + f.r : "");
   if (S.matches.some(m => m.id === id || m.vw === f.w)) return;
@@ -5557,6 +5573,7 @@ function adJornada(el) {
       <button class="btn del" id="resetCromos" style="width:100%">Borrar cromos de todos</button></div>`;
 
   $("#newSeason").onclick = nuevaTemporada;
+  if ($("#votTst")) $("#votTst").onclick = votPrueba;
   if ($("#votCan")) $("#votCan").onclick = votCancelar;
   if ($("#votRep")) $("#votRep").onclick = votRepetir;
   if ($("#simGo")) $("#simGo").onclick = simular;
