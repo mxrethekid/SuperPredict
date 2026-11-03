@@ -4105,13 +4105,37 @@ function renderJugar() {
 // Se abre el viernes a las 14:00 y se cierra el domingo a las 23:59 (hora del dispositivo). Cada jugador guarda su voto en su ficha (p.vot)
 // y nadie ve los recuentos. Al cerrarse, el primer dispositivo que abre la app crea el partido ganador (id fijo por semana: no se duplica).
 const VOT_COMP = { PD: ["LL", "#ff5a52", "LaLiga"], PL: ["PL", "#b07dff", "Premier League"], BL1: ["BL", "#ff8a5c", "Bundesliga"], SA: ["SA", "#4f9bff", "Serie A"], FL1: ["L1", "#38d996", "Ligue 1"], CL: ["CL", "#19d3ff", "Champions League"] };
-const VOT_BIG = ["real madrid", "barcelona", "atletico", "manchester city", "manchester united", "liverpool", "arsenal", "chelsea", "tottenham", "bayern", "dortmund", "leverkusen", "juventus", "inter", "milan", "napoli", "roma", "atalanta", "paris", "marseille", "monaco"];
 const VOT_INI = "2026-11-06";   // primera votación
 let VOT_TEST = null;   // modo prueba del admin: solo en este móvil y sin guardar nada
 const votN = t => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
-const votBig = n => VOT_BIG.some(b => (" " + votN(n) + " ").includes(" " + b + " "));
-// Desempate: el «mejor» partido = equipos grandes + Champions
-const votScore = c => (votBig(c.h) ? 3 : 0) + (votBig(c.a) ? 3 : 0) + (votBig(c.h) && votBig(c.a) ? 2 : 0) + (c.c === "CL" ? 2 : 0);
+// Nivel de cada equipo (0-10) para elegir los mejores partidos de la semana. Los que no estén aquí cuentan como 3.
+const VOT_NV = Object.fromEntries(Object.entries({
+  "Real Madrid": 10, "Barcelona": 10, "Atlético de Madrid": 9, "Villarreal": 7, "Athletic Club": 7, "Real Betis": 6.5, "Real Sociedad": 6, "Sevilla FC": 5.5, "Valencia": 5, "Celta de Vigo": 5, "Osasuna": 4.5, "Getafe": 4.5, "Rayo Vallecano": 4.5, "Alavés": 4, "Espanyol": 4, "Elche": 3.5, "Levante": 3.5, "Deportivo": 3, "Málaga": 3, "Racing de Santander": 3,
+  "Manchester City": 10, "Arsenal": 10, "Liverpool": 9.5, "Chelsea": 8.5, "Manchester United": 8, "Tottenham": 8, "Newcastle United": 8, "Aston Villa": 7.5, "Brighton": 6, "Crystal Palace": 6, "Bournemouth": 6, "Nottingham Forest": 5.5, "Brentford": 5.5, "Fulham": 5.5, "Everton": 5.5, "Leeds United": 5, "Sunderland": 4.5, "Coventry City": 3.5, "Ipswich Town": 3.5, "Hull City": 3,
+  "Bayern München": 10, "Bayer Leverkusen": 8.5, "Borussia Dortmund": 8.5, "RB Leipzig": 8, "Eintracht Frankfurt": 6.5, "Stuttgart": 6.5, "Freiburg": 5.5, "Hoffenheim": 5, "Borussia Mönchengladbach": 4.5, "Werder Bremen": 4.5, "Union Berlin": 4.5, "Mainz 05": 4.5, "Augsburg": 4, "Köln": 4, "Hamburger SV": 4, "Schalke 04": 3.5, "Paderborn": 3, "Elversberg": 3,
+  "Inter": 9.5, "Napoli": 8.5, "Juventus": 8.5, "Milan": 8.5, "Atalanta": 8, "Roma": 7.5, "Lazio": 7, "Fiorentina": 6, "Bologna": 6, "Torino": 5, "Como": 5, "Genoa": 4.5, "Udinese": 4.5, "Sassuolo": 4, "Cagliari": 4, "Parma": 4, "Lecce": 3.5, "Monza": 3.5, "Venezia": 3.5, "Frosinone": 3,
+  "Paris Saint-Germain": 9.5, "Marseille": 7, "Monaco": 7, "Lille": 6.5, "Lyon": 6.5, "Lens": 6, "Nice": 5.5, "Rennes": 5.5, "Strasbourg": 5, "Brest": 4.5, "Toulouse": 4, "Paris FC": 4, "Lorient": 3.5, "Auxerre": 3.5, "Angers": 3, "Le Havre": 3, "Le Mans": 2.5, "Troyes": 2.5,
+  "Sporting CP": 7, "Porto": 6.5, "PSV": 6.5, "Club Brugge": 6, "Feyenoord": 6, "Galatasaray": 6, "Fenerbahçe": 5.5, "Bodø/Glimt": 4.5, "Shaktar": 4.5, "Slavia Praha": 4.5, "PAE AEK": 4, "LASK": 3, "Sl. Bratislava": 3, "Viking": 3, "Sabah FK": 2.5
+}).map(([k, v]) => [votN(k), v]));
+const votNv = n => { const v = VOT_NV[votN(n)]; return v == null ? 3 : v; };
+// Nivel del partido: pesa más que los dos equipos sean fuertes (un grande contra un flojo puntúa menos); la Champions suma un extra. También desempata la votación.
+const votScore = c => { const a = votNv(c.h), b = votNv(c.a); return a + b + Math.min(a, b) + (c.c === "CL" ? 1.5 : 0); };
+// Derbis: entran siempre en la votación (dentro del máximo de 8)
+const VOT_DERBIS = new Set([
+  ["Real Madrid", "Atlético de Madrid"], ["Real Madrid", "Barcelona"], ["Barcelona", "Espanyol"], ["Sevilla FC", "Real Betis"], ["Athletic Club", "Real Sociedad"], ["Valencia", "Levante"], ["Deportivo", "Celta de Vigo"],
+  ["Manchester United", "Manchester City"], ["Manchester United", "Liverpool"], ["Liverpool", "Everton"], ["Arsenal", "Tottenham"], ["Arsenal", "Chelsea"], ["Chelsea", "Tottenham"], ["Crystal Palace", "Brighton"], ["Newcastle United", "Sunderland"],
+  ["Borussia Dortmund", "Schalke 04"], ["Bayern München", "Borussia Dortmund"], ["Hamburger SV", "Werder Bremen"], ["Köln", "Borussia Mönchengladbach"], ["Eintracht Frankfurt", "Mainz 05"],
+  ["Inter", "Milan"], ["Roma", "Lazio"], ["Juventus", "Torino"], ["Juventus", "Inter"],
+  ["Paris Saint-Germain", "Marseille"], ["Paris Saint-Germain", "Paris FC"], ["Lyon", "Marseille"], ["Monaco", "Nice"], ["Lille", "Lens"],
+  ["Galatasaray", "Fenerbahçe"]
+].map(([x, y]) => [votN(x), votN(y)].sort().join("|")));
+const votDerbi = (h, a) => VOT_DERBIS.has([votN(h), votN(a)].sort().join("|"));
+function votTop(list) {   // máximo 8: primero los derbis (siempre entran) y el resto de huecos, con los mejores por nivel; de mejor a peor
+  const ord = list.slice().sort((x, y) => votScore(y) - votScore(x) || Date.parse(x.t) - Date.parse(y.t) || (x.k < y.k ? -1 : 1));
+  const der = ord.filter(c => votDerbi(c.h, c.a)).slice(0, 8), usado = new Set(der.map(c => c.k));
+  const res = der.concat(ord.filter(c => !usado.has(c.k)).slice(0, 8 - der.length)), ks = new Set(res.map(c => c.k));
+  return ord.filter(c => ks.has(c.k));
+}
 const votMap = (() => {
   const N = votN, teams = CONFIG.ligas.flatMap(l => l.equipos);
   const ALIAS = { "racing de santander": ["santander", "racing santander", "real racing club de santander", "racing club de santander"], "bayer leverkusen": ["leverkusen", "bayer 04 leverkusen", "b04"], "rennes": ["stade rennais", "stade rennais fc", "stade rennais fc 1901", "rennais", "ren"],
@@ -4132,9 +4156,9 @@ const votCtl = w => { let b = { r: 0, c: 0, x: 0, t: -1 }; S.players.forEach(q =
 const votCk = f => f.w + "|" + f.close, votSg = f => (f.ab ? "a" : f.can ? "x" : "c") + f.w + "." + f.r + "." + f.close;
 const votCierreTxt = f => { const d = new Date(f.close); return d.toLocaleDateString("es-ES", { weekday: "long" }) + " a las " + d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }); };
 function votFase(now = Date.now()) {
-  if (VOT_TEST) {   // prueba: votación abierta ahora, con los partidos de los próximos 7 días; nada se guarda
+  if (VOT_TEST) {   // prueba: votación abierta ahora, con los partidos de la semana siguiente (lunes a domingo); nada se guarda
     const d = new Date(now), p3 = n => String(n).padStart(2, "0"), fin = new Date(d.getFullYear(), d.getMonth(), d.getDate() + (7 - d.getDay()) % 7, 23, 59, 59, 999);
-    return { w: "test", open: now, close: fin.getTime(), desde: d.getFullYear() + "-" + p3(d.getMonth() + 1) + "-" + p3(d.getDate()), ab: true, cerrada: false, can: false, r: 0 };
+    return { w: "test", open: now, close: fin.getTime(), desde: (x => x.getFullYear() + "-" + p3(x.getMonth() + 1) + "-" + p3(x.getDate()))(new Date(d.getFullYear(), d.getMonth(), d.getDate() + ((8 - d.getDay()) % 7 || 7))), ab: true, cerrada: false, can: false, r: 0 };
   }
   const d = new Date(now), back = (d.getDay() - 5 + 7) % 7;
   const fri = new Date(d.getFullYear(), d.getMonth(), d.getDate() - back, 14, 0, 0, 0);
@@ -4152,7 +4176,8 @@ async function votCand(f) {   // todos los partidos de la semana siguiente (lune
   if (!r.ok && !VOT_TEST) throw new Error(j.error || "No se pudo cargar el calendario (" + r.status + ").");
   const seen = new Set(), min = VOT_TEST ? Date.now() : f.close + CIERRE_MS;
   let list = (j.matches || []).map(m => { const h = votMap(m.home), a = votMap(m.away), ms = Date.parse(m.kickoff); return h && a && ms > min ? { k: h + "|" + a + "|" + ms, h, a, t: new Date(ms).toISOString(), c: m.comp || "" } : null; })
-    .filter(c => c && !seen.has(c.k) && seen.add(c.k)).sort((x, y) => Date.parse(x.t) - Date.parse(y.t));
+    .filter(c => c && !seen.has(c.k) && seen.add(c.k));
+  list = votTop(list);   // 8 mejores por nivel + derbis
   if (VOT_TEST && !list.length) { const eq = CONFIG.ligas.flatMap(l => l.equipos); list = []; for (let i = 0; i + 1 < eq.length && list.length < 6; i += 2) { const ms = Date.now() + (list.length + 1) * 864e5; list.push({ k: eq[i] + "|" + eq[i + 1] + "|" + ms, h: eq[i], a: eq[i + 1], t: new Date(ms).toISOString(), c: "" }); } }   // ejemplos si no hay partidos
   VOT_C = { k: votCk(f), t: Date.now(), list };
   return list;
@@ -4170,11 +4195,9 @@ function votMount() {
   votPaint(el, f, p);
 }
 function votPaint(el, f, p) {
-  el.onclick = e => { if (e.target.id === "vtOff") votPrueba(); };   // quitar el modo prueba
-  const hd = '<h2 class="ja-t">VOTACIÓN SIGUIENTE JORNADA</h2>' + (VOT_TEST ? '<p class="muted vt-n">🧪 Modo prueba: solo lo ves tú y no se guarda nada. <button type="button" class="btn ghost" id="vtOff" style="margin:8px auto 0;display:block">Quitar prueba</button></p>' : ""), v = VOT_TEST ? VOT_TEST.v : p.vot && p.vot.w === f.w && (p.vot.r || 0) === f.r ? p.vot : null;
+  const hd = '<h2 class="ja-t">VOTACIÓN SIGUIENTE JORNADA</h2>', v = VOT_TEST ? VOT_TEST.v : p.vot && p.vot.w === f.w && (p.vot.r || 0) === f.r ? p.vot : null;
   if (v && !VOT_UI.edit) {
-    el.innerHTML = hd + `<div class="card vt-ok"><b>Votación hecha ✅</b><div class="muted" style="margin-top:4px">Tu voto: ${esc(v.h)} – ${esc(v.a)}</div><button type="button" class="btn ghost" id="vtChg">Cambiar voto</button></div>`;
-    el.querySelector("#vtChg").onclick = () => { VOT_UI.edit = true; votMount(); };
+    el.innerHTML = hd + `<div class="card vt-ok"><b>Votación hecha ✅</b><div class="muted" style="margin-top:4px">Tu voto: ${esc(v.h)} – ${esc(v.a)}</div></div>`;
     return;
   }
   const note = `<p class="muted vt-n">Elige el partido que quieres para la próxima jornada. Cierra el ${votCierreTxt(f)}.</p>`;
@@ -4196,8 +4219,8 @@ function votPaint(el, f, p) {
   lst.onscroll = () => { VOT_UI.st = lst.scrollTop; };
   lst.onclick = e => {
     const b = e.target.closest(".vt-r"); if (!b) return;
-    const c = cand.find(x => x.k === b.dataset.k); if (!c) return;
-    if (VOT_TEST) { VOT_TEST.v = c; VOT_UI.edit = false; VOT_UI.st = 0; toast("Votación hecha ✅ (prueba)"); votMount(); return; }
+    const c = cand.find(x => x.k === b.dataset.k); if (!c || v) return;   // un voto por jugador: no se puede cambiar
+    if (VOT_TEST) { VOT_TEST.v = c; VOT_UI.edit = false; VOT_UI.st = 0; toast("Votación hecha ✅"); votMount(); return; }
     if (Date.now() > f.close) { toast("La votación ya se ha cerrado."); renderJugar(); return; }
     p.vot = { w: f.w, r: f.r, k: c.k, h: c.h, a: c.a, t: c.t, c: c.c };
     VOT_UI.edit = false; VOT_UI.st = 0; save(); toast("Votación hecha ✅"); votMount();
