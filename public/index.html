@@ -4313,7 +4313,9 @@ async function euAuto() {
   try {
     if (go1) {   // semifinales y finales de Europa League y Conference: semana siguiente a la jornada 20
       try {
-        const l = await euCand(sem(new Date(Math.max(...ult))));
+        let l = [];   // si esa semana no tiene suficientes partidos válidos para crear todos (4), se aplaza todo a la siguiente (hasta 4 semanas)
+        const w0 = sem(new Date(Math.max(...ult)));
+        for (let i = 0; i < 4 && l.length < EU_AUTO.length; i++) l = await euCand(new Date(w0.getFullYear(), w0.getMonth(), w0.getDate() + 7 * i));
         if (l.length >= EU_AUTO.length && need1()) EU_AUTO.forEach(([c, k], i) => { const s = eSlot(c, COMPS[c].st.find(t => t.k === k)); if (s.pl.every(Boolean)) mk(c, k, l[i], s.pl.slice()); });
         else if (l.length < EU_AUTO.length) euNext = Date.now() + 3e5;
       } catch (e) { euNext = Date.now() + 3e5; }
@@ -4321,12 +4323,13 @@ async function euAuto() {
     if (need2()) {   // final de Champions: en cuanto existen las dos semifinales (creadas solas o a mano), con el mejor partido de la semana siguiente a ellas
       try {
         const ks = ["sf1", "sf2"].map(k => Date.parse(eMatch("champions", k).kickoff)).filter(Boolean);
-        const l = ks.length ? await euCand(sem(new Date(Math.max(...ks)))) : [];
+        let l = [];   // si la semana siguiente a las semis no tiene partidos válidos (p. ej. parón de selecciones), prueba con las siguientes (hasta 4)
+        if (ks.length) { const w1 = sem(new Date(Math.max(...ks))); for (let i = 0; i < 4 && !l.length; i++) l = await euCand(new Date(w1.getFullYear(), w1.getMonth(), w1.getDate() + 7 * i)); }
         if (l.length && need2()) mk("champions", "final", l[0], null);
         else if (!l.length) euNext = Date.now() + 3e5;
       } catch (e) { euNext = Date.now() + 3e5; }
     }
-    if (ch) { save(); try { renderEuro(); renderJugar(); } catch (e) {} toast("Competiciones europeas: partidos creados"); }
+    if (ch) { save(); try { renderEuro(); renderJugar(); } catch (e) {} }
   } finally { euBusy = false; }
 }
 setInterval(() => {
@@ -6556,7 +6559,8 @@ function penOfKey(p, k) {   // duelo guardado de un jugador en una semana (null 
 // Sorteo y calendario de los duelos: no empiezan hasta que la liga está completa (20 jugadores). En ese momento se sortea un orden
 // aleatorio (sale de los ids, así es idéntico en todos los móviles) y cada semana se juega una jornada de un calendario todos-contra-todos
 // (método del círculo): 19 semanas, cada una con un rival distinto, y al terminar se han enfrentado todos contra todos.
-// La semana 20 no tiene rival nuevo: repite el duelo de la primera.
+// Solo hay duelo en las semanas con partido de liga (la jornada cuyo primer partido cae esa semana) y el rival lo marca el número de jornada:
+// jornadas 1-19 = 19 rivales distintos, y la jornada 20 no tiene rival nuevo: repite el duelo de la jornada 1.
 const penFull = () => S.players.length >= MAX_PLAYERS;
 function penStart() {   // semana del sorteo: la primera con duelo para TODOS los jugadores (los duelos sueltos de antes de estar completa no cuentan)
   const ws = {};
@@ -6564,9 +6568,21 @@ function penStart() {   // semana del sorteo: la primera con duelo para TODOS lo
   const all = Object.keys(ws).map(Number).filter(x => ws[x] >= S.players.length).sort((x, y) => x - y);
   return all.length ? all[0] : null;
 }
+function penRoundOf(w) {   // jornada del duelo de la semana w: la jornada de liga cuyo primer partido cae en esa semana (la más baja si hay varias); null si no hay partido esa semana
+  const first = {};
+  leagueMs().forEach(m => { const t = Date.parse(m.kickoff); if (!Number.isFinite(t) || !(+m.round >= 1)) return; if (!(m.round in first) || t < first[m.round]) first[m.round] = t; });
+  let best = null;
+  Object.keys(first).forEach(r => { if (semTienda(first[r]) === w && (best === null || +r < best)) best = +r; });
+  return best;
+}
+function penW20() {   // semana del duelo de la última jornada (null si aún no hay partido de esa jornada)
+  let t = null; leagueMs().forEach(m => { if (+m.round === CONFIG.jornadas) { const x = Date.parse(m.kickoff); if (Number.isFinite(x) && (t === null || x < t)) t = x; } });
+  return t === null ? null : semTienda(t);
+}
 function penEnsure(w) {
   if (!penFull() || S.players.length % 2) return false;
-  const k = penKey(w), w0 = penStart(), r = w0 === null ? 0 : w - w0; if (r < 0) return false;
+  const k = penKey(w), R = penRoundOf(w); if (R === null) return false;   // sin partido de la semana, no hay duelo
+  const r = R - 1;
   const L = S.players.slice().sort((a, b) => (a.id < b.id ? -1 : 1)), n = L.length;
   const rnd = penRng(penHash(L.map(p => p.id).join("|")) + 20261026);   // el sorteo: orden aleatorio fijo
   for (let i = n - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [L[i], L[j]] = [L[j], L[i]]; }
@@ -6597,6 +6613,11 @@ function penState(d) {
     gA += R.ga ? 1 : 0; gB += R.gb ? 1 : 0;
     if (r >= 2 && gA !== gB) { winner = gA > gB ? d.A : d.B; over = true; break; }   // mínimo 3 rondas; si siguen empatados, muerte súbita (gana quien marque y el otro falle)
     if (r === PEN_MAX - 1) over = true;
+  }
+  // Duelo semanal de una semana ya terminada y sin acabar: se lo lleva quien haya jugado más rondas (tiro + parada elegidos); si han jugado las mismas, sigue sin ganador
+  if (!over && d.k[0] === "w" && +d.k.slice(1) < semTienda(Date.now())) {
+    const ca = Math.min(As.length, Ak.length), cb = Math.min(Bs.length, Bk.length);
+    if (ca !== cb) { winner = ca > cb ? d.A : d.B; over = true; }
   }
   return { rounds, winner, over, next };
 }
@@ -6823,7 +6844,9 @@ function _renderPen() {
   if (!box) return;
   const TIT = eu ? '<h2 class="ja-t">Desempate por penaltis</h2>' : `<h2 class="ja-t">Duelo de penaltis</h2>`;
   if (!m) { box.innerHTML = ""; return; }
-  if (!d) { box.innerHTML = !penFull() ? "" : S.players.length >= 2 ? TIT + `<div class="pz"><div class="pz-wt">Esta semana descansas 😴</div></div>` : ""; return; }
+  const w20 = penW20(), statTxt = `<img src="${COIN_IMG}" alt="" style="width:20px;height:20px;vertical-align:-4px;margin-right:6px">Monedas conseguidas en duelos: <b>${penWins(m)}</b>`;   // tras el duelo de la última jornada ya no hay más: solo la estadística
+  if (!eu && w20 !== null && w > w20) { box.innerHTML = TIT + `<div class="pz"><div class="pz-wt">${statTxt}</div></div>`; return; }
+  if (!d) { box.innerHTML = !penFull() ? "" : S.players.length >= 2 ? TIT + `<div class="pz"><div class="pz-wt">${penRoundOf(w) === null ? "Esta semana no hay duelo: no hay partido de la semana" : "Esta semana descansas 😴"}</div></div>` : ""; return; }
   const rnN = seen < done ? seen : st.next ? st.next.r : -1, sd = rnN >= 3;
   const key = w + "|" + (st.next ? st.next.r : "x");
   if (penSel.key !== key) penSel = { key, s: -1, k: -1 };
@@ -6834,8 +6857,10 @@ function _renderPen() {
   else act = `<div class="pz-wt"><b>⚽</b> Tu jugada está lista · esperando al rival…</div>`;
   if (st.over && seen >= done) {   // duelo ya jugado: solo el resultado y cuándo llega el siguiente
     const gn = ganadasDe(m); if (penCoinSync !== gn) { penCoinSync = gn; renderSobres(); checkCoins(); }   // la moneda del duelo se da al momento: contador y aviso al terminar, sin cambiar de pestaña
-    const nd = penDias();
-    box.innerHTML = TIT + `<div class="pz${penNew ? " nw" : ""}"><div class="pz-bd">${penBoardHtml(d, st, seen)}</div>${act}${eu ? "" : `<div class="pz-wt" style="margin-top:14px">Próximo duelo ${nd === 1 ? "mañana" : "en " + nd + " días"}</div>`}</div>`;
+    let nd = penDias();   // días hasta el próximo duelo: el lunes siguiente si esa semana hay partido de liga; si no, el de la primera semana posterior que lo tenga
+    const fin20 = !eu && w20 !== null && w >= w20;
+    if (!eu && !fin20) for (let i = 1; i <= 8; i++) if (penRoundOf(w + i) !== null) { nd += 7 * (i - 1); break; }
+    box.innerHTML = TIT + `<div class="pz${penNew ? " nw" : ""}"><div class="pz-bd">${penBoardHtml(d, st, seen)}</div>${act}${eu ? "" : `<div class="pz-wt" style="margin-top:14px">${fin20 ? statTxt : `Próximo duelo ${nd === 1 ? "mañana" : "en " + nd + " días"}`}</div>`}</div>`;
     box.onclick = () => { if (penNew) penMark(); };
     penWatch(box, true);
     return;
