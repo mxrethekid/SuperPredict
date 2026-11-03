@@ -1,6 +1,7 @@
-// SuperPredict en Cloudflare Workers: página (carpeta public), /api (estado compartido), calendario, forma y resultados automáticos.
+// SuperPredict en Cloudflare Workers: página (carpeta public), /api (estado compartido), calendario, forma, resultados automáticos y avisos push.
 // Un solo archivo. Los datos se guardan en un Durable Object (base de datos SQLite con consistencia fuerte: dos móviles a la vez no se pisan).
-// Secreto necesario: FOOTBALL_DATA_TOKEN (Workers & Pages → tu proyecto → Settings → Variables and Secrets).
+// Secretos necesarios (Workers & Pages → tu proyecto → Settings → Variables and Secrets): FOOTBALL_DATA_TOKEN, VAPID_PRIVATE, ADMIN_PIN.
+// Variables (van en wrangler.jsonc): VAPID_PUBLIC, VAPID_SUBJECT.
 import { DurableObject } from "cloudflare:workers";
 
 const DIA = 864e5;
@@ -61,6 +62,76 @@ export class Store extends DurableObject {
     const st = this._state();
     if (Array.isArray(ops) && ops.length) { applyOps(st, ops); this._set("state", st); }
     return st;
+  }
+
+  // ---- Avisos push ----
+  _logOnce() {   // registro de avisos ya enviados: "once(token)" es true solo la primera vez
+    const log = this._get("pushlog") || {}, now = Date.now(); let dirty = false;
+    return {
+      once: (tok) => { if (log[tok]) return false; log[tok] = now; dirty = true; return true; },
+      save: () => { if (!dirty) return; const lim = now - 60 * 864e5; for (const k in log) if (log[k] < lim) delete log[k]; this._set("pushlog", log); },
+    };
+  }
+  _subs() { const d = this._get("push") || {}; d.subs ||= {}; return d; }
+  _jobs(msgs) {   // cada aviso se convierte en un envío por cada móvil suscrito del jugador
+    if (!msgs.length) return [];
+    const subs = this._subs().subs, jobs = [];
+    for (const m of msgs) for (const s of subs[m.pid] || []) jobs.push({ sub: s, payload: { t: m.title, b: m.body, tag: m.tag, url: "/" } });
+    return jobs;
+  }
+  // Igual que applyOps, pero además devuelve los avisos que provocan los cambios (jornada nueva, resultado, penaltis).
+  async applyOpsN(ops) {
+    const st = this._state(); let jobs = [];
+    if (Array.isArray(ops) && ops.length) {
+      const antes = { ids: new Set(st.matches.map((m) => m.id)), res: Object.fromEntries(st.matches.map((m) => [m.id, !!m.result])) };
+      applyOps(st, ops); this._set("state", st);
+      try {   // un fallo en los avisos nunca debe impedir que se guarde
+        const now = Date.now(), L = this._logOnce();
+        const msgs = [...avisosNuevaJornada(st, antes, now, L.once), ...avisosResultado(st, antes, L.once), ...avisosPenaltis(st, now, L.once)];
+        L.save(); jobs = this._jobs(msgs);
+      } catch (e) { console.error("avisos:", e && e.message); }
+    }
+    return { st, jobs };
+  }
+  async pushReminders() {   // lo llama el cron: recordatorios de cierre
+    try {
+      const st = this._state(), L = this._logOnce(), msgs = avisosCierre(st, Date.now(), L.once);
+      L.save(); return this._jobs(msgs);
+    } catch (e) { console.error("recordatorios:", e && e.message); return []; }
+  }
+  async pushSubscribe(pid, sub) {
+    if (!this._state().players.some((p) => p.id === pid)) return false;
+    const d = this._subs();
+    for (const k of Object.keys(d.subs)) { d.subs[k] = d.subs[k].filter((s) => s.e !== sub.e); if (!d.subs[k].length) delete d.subs[k]; }   // un móvil solo pertenece a un jugador
+    const arr = (d.subs[pid] = d.subs[pid] || []);
+    arr.push({ e: sub.e, p: sub.p, a: sub.a, t: Date.now() });
+    while (arr.length > 5) arr.shift();
+    this._set("push", d); return true;
+  }
+  async pushUnsubscribe(endpoints) {   // quita suscripciones (el jugador las desactiva o el servicio de push dice que caducaron)
+    const lista = Array.isArray(endpoints) ? endpoints : [endpoints], d = this._subs(); let ch = false;
+    for (const k of Object.keys(d.subs)) {
+      const n = d.subs[k].filter((s) => !lista.includes(s.e));
+      if (n.length !== d.subs[k].length) { ch = true; if (n.length) d.subs[k] = n; else delete d.subs[k]; }
+    }
+    if (ch) this._set("push", d); return ch;
+  }
+  async pushJobsPara(pids, payload) {   // pids = null → todos
+    const subs = this._subs().subs, jobs = []; let jugadores = 0;
+    for (const pid of Object.keys(subs)) {
+      if (pids && !pids.includes(pid)) continue;
+      jugadores++; for (const s of subs[pid]) jobs.push({ sub: s, payload });
+    }
+    return { jobs, jugadores };
+  }
+  async pushJobsEndpoint(endpoint, payload) {
+    const subs = this._subs().subs, jobs = [];
+    for (const pid of Object.keys(subs)) for (const s of subs[pid]) if (s.e === endpoint) jobs.push({ sub: s, payload });
+    return jobs;
+  }
+  async pushStats() {
+    const subs = this._subs().subs;
+    return { pids: Object.keys(subs), moviles: Object.values(subs).reduce((n, a) => n + a.length, 0) };
   }
 }
 
@@ -280,15 +351,275 @@ async function resultados(env, estado) {
   }
   if (!ops.length) return;
   // se guarda directamente en la base de datos, igual que si lo hiciera el admin desde /api
-  await estado.applyOps(ops);
+  const r2 = await estado.applyOpsN(ops);   // además de guardar, devuelve los avisos de resultado
   console.log("Resultados guardados:", ops.length);
+  await enviar(env, estado, r2.jobs);
+}
+
+// ==== WEBPUSH START ====
+// Web Push (RFC 8291 aes128gcm + VAPID RFC 8292) con WebCrypto, sin librerías.
+const te = new TextEncoder();
+const b64uEnc = (buf) => { const a = new Uint8Array(buf); let s = ""; for (let i = 0; i < a.length; i++) s += String.fromCharCode(a[i]); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); };
+const b64uDec = (s) => { s = String(s).replace(/-/g, "+").replace(/_/g, "/"); s += "=".repeat((4 - (s.length % 4)) % 4); const b = atob(s), a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; };
+const cat = (...xs) => { const o = new Uint8Array(xs.reduce((n, x) => n + x.length, 0)); let p = 0; for (const x of xs) { o.set(x, p); p += x.length; } return o; };
+
+async function hkdf(salt, ikm, info, len) {
+  const k = await crypto.subtle.importKey("raw", ikm, "HKDF", false, ["deriveBits"]);
+  return new Uint8Array(await crypto.subtle.deriveBits({ name: "HKDF", hash: "SHA-256", salt, info }, k, len * 8));
+}
+
+// Cifra el mensaje para una suscripción { p: p256dh, a: auth }. "fijo" solo se usa en las pruebas (clave efímera y sal conocidas).
+async function pushCifrar(sub, texto, fijo) {
+  const uaPub = b64uDec(sub.p), auth = b64uDec(sub.a);
+  let asPriv, asPub;
+  if (fijo) { asPriv = fijo.priv; asPub = fijo.pub; }
+  else { const kp = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]); asPriv = kp.privateKey; asPub = new Uint8Array(await crypto.subtle.exportKey("raw", kp.publicKey)); }
+  const uaKey = await crypto.subtle.importKey("raw", uaPub, { name: "ECDH", namedCurve: "P-256" }, false, []);
+  const ecdh = new Uint8Array(await crypto.subtle.deriveBits({ name: "ECDH", public: uaKey }, asPriv, 256));
+  const prk = await hkdf(auth, ecdh, cat(te.encode("WebPush: info\0"), uaPub, asPub), 32);
+  const salt = fijo ? fijo.salt : crypto.getRandomValues(new Uint8Array(16));
+  const cek = await hkdf(salt, prk, te.encode("Content-Encoding: aes128gcm\0"), 16);
+  const nonce = await hkdf(salt, prk, te.encode("Content-Encoding: nonce\0"), 12);
+  const aes = await crypto.subtle.importKey("raw", cek, "AES-GCM", false, ["encrypt"]);
+  const claro = cat(te.encode(texto), new Uint8Array([2]));   // 0x02 = último (y único) bloque
+  const cif = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce }, aes, claro));
+  return cat(salt, new Uint8Array([0, 0, 0x10, 0]), new Uint8Array([asPub.length]), asPub, cif);   // cabecera: sal + tamaño de bloque (4096) + clave pública
+}
+
+let _vapidKey = null;
+async function vapidFirma(env, audience) {
+  if (!_vapidKey || _vapidKey.k !== env.VAPID_PRIVATE) {
+    const pub = b64uDec(env.VAPID_PUBLIC);
+    const key = await crypto.subtle.importKey("jwk", { kty: "EC", crv: "P-256", d: env.VAPID_PRIVATE, x: b64uEnc(pub.slice(1, 33)), y: b64uEnc(pub.slice(33, 65)), ext: true }, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);
+    _vapidKey = { k: env.VAPID_PRIVATE, key };
+  }
+  const h = b64uEnc(te.encode(JSON.stringify({ typ: "JWT", alg: "ES256" })));
+  const p = b64uEnc(te.encode(JSON.stringify({ aud: audience, exp: Math.floor(Date.now() / 1000) + 12 * 3600, sub: env.VAPID_SUBJECT || "mailto:avisos@superpredict.app" })));
+  const firma = new Uint8Array(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, _vapidKey.key, te.encode(h + "." + p)));
+  return h + "." + p + "." + b64uEnc(firma);
+}
+
+// Envía un aviso a una suscripción { e: endpoint, p, a }. Devuelve el código HTTP del servicio de push (404/410 = suscripción caducada).
+async function pushEnviar(env, sub, payload, ttl) {
+  const cuerpo = await pushCifrar(sub, JSON.stringify(payload));
+  const jwt = await vapidFirma(env, new URL(sub.e).origin);
+  const r = await fetch(sub.e, {
+    method: "POST",
+    headers: { "Content-Encoding": "aes128gcm", "Content-Type": "application/octet-stream", TTL: String(ttl || 6 * 3600), Urgency: "high", Authorization: "vapid t=" + jwt + ", k=" + env.VAPID_PUBLIC },
+    body: cuerpo,
+  });
+  return r.status;
+}
+// ==== WEBPUSH END ====
+
+// ======================= Avisos (notificaciones push) =======================
+// Qué se avisa y cuándo:
+//  - Nueva jornada publicada (al guardarse el partido nuevo)         → todos los jugadores
+//  - Cierre de pronósticos: 6 h, 3 h y 1 h antes (cron cada 5 min)     → solo quien aún no ha pronosticado
+//  - Resultado del partido con los puntos ganados (al guardarse)      → quien pronosticó
+//  - Penaltis: duelo nuevo, o el rival ya ha jugado y te toca a ti     → el jugador al que le toca
+//  - Mensaje del admin (ruta /api/push/admin)                         → todos o un jugador
+// Cada aviso se apunta en un registro ("pushlog") para no enviarse dos veces.
+const HORA = 36e5, CIERRE = 36e5;   // las apuestas cierran 1 h antes del partido, igual que en la app
+const RECORDATORIOS = [6, 3, 1];    // horas que quedan para el cierre
+const esp = (ms, o) => new Date(ms).toLocaleString("es-ES", Object.assign({ timeZone: "Europe/Madrid" }, o));
+const fechaEs = (ms) => esp(ms, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+const horaEs = (ms) => esp(ms, { hour: "2-digit", minute: "2-digit" });
+const unidad = (n) => (Math.abs(n) === 1 ? "punto" : "puntos");
+
+// ---- Puntos: misma lógica que la app ----
+const pt1 = (q, r) => (q.h === r.h && q.a === r.a ? 3 : q.h === r.h || q.a === r.a ? 1 : 0);
+function effPred(p) {
+  if (!p || !p.mods || !p.mods.length) return p;
+  const sm = (k, w) => p.mods.reduce((n, x) => n + (!x.w || x.w === w ? x[k] || 0 : 0), 0);
+  const o = { ...p, h: Math.max(0, p.h + sm("dh", 1)), a: Math.max(0, p.a + sm("da", 1)) };
+  if (p.h2 != null) { o.h2 = Math.max(0, p.h2 + sm("dh", 2)); o.a2 = Math.max(0, p.a2 + sm("da", 2)); }
+  return o;
+}
+function ptsBase(p, r) {
+  if (!p || !r || typeof p.h !== "number") return 0;
+  const e = effPred(p); let x = pt1(e, r);
+  if (e.h2 != null) x = Math.max(x, pt1({ h: e.h2, a: e.a2 }, r));
+  return x;
+}
+function ptsPocion(p, r) {
+  if (!p || !r || typeof p.h !== "number") return 0;
+  const b = ptsBase(p, r);
+  if (p.pot === "doble") return b > 0 ? b * 2 : -1;
+  if (p.pot === "salva") return b === 0 ? 1 : b;
+  return b;
+}
+function rondasCalculadas(st) {
+  const by = {};
+  st.matches.filter((m) => !m.comp).forEach((m) => { (by[m.round] = by[m.round] || []).push(m); });
+  return Object.keys(by).map(Number).filter((r) => by[r].every((m) => m.result)).sort((a, b) => a - b);
+}
+function bonusRacha(st, pid, rs) {   // +1 desde la 3ª jornada seguida puntuando
+  const out = {}; let racha = 0;
+  rs.forEach((r) => {
+    const base = st.matches.filter((m) => m.round === r).reduce((n, m) => n + ptsBase((st.preds[m.id] || {})[pid], m.result), 0);
+    if (base > 0) { racha++; if (racha >= 3) out[r] = 1; } else racha = 0;
+  });
+  return out;
+}
+
+// ---- Penaltis: ronda en la que va el duelo vista desde un jugador (own = su ficha, riv = la del rival) ----
+function penSiguiente(own, riv) {
+  const os = own.s || [], ok = own.k || [], rs = riv.s || [], rk = riv.k || [];
+  let gO = 0, gR = 0;
+  for (let r = 0; r < 10; r++) {
+    const oO = os[r] != null && ok[r] != null, oR = rs[r] != null && rk[r] != null;
+    if (!(oO && oR)) return { over: false, r, ownOk: oO, rivOk: oR };
+    gO += os[r] !== rk[r] ? 1 : 0; gR += rs[r] !== ok[r] ? 1 : 0;
+    if (Math.abs(gO - gR) > Math.max(0, 3 - (r + 1))) return { over: true };
+  }
+  return { over: true };
+}
+const amTs = (k) => parseInt(String(k).slice(1), 36) || 0;   // hora de un reto amistoso (va en su clave)
+
+// ---- Generadores de avisos: devuelven [{ pid, title, body, tag }] ----
+const reales = (st) => st.players.filter((p) => p.regAt && !p.sim);
+
+function avisosNuevaJornada(st, antes, now, once) {
+  const out = [];
+  for (const m of st.matches) {
+    if (m.comp || antes.ids.has(m.id)) continue;
+    const k = Date.parse(m.kickoff); if (!k || k - CIERRE <= now) continue;
+    if (!once(`j:${m.round}|${m.home}|${m.away}`)) continue;
+    for (const p of reales(st)) out.push({ pid: p.id, tag: "jornada-" + m.round, title: "🆕 Nueva jornada publicada", body: `Jornada ${m.round}: ${m.home} vs ${m.away}. Pronostica antes del ${fechaEs(k - CIERRE)}.` });
+  }
+  return out;
+}
+
+function avisosResultado(st, antes, once) {
+  const out = [];
+  for (const m of st.matches) {
+    if (m.comp || !m.result || antes.res[m.id] !== false) continue;   // solo partidos que acaban de recibir resultado
+    if (!once("r:" + m.id)) continue;
+    const rs = rondasCalculadas(st), conRonda = rs.includes(m.round), r = m.result;
+    for (const p of reales(st)) {
+      const q = (st.preds[m.id] || {})[p.id];
+      if (!q || typeof q.h !== "number") continue;
+      const bonus = conRonda ? bonusRacha(st, p.id, rs)[m.round] || 0 : 0;
+      const total = ptsPocion(q, r) + bonus, base = ptsBase(q, r);
+      const pron = q.h2 != null ? `${q.h}-${q.a} / ${q.h2}-${q.a2}` : `${q.h}-${q.a}`;
+      const extra = [];
+      if (base === 3) extra.push("🎯 ¡Pleno!");
+      if (q.pot === "doble") extra.push("Doble filo");
+      if (q.pot === "salva" && base === 0) extra.push("Salvavidas");
+      if (bonus) extra.push("🔥 +1 por racha");
+      out.push({ pid: p.id, tag: "resultado-" + m.id, title: `🏁 Final: ${m.home} ${r.h}-${r.a} ${m.away}`, body: `Tu pronóstico ${pron}: ${total > 0 ? "+" : ""}${total} ${unidad(total)}.` + (extra.length ? " " + extra.join(" · ") : "") });
+    }
+  }
+  return out;
+}
+
+function avisosCierre(st, now, once) {
+  const out = [];
+  for (const m of st.matches) {
+    if (m.comp || m.result) continue;
+    const k = Date.parse(m.kickoff); if (!k) continue;
+    const quedan = k - CIERRE - now; if (quedan <= 0) continue;
+    for (const T of RECORDATORIOS) {
+      if (!(quedan <= T * HORA && quedan > T * HORA - 25 * 6e4)) continue;   // ventana de 25 min por si algún cron se retrasa
+      if (!once(`c:${m.id}:${T}`)) continue;
+      for (const p of reales(st)) {
+        const q = (st.preds[m.id] || {})[p.id]; if (q && typeof q.h === "number") continue;   // ya pronosticó
+        out.push({ pid: p.id, tag: `cierre-${m.id}`, title: T === 1 ? "⏰ ¡Queda 1 hora para cerrar!" : `⏰ Quedan ${T} horas para cerrar`, body: `${m.home} vs ${m.away} (jornada ${m.round}). Cierra a las ${horaEs(k - CIERRE)} y aún no has puesto tu pronóstico.` });
+      }
+    }
+  }
+  return out;
+}
+
+function avisosPenaltis(st, now, once) {
+  const out = [], by = new Map(st.players.map((p) => [p.id, p]));
+  for (const p of st.players) {
+    if (!p.pen) continue;
+    for (const k of Object.keys(p.pen)) {
+      const e = p.pen[k]; if (!e || !e.o) continue;
+      const o = by.get(e.o); if (!o) continue;
+      const f = o.pen && o.pen[k] && o.pen[k].o === p.id ? o.pen[k] : null;
+      const tipo = k[0] === "a" ? "amistoso" : k[0] === "w" ? "semanal" : "europeo";
+      if (tipo === "amistoso") {
+        if (now - amTs(k) > 7 * 864e5) continue;
+        // reto recién enviado: p es el retador y el retado aún no ha respondido
+        if (e.f === 1 && !f && !e.x && now - amTs(k) <= 48 * HORA && !o.sim && o.regAt && once(`i:${k}:${o.id}`))
+          out.push({ pid: o.id, tag: "reto-" + k, title: "🤝 Te han retado a penaltis", body: `${p.name} te reta a una tanda de penaltis. Acepta el reto desde la pestaña Jugar.` });
+      }
+      if (!f || e.x || f.x || p.sim || !p.regAt) continue;
+      const nx = penSiguiente(e, f);
+      if (nx.over || nx.ownOk) continue;
+      if (nx.rivOk) {
+        if (once(`t:${k}:${nx.r}:${p.id}`)) out.push({ pid: p.id, tag: "turno-" + k, title: "⚽ ¡Te toca tirar!", body: `${o.name} ya ha jugado la ronda ${nx.r + 1} de vuestra tanda. Es tu turno.` });
+      } else if (nx.r === 0 && once(`n:${k}:${p.id}`)) {
+        out.push({ pid: p.id, tag: "duelo-" + k, title: tipo === "europeo" ? "🏆 Desempate por penaltis" : tipo === "amistoso" ? "🤝 Reto amistoso listo" : "⚽ Duelo de penaltis", body: `Tienes una tanda contra ${o.name}. ¡Entra a jugarla!` });
+      }
+    }
+  }
+  return out;
 }
 
 // ======================= Rutas =======================
 const json = (o, s = 200) => new Response(JSON.stringify(o), { status: s, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 
+// ======================= Envío y rutas de avisos =======================
+async function enviar(env, estado, jobs) {
+  if (!jobs || !jobs.length) return { enviados: 0, fallidos: 0 };
+  if (!env.VAPID_PUBLIC || !env.VAPID_PRIVATE) { console.error("Faltan VAPID_PUBLIC / VAPID_PRIVATE"); return { enviados: 0, fallidos: jobs.length, error: "Faltan las claves VAPID" }; }
+  const caducadas = []; let enviados = 0, fallidos = 0;
+  await Promise.all(jobs.map(async (j) => {
+    try {
+      const code = await pushEnviar(env, j.sub, j.payload);
+      if (code >= 200 && code < 300) enviados++;
+      else { fallidos++; if (code === 404 || code === 410) caducadas.push(j.sub.e); else console.error("push respondió", code); }
+    } catch (e) { fallidos++; console.error("push:", e && e.message); }
+  }));
+  if (caducadas.length) { try { await estado.pushUnsubscribe(caducadas); } catch (e) {} }
+  return { enviados, fallidos };
+}
+
+async function pushRoutes(req, env, estado, ctx, p) {
+  if (p === "/api/push/key" && req.method === "GET") return json({ key: env.VAPID_PUBLIC || "" });
+  if (req.method !== "POST") return json({ error: "método no permitido" }, 405);
+  let b; try { b = await req.json(); } catch { return json({ error: "bad json" }, 400); }
+  b = b || {};
+  const admin = () => !!env.ADMIN_PIN && String(b.pin || "") === String(env.ADMIN_PIN);
+  const cut = (s, n) => String(s || "").slice(0, n);
+
+  if (p === "/api/push/sub") {
+    const s = b.sub || {}, k = s.keys || {};
+    if (typeof s.endpoint !== "string" || !/^https:\/\//.test(s.endpoint) || s.endpoint.length > 600 || !k.p256dh || !k.auth || typeof b.pid !== "string") return json({ error: "suscripción no válida" }, 400);
+    const ok = await estado.pushSubscribe(b.pid, { e: s.endpoint, p: String(k.p256dh), a: String(k.auth) });
+    return ok ? json({ ok: true }) : json({ error: "jugador desconocido" }, 404);
+  }
+  if (p === "/api/push/unsub") { await estado.pushUnsubscribe(String(b.endpoint || "")); return json({ ok: true }); }
+  if (p === "/api/push/test") {   // aviso de prueba al propio móvil
+    const jobs = await estado.pushJobsEndpoint(String(b.endpoint || ""), { t: "✅ Avisos activados", b: "Recibirás las novedades de Súper Predict en este móvil.", tag: "prueba", url: "/" });
+    if (!jobs.length) return json({ error: "este móvil no está suscrito" }, 404);
+    const r = await enviar(env, estado, jobs);
+    return json({ ok: r.enviados > 0, ...r });
+  }
+  if (p === "/api/push/stats") {
+    if (!admin()) return json({ error: "PIN incorrecto" }, 403);
+    return json(await estado.pushStats());
+  }
+  if (p === "/api/push/admin") {
+    if (!env.ADMIN_PIN) return json({ error: "Falta el secreto ADMIN_PIN en Cloudflare" }, 500);
+    if (!admin()) return json({ error: "PIN incorrecto" }, 403);
+    const t = cut(b.title, 80).trim(), cuerpo = cut(b.body, 300).trim();
+    if (!t || !cuerpo) return json({ error: "Falta el título o el mensaje" }, 400);
+    const pids = Array.isArray(b.to) ? b.to.map(String) : null;   // null = todos
+    const { jobs, jugadores } = await estado.pushJobsPara(pids, { t, b: cuerpo, tag: "admin-" + Date.now(), url: "/" });
+    if (!jobs.length) return json({ ok: true, enviados: 0, fallidos: 0, jugadores: 0 });
+    const r = await enviar(env, estado, jobs);
+    return json({ ok: true, jugadores, ...r });
+  }
+  return json({ error: "ruta desconocida" }, 404);
+}
+
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     const url = new URL(req.url), p = url.pathname.replace(/\/+$/, "") || "/";
     const estado = env.STORE.get(env.STORE.idFromName("estado"));
     if (p === "/api") {
@@ -296,17 +627,24 @@ export default {
       if (req.method === "POST") {
         let body;
         try { body = await req.json(); } catch { return json({ error: "bad json" }, 400); }
-        st = await estado.applyOps(body && body.ops);
+        const r = await estado.applyOpsN(body && body.ops);
+        st = r.st;
+        if (r.jobs && r.jobs.length) ctx.waitUntil(enviar(env, estado, r.jobs).catch((e) => console.error("avisos:", e && e.message)));   // avisos en segundo plano
       } else st = await estado.getState();
       return json({ state: st });
     }
+    if (p.startsWith("/api/push/")) return pushRoutes(req, env, estado, ctx, p);
     if (p === "/.netlify/functions/calendario") return calendario(req, env);
     if (p === "/.netlify/functions/forma") return forma(req, env, env.STORE.get(env.STORE.idFromName("cache")));
     // la página y el resto de archivos de la carpeta public
     return env.ASSETS.fetch(p === "/" ? new Request(new URL("/index.html", url), req) : req);
   },
-  // Cada 15 minutos (cron de wrangler.jsonc): resultados automáticos de los partidos de liga ya terminados
+  // Cada 5 minutos (cron de wrangler.jsonc): resultados automáticos de los partidos de liga ya terminados y recordatorios de cierre
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(resultados(env, env.STORE.get(env.STORE.idFromName("estado"))).catch((e) => console.error("resultados:", e && e.message)));
+    const estado = env.STORE.get(env.STORE.idFromName("estado"));
+    ctx.waitUntil((async () => {
+      try { await resultados(env, estado); } catch (e) { console.error("resultados:", e && e.message); }
+      try { await enviar(env, estado, await estado.pushReminders()); } catch (e) { console.error("recordatorios:", e && e.message); }   // recordatorios de cierre
+    })());
   },
 };

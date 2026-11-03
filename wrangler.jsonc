@@ -12,6 +12,10 @@
     "bindings": [{ "name": "STORE", "class_name": "Store" }]
   },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Store"] }],
-  "triggers": { "crons": ["*/15 * * * *"] },
+  "triggers": { "crons": ["*/5 * * * *"] },
+  "vars": {
+    "VAPID_PUBLIC": "BHu5jKvBU1JBht8bUgZkIVB64_i6coOxmTtvrfBmfP02RQd3oAlCjeJjsVPKjrNjba71obGZacVAOtWvzRT-smI",
+    "VAPID_SUBJECT": "mailto:avisos@superpredict.app"
+  },
   "observability": { "enabled": true }
 }
