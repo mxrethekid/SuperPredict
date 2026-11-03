@@ -4172,13 +4172,12 @@ let VOT_C = null;
 async function votCand(f) {   // todos los partidos de la semana siguiente (lunes a domingo) de las competiciones de la API cuyos dos equipos están en la app
   if (VOT_C && VOT_C.k === votCk(f) && Date.now() - VOT_C.t < 108e5) return VOT_C.list;
   let r = { ok: false }, j = {};
-  try { r = await fetch("/.netlify/functions/calendario?from=" + f.desde); j = await r.json().catch(() => ({})); } catch (e) { if (!VOT_TEST) throw e; }
-  if (!r.ok && !VOT_TEST) throw new Error(j.error || "No se pudo cargar el calendario (" + r.status + ").");
-  const seen = new Set(), min = VOT_TEST ? Date.now() : f.close + CIERRE_MS;
+  try { r = await fetch("/.netlify/functions/calendario?from=" + f.desde); j = await r.json().catch(() => ({})); } catch (e) { throw e; }
+  if (!r.ok) throw new Error(j.error || "No se pudo cargar el calendario (" + r.status + ").");
+  const seen = new Set(), min = f.close + CIERRE_MS;
   let list = (j.matches || []).map(m => { const h = votMap(m.home), a = votMap(m.away), ms = Date.parse(m.kickoff); return h && a && ms > min ? { k: h + "|" + a + "|" + ms, h, a, t: new Date(ms).toISOString(), c: m.comp || "" } : null; })
     .filter(c => c && !seen.has(c.k) && seen.add(c.k));
   list = votTop(list);   // 8 mejores por nivel + derbis
-  if (VOT_TEST && !list.length) { const eq = CONFIG.ligas.flatMap(l => l.equipos); list = []; for (let i = 0; i + 1 < eq.length && list.length < 6; i += 2) { const ms = Date.now() + (list.length + 1) * 864e5; list.push({ k: eq[i] + "|" + eq[i + 1] + "|" + ms, h: eq[i], a: eq[i + 1], t: new Date(ms).toISOString(), c: "" }); } }   // ejemplos si no hay partidos
   VOT_C = { k: votCk(f), t: Date.now(), list };
   return list;
 }
@@ -4212,7 +4211,7 @@ function votPaint(el, f, p) {
     if (!VOT_UI.loading) { VOT_UI.loading = true; votCand(f).then(() => { VOT_UI.loading = false; votMount(); }).catch(e => { VOT_UI.loading = false; VOT_UI.err = (e && e.message) || "No se pudo cargar el calendario."; votMount(); }); }
     return;
   }
-  if (!cand.length) { el.innerHTML = hd + '<div class="card muted" style="text-align:center">No hay partidos de la semana que viene en la lista de equipos de la app.</div>'; return; }
+  if (!cand.length) { el.innerHTML = hd + '<div class="card muted" style="text-align:center">Semana de parón: no hay partidos la semana que viene.</div>'; return; }
   const html = cand.map(c => `<button type="button" class="vt-r${v && v.k === c.k ? " on" : ""}" data-k="${esc(c.k)}">${crest(c.h)}${crest(c.a)}<span class="vt-t">${esc(c.h)} – ${esc(c.a)}</span></button>`).join("");
   el.innerHTML = hd + note + `<div class="vt-l">${html}</div>`;
   const lst = el.querySelector(".vt-l"); lst.scrollTop = VOT_UI.st || 0;
