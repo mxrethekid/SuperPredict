@@ -1005,8 +1005,8 @@ html.pko-lock,html.pko-lock body{overflow:hidden}
 .ti-g{display:flex;flex-direction:column;gap:8px}
 .ti-r,.card.match{position:relative}
 #tiendaTit.nw::after{content:"";display:inline-block;width:10px;height:10px;margin-left:10px;border-radius:50%;background:#ff3b4a;box-shadow:0 0 8px #ff3b4a;vertical-align:middle;-webkit-text-fill-color:initial}
-nav button.nw::after,.ti-r.nw::after,.card.match.nw::after{content:"";position:absolute;width:11px;height:11px;border-radius:50%;background:#ff3b4a;box-shadow:0 0 0 2px #0c1115,0 0 8px #ff3b4a}
-nav button.nw::after{top:7px;left:calc(50% + 10px)}
+nav button.nw::after,nav button.nwp::after,.ti-r.nw::after,.card.match.nw::after{content:"";position:absolute;width:11px;height:11px;border-radius:50%;background:#ff3b4a;box-shadow:0 0 0 2px #0c1115,0 0 8px #ff3b4a}
+nav button.nw::after,nav button.nwp::after{top:7px;left:calc(50% + 10px)}
 .ti-r.nw::after,.card.match.nw::after{top:-4px;right:-3px}
 .ti-r{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#18212a,#12181e);opacity:.78}
 .ti-r.ok{opacity:1;border-color:#ffc83d55}
@@ -1762,6 +1762,29 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 #tabla tr.rcol td,#tabla tr.rcol td:first-child,#tabla tr.rcol td:last-child{box-shadow:inset 0 0 16px rgba(255,77,141,.38)}
 #myPos.colf{border-color:var(--line);box-shadow:inset 0 0 14px rgba(255,77,141,.35)}
 @media(prefers-reduced-motion:no-preference){#tabla tr.rcol td,#tabla tr.rcol td:first-child,#tabla tr.rcol td:last-child{animation:colGlow 7s linear infinite}#myPos.colf{animation:colGlowMy 7s linear infinite}}
+/* Avisos (perfil): recuadro compacto con interruptor */
+#pshBox .psh{display:block;margin:30px 0 8px;padding:12px 14px}
+#pshBox .psh-r{display:flex;align-items:center;gap:12px}
+#pshBox .psh-i{width:42px;height:42px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:var(--cyan);border:1px solid #00b4d855;background:radial-gradient(circle at 50% 30%,#00b4d833,#00b4d80d)}
+#pshBox .psh-i svg{width:22px;height:22px}
+#pshBox .psh-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+#pshBox .psh-t b{font:400 22px/1 var(--h);letter-spacing:.04em;text-transform:uppercase;color:var(--text)}
+#pshBox .psh-t span{display:flex;align-items:center;gap:6px;font:700 13px/1.1 var(--b);color:var(--mute)}
+#pshBox .psh-t span::before{content:"";width:8px;height:8px;border-radius:50%;background:#5b6b78;flex:0 0 auto}
+#pshBox .psh-on .psh-i{color:#3be08a;border-color:#3be08a66;background:radial-gradient(circle at 50% 30%,#3be08a33,#3be08a0d)}
+#pshBox .psh-on .psh-t span{color:#3be08a}
+#pshBox .psh-on .psh-t span::before{background:#3be08a;box-shadow:0 0 8px #3be08a}
+#pshBox .psh-instalar .psh-t span,#pshBox .psh-bloqueado .psh-t span{color:#ffc21a}
+#pshBox .psh-instalar .psh-t span::before,#pshBox .psh-bloqueado .psh-t span::before{background:#ffc21a}
+#pshBox .psh-sw{position:relative;flex:0 0 auto;width:54px;height:32px;padding:0;margin:0;border-radius:99px;border:1px solid var(--line);background:#0a1014;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .2s,border-color .2s}
+#pshBox .psh-sw i{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#8b9aa6;transition:transform .2s,background .2s}
+#pshBox .psh-sw.psh-on{background:#00b4d833;border-color:var(--cyan)}
+#pshBox .psh-sw.psh-on i{transform:translateX(22px);background:var(--cyan);box-shadow:0 0 10px #00b4d8aa}
+#pshBox .psh-sw:disabled{opacity:.55}
+#pshBox .psh-h{margin:10px 2px 0;font-size:13px;line-height:1.35}
+#pshBox #pshMsg:empty{display:none}
+#pshBox #pshMsg{margin:10px 2px 0;font-size:14px}
+@media (prefers-reduced-motion:reduce){#pshBox .psh-sw,#pshBox .psh-sw i{transition:none}}
 </style>
 </head>
 <body>
@@ -2014,6 +2037,7 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
   <div id="historialBox"></div>
   <div id="euroHist"></div>
   <div id="logrosBox"></div>
+  <div id="pshBox"></div>
 </section>
 
 <!-- ADMIN -->
@@ -7544,12 +7568,11 @@ async function pshState() {
   if (Notification.permission === "denied") return "bloqueado";
   return Notification.permission === "granted" && (await pshSub()) ? "on" : "off";
 }
-const PUSH_LISTA = "Te avisamos de: nueva jornada, últimas 6, 3 y 1 horas para pronosticar, resultado con tus puntos y cuando te toca en los penaltis.";
 function pshPaint(html) {
   const box = $("#pshBox"); if (!box) return;
   pshLast = html; box.innerHTML = html;
   const msg = t => { const m = $("#pshMsg"); if (m) { m.className = "msg"; m.textContent = t; } };
-  const on = $("#pshOn"), off = $("#pshOff"), test = $("#pshTest");
+  const on = $("#pshOn"), off = $("#pshOff");
   if (on) on.onclick = async () => {
     const p = meP(); if (!p) return;
     on.disabled = true; msg("Activando…");
@@ -7574,36 +7597,48 @@ function pshPaint(html) {
     if (s) { await pshPost("/api/push/unsub", { endpoint: s.endpoint }).catch(() => {}); try { await s.unsubscribe(); } catch (e) {} }
     pshSynced = ""; pshCard();
   };
-  if (test) test.onclick = async () => {
-    test.disabled = true; msg("Enviando…");
-    try { const s = await pshSub(); if (!s) throw new Error("Este móvil no está suscrito."); await pshPost("/api/push/test", { endpoint: s.endpoint }); msg("Aviso de prueba enviado."); }
-    catch (e) { const m = $("#pshMsg"); if (m) { m.className = "msg err"; m.textContent = e.message; } }
-    test.disabled = false;
-  };
+}
+// Punto rojo en la pestaña de perfil hasta que el jugador ve el recuadro de avisos (solo si aún no los tiene activados)
+const pshVistoKey = id => KEY + "_pshvisto_" + id;
+const pshDot = on => { const b = document.querySelector('nav button[data-t="historial"]'); if (b) b.classList.toggle("nwp", !!on); };
+function pshVisto() { const p = meP(); if (p) { try { localStorage.setItem(pshVistoKey(p.id), "1"); } catch (e) {} } pshDot(false); }
+async function pshDotCheck() {
+  try {
+    const p = meP();
+    if (!p || LOCAL || !S.players.includes(p)) return pshDot(false);
+    let visto = false; try { visto = !!localStorage.getItem(pshVistoKey(p.id)); } catch (e) {}
+    if (visto) return pshDot(false);
+    const st = await pshState();
+    pshDot(st === "off" || st === "instalar");
+  } catch (e) {}
+}
+let pshIO = null;
+function pshWatch() {   // se da por visto cuando el recuadro lleva un momento en pantalla
+  const box = $("#pshBox"); if (!box) return;
+  if (!("IntersectionObserver" in window)) return pshVisto();
+  if (!pshIO) { let tm = 0; pshIO = new IntersectionObserver(es => es.forEach(e => { clearTimeout(tm); if (e.isIntersecting && box.firstChild) tm = setTimeout(pshVisto, 900); }), { threshold: .6 }); }
+  pshIO.observe(box);
 }
 async function pshCard(err) {
   if (!$("#pshBox")) return;
   const st = await pshState(); if (!$("#pshBox")) return;
-  const T = {
-    instalar: 'Para recibir avisos en iPhone, añade esta app a la pantalla de inicio (botón Compartir → «Añadir a pantalla de inicio») y ábrela desde ahí.',
-    nosoporte: "Este navegador no permite recibir avisos.",
-    bloqueado: "Los avisos están bloqueados. Actívalos en los ajustes del móvil o del navegador para esta app.",
-    off: PUSH_LISTA,
-    on: "Avisos activados en este móvil ✓ " + PUSH_LISTA,
-  }[st];
-  const btns = st === "off" ? '<button class="btn" id="pshOn" style="width:100%">Activar avisos</button>'
-    : st === "on" ? '<div class="row"><button class="btn ghost" id="pshTest">Probar</button><button class="btn ghost" id="pshOff">Desactivar</button></div>' : "";
-  pshPaint(`<div class="card"><h3>🔔 Avisos</h3><p class="muted" style="margin:6px 0 0">${T}</p>${btns}<p class="msg" id="pshMsg"></p></div>`);
+  const bell = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
+  const E = { on: "Activados", off: "Desactivados", instalar: "Instala la app", bloqueado: "Bloqueados", nosoporte: "No disponibles" }[st];
+  const H = { instalar: "Toca Compartir → «Añadir a pantalla de inicio» y ábrela desde ahí.", bloqueado: "Actívalos en los ajustes del móvil." }[st];
+  const ctl = st === "off" ? '<button type="button" class="psh-sw" id="pshOn" role="switch" aria-checked="false" aria-label="Activar avisos"><i></i></button>'
+    : st === "on" ? '<button type="button" class="psh-sw psh-on" id="pshOff" role="switch" aria-checked="true" aria-label="Desactivar avisos"><i></i></button>' : "";
+  pshPaint(`<div class="card psh psh-${st}"><div class="psh-r"><span class="psh-i">${bell}</span><div class="psh-t"><b>Avisos</b><span>${E}</span></div>${ctl}</div>${H ? `<p class="muted psh-h">${H}</p>` : ""}<p class="msg" id="pshMsg"></p></div>`);
   if (err) { const m = $("#pshMsg"); if (m) { m.className = "msg err"; m.textContent = err; } }
+  if (st === "on") pshVisto(); else pshWatch();
 }
-// El recuadro de avisos va al final del perfil propio
+// El recuadro de avisos va al final de la pestaña de perfil propio (debajo de los logros)
 const _renderHistorial = renderHistorial;
 renderHistorial = function () {
   _renderHistorial.apply(this, arguments);
   try {
-    const box = $("#historialBox"), pl = meP();
-    if (!box || !pl || (viewId && viewId !== me) || !box.firstChild) return;
-    box.insertAdjacentHTML("beforeend", '<div id="pshBox"></div>');
+    const box = $("#historialBox"), pb = $("#pshBox"), pl = meP();
+    if (!pb) return;
+    if (!box || !pl || (viewId && viewId !== me) || !box.firstChild) { pb.innerHTML = ""; return; }   // solo en el perfil propio
     if (pshLast) pshPaint(pshLast);   // se pinta al instante lo último y luego se actualiza
     pshCard(); pshSync();
   } catch (e) {}
@@ -7614,11 +7649,13 @@ setMe = function (id) {
   const was = me, r = _setMe.apply(this, arguments);
   try {
     if (PUSH_OK && was && !id) pshSub().then(s => { if (s) pshPost("/api/push/unsub", { endpoint: s.endpoint }).catch(() => {}); });
-    pshSynced = ""; if (id) setTimeout(pshSync, 1500);
+    pshSynced = ""; if (id) setTimeout(pshSync, 1500); pshDotCheck();
   } catch (e) {}
   return r;
 };
 setTimeout(pshSync, 3000);
+setTimeout(pshDotCheck, 3200); setTimeout(pshDotCheck, 9000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) pshDotCheck(); });
 
 // ---- Admin: mensaje personalizado ----
 async function adAvisos(el) {
@@ -7661,6 +7698,83 @@ go(meP() ? "jugar" : "cuenta");
 ["gesturestart", "gesturechange", "gestureend"].forEach(t => document.addEventListener(t, e => e.preventDefault(), { passive: false }));
 document.addEventListener("touchmove", e => { if (e.touches && e.touches.length > 1) e.preventDefault(); }, { passive: false });
 boot();
+</script>
+<style>
+#spi{position:fixed;left:0;right:0;bottom:0;z-index:200;display:flex;justify-content:center;padding:0 12px calc(12px + env(safe-area-inset-bottom,0px));pointer-events:none;transform:translateY(130%);transition:transform .45s cubic-bezier(.2,.9,.3,1)}
+#spi.on{transform:none}
+#spi .spi-c{pointer-events:auto;width:100%;max-width:460px;background:var(--panel);border:1px solid var(--cyan);border-radius:18px;padding:16px 16px 12px;box-shadow:0 10px 40px #000c,0 0 0 1px #00b4d822,0 0 28px #00b4d833}
+#spi .spi-h{display:flex;align-items:center;gap:12px}
+#spi .spi-h img{width:48px;height:48px;border-radius:12px;flex:0 0 auto}
+#spi .spi-t{font-family:var(--h);font-size:21px;letter-spacing:.03em;text-transform:uppercase;color:var(--cyan);line-height:1.05}
+#spi .spi-s{font-size:14px;color:var(--mute);margin-top:3px;line-height:1.3}
+#spi ol{margin:12px 0 2px;padding-left:0;list-style:none;font-size:15px;color:var(--text);display:grid;gap:8px}
+#spi li{display:flex;align-items:center;gap:10px;line-height:1.25}
+#spi li b{flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:#00b4d822;color:var(--cyan);font:700 13px var(--b);display:flex;align-items:center;justify-content:center}
+#spi li svg{width:1.25em;height:1.25em;vertical-align:-.25em;color:var(--cyan)}
+#spi .spi-b{display:flex;gap:8px;margin-top:14px}
+#spi button{font:700 15px var(--b);border-radius:12px;padding:11px 14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#spi .spi-go{flex:1;background:var(--cyan);color:#04222b;border:0}
+#spi .spi-no{background:transparent;color:var(--text);border:1px solid var(--line)}
+#spi .spi-nv{display:block;margin:8px auto 0;background:none;border:0;color:var(--mute);font:500 12px var(--b);padding:6px;text-decoration:underline}
+@media (prefers-reduced-motion:reduce){#spi{transition:none}}
+</style>
+<script>
+// ===== Aviso para instalar la app (aparece al entrar si aún no está instalada) =====
+(() => {
+  const K = "sp_install_v1", DIAS = 7, ESPERA = 2500;
+  const ua = navigator.userAgent;
+  const ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const android = /Android/.test(ua);
+  const instalada = navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+  const local = /^(file:|about:)/.test(location.protocol) || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || /[?&]local\b/.test(location.search);
+  if (instalada || local || !(ios || android)) return;
+  const leer = () => { try { return JSON.parse(localStorage.getItem(K)) || {}; } catch (e) { return {}; } };
+  const guardar = o => { try { localStorage.setItem(K, JSON.stringify(Object.assign(leer(), o))); } catch (e) {} };
+  const st = leer();
+  if (st.nunca || (st.t && Date.now() - st.t < DIAS * 864e5)) return;
+
+  let evt = null, listo = false, mostrado = false;
+  const t0 = Date.now();
+  const enNavApp = /FBAN|FBAV|Instagram|Line\/|TikTok|Snapchat|musical_ly/.test(ua);   // navegadores internos: no pueden instalar
+  const share = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M8 7l4-4 4 4M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>';
+  const plus = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/></svg>';
+
+  function cerrar(ms) {
+    const el = document.getElementById("spi"); if (!el) return;
+    el.classList.remove("on"); setTimeout(() => el.remove(), 500);
+  }
+  function mostrar() {
+    if (mostrado || document.getElementById("spi")) return; mostrado = true;
+    const iosPasos = enNavApp
+      ? '<ol><li><b>1</b><span>Abre este enlace en <b style="all:unset;font-weight:700">Safari</b> (menú ··· → «Abrir en Safari»).</span></li><li><b>2</b><span>Toca ' + share + ' y «Añadir a pantalla de inicio».</span></li></ol>'
+      : '<ol><li><b>1</b><span>Toca ' + share + ' <span style="color:var(--mute)">(Compartir, abajo)</span></span></li><li><b>2</b><span>Elige «Añadir a pantalla de inicio» ' + plus + '</span></li><li><b>3</b><span>Ábrela desde el icono nuevo</span></li></ol>';
+    const el = document.createElement("div");
+    el.id = "spi"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Instalar Súper Predict");
+    el.innerHTML = '<div class="spi-c"><div class="spi-h"><img src="/icon-192.png" alt=""><div><div class="spi-t">Instala Súper Predict</div><div class="spi-s">' +
+      (ios ? 'Para recibir los avisos en tu iPhone tienes que añadirla a la pantalla de inicio.' : 'Ábrela como una app y recibe los avisos de cada jornada.') + '</div></div></div>' +
+      (ios ? iosPasos + '<div class="spi-b"><button class="spi-no" id="spiNo" style="flex:1">Ahora no</button></div>'
+           : '<div class="spi-b"><button class="spi-go" id="spiGo">Instalar</button><button class="spi-no" id="spiNo">Ahora no</button></div>') +
+      '<button class="spi-nv" id="spiNv">No volver a mostrar</button></div>';
+    document.body.appendChild(el);
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("on")));
+    document.getElementById("spiNo").onclick = () => { guardar({ t: Date.now() }); cerrar(); };
+    document.getElementById("spiNv").onclick = () => { guardar({ nunca: 1 }); cerrar(); };
+    const go = document.getElementById("spiGo");
+    if (go) go.onclick = async () => {
+      if (!evt) return cerrar();
+      try { evt.prompt(); const r = await evt.userChoice; guardar(r && r.outcome === "accepted" ? { nunca: 1 } : { t: Date.now() }); } catch (e) { guardar({ t: Date.now() }); }
+      evt = null; cerrar();
+    };
+  }
+  function intentar() {   // espera un poco tras cargar para no tapar la pantalla de inicio de golpe
+    if (!listo) return;
+    setTimeout(mostrar, Math.max(0, ESPERA - (Date.now() - t0)));
+  }
+
+  window.addEventListener("appinstalled", () => { guardar({ nunca: 1 }); cerrar(); });
+  if (ios) { listo = true; window.addEventListener("load", intentar); if (document.readyState === "complete") intentar(); }
+  else window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); evt = e; listo = true; intentar(); });   // Android: solo si el navegador permite instalar
+})();
 </script>
 </body>
 </html>
