@@ -83,11 +83,11 @@ export class Store extends DurableObject {
   async applyOpsN(ops) {
     const st = this._state(); let jobs = [];
     if (Array.isArray(ops) && ops.length) {
-      const antes = { ids: new Set(st.matches.map((m) => m.id)), res: Object.fromEntries(st.matches.map((m) => [m.id, !!m.result])) };
+      const antes = { ids: new Set(st.matches.map((m) => m.id)), res: Object.fromEntries(st.matches.map((m) => [m.id, !!m.result])), mods: modsActuales(st) };
       applyOps(st, ops); this._set("state", st);
       try {   // un fallo en los avisos nunca debe impedir que se guarde
         const now = Date.now(), L = this._logOnce();
-        const msgs = [...avisosNuevaJornada(st, antes, now, L.once), ...avisosResultado(st, antes, L.once), ...avisosPenaltis(st, now, L.once)];
+        const msgs = [...avisosNuevaJornada(st, antes, now, L.once), ...avisosResultado(st, antes, L.once), ...avisosPocion(st, antes, L.once), ...avisosPenaltis(st, now, L.once)];
         L.save(); jobs = this._jobs(msgs);
       } catch (e) { console.error("avisos:", e && e.message); }
     }
@@ -486,7 +486,7 @@ function avisosNuevaJornada(st, antes, now, once) {
     if (m.comp || antes.ids.has(m.id)) continue;
     const k = Date.parse(m.kickoff); if (!k || k - CIERRE <= now) continue;
     if (!once(`j:${m.round}|${m.home}|${m.away}`)) continue;
-    for (const p of reales(st)) out.push({ pid: p.id, tag: "jornada-" + m.round, title: "🆕 Nueva jornada publicada", body: `Jornada ${m.round}: ${m.home} vs ${m.away}. Pronostica antes del ${fechaEs(k - CIERRE)}.` });
+    for (const p of reales(st)) out.push({ pid: p.id, tag: "jornada-" + m.round, title: "🆕 ¡Nueva jornada!", body: `J${m.round}: ${m.home} vs ${m.away}.\nCierre: ${fechaEs(k - CIERRE)}.` });
   }
   return out;
 }
@@ -502,13 +502,34 @@ function avisosResultado(st, antes, once) {
       if (!q || typeof q.h !== "number") continue;
       const bonus = conRonda ? bonusRacha(st, p.id, rs)[m.round] || 0 : 0;
       const total = ptsPocion(q, r) + bonus, base = ptsBase(q, r);
-      const pron = q.h2 != null ? `${q.h}-${q.a} / ${q.h2}-${q.a2}` : `${q.h}-${q.a}`;
       const extra = [];
-      if (base === 3) extra.push("🎯 ¡Pleno!");
-      if (q.pot === "doble") extra.push("Doble filo");
-      if (q.pot === "salva" && base === 0) extra.push("Salvavidas");
-      if (bonus) extra.push("🔥 +1 por racha");
-      out.push({ pid: p.id, tag: "resultado-" + m.id, title: `🏁 Final: ${m.home} ${r.h}-${r.a} ${m.away}`, body: `Tu pronóstico ${pron}: ${total > 0 ? "+" : ""}${total} ${unidad(total)}.` + (extra.length ? " " + extra.join(" · ") : "") });
+      if (q.pot === "doble") extra.push("Doble filo 🧪");
+      if (q.pot === "salva" && base === 0) extra.push("Salvavidas 🧪");
+      if (bonus) extra.push("+1 por racha 🔥");
+      out.push({ pid: p.id, tag: "resultado-" + m.id, title: `🏁 Final: ${m.home} ${r.h}-${r.a} ${m.away}`, body: `${total > 0 ? "+" : ""}${total} ${unidad(total)} ${total > 0 ? "✅" : total < 0 ? "😢" : "❌"}` + (extra.length ? " " + extra.join(" ") : "") });
+    }
+  }
+  return out;
+}
+
+// Cambiaforma: avisa al jugador al que le han retocado la predicción (Visión es secreta, no se avisa).
+const modsActuales = (st) => {
+  const s = new Set();
+  for (const mid of Object.keys(st.preds)) for (const pid of Object.keys(st.preds[mid])) { const q = st.preds[mid][pid]; if (q && Array.isArray(q.mods) && q.mods.length) s.add(mid + ">" + pid); }
+  return s;
+};
+const modTxt = (m, x) => (x.dh ? (x.dh > 0 ? "+1 gol a " : "-1 gol a ") + m.home : (x.da > 0 ? "+1 gol a " : "-1 gol a ") + m.away) + (x.w ? " (marcador " + x.w + ")" : "");
+
+function avisosPocion(st, antes, once) {
+  const out = [], by = new Map(st.players.map((p) => [p.id, p]));
+  for (const m of st.matches) {
+    for (const pid of Object.keys(st.preds[m.id] || {})) {
+      const q = st.preds[m.id][pid];
+      if (!q || !Array.isArray(q.mods) || !q.mods.length || antes.mods.has(m.id + ">" + pid)) continue;
+      const v = by.get(pid); if (!v || v.sim || !v.regAt) continue;
+      if (!once(`p:${m.id}:${pid}`)) continue;
+      const x = q.mods[0], autor = (by.get(x.by) || {}).name || "Un rival";
+      out.push({ pid, tag: `pocion-${m.id}`, title: "🧪 ¡Te han lanzado una poción!", body: `${autor} ha usado Cambiaforma.\n${modTxt(m, x)}.` });
     }
   }
   return out;
@@ -525,7 +546,7 @@ function avisosCierre(st, now, once) {
       if (!once(`c:${m.id}:${T}`)) continue;
       for (const p of reales(st)) {
         const q = (st.preds[m.id] || {})[p.id]; if (q && typeof q.h === "number") continue;   // ya pronosticó
-        out.push({ pid: p.id, tag: `cierre-${m.id}`, title: T === 1 ? "⏰ ¡Queda 1 hora para cerrar!" : `⏰ Quedan ${T} horas para cerrar`, body: `${m.home} vs ${m.away} (jornada ${m.round}). Cierra a las ${horaEs(k - CIERRE)} y aún no has puesto tu pronóstico.` });
+        out.push({ pid: p.id, tag: `cierre-${m.id}`, title: T === 1 ? "⏰ ¡Queda 1 hora para el cierre!" : `⏰ Quedan ${T} horas para el cierre`, body: `J${m.round}: ${m.home} vs ${m.away}\nCierra a las ${horaEs(k - CIERRE)} y aún no has puesto tu pronóstico…` });
       }
     }
   }
@@ -545,7 +566,7 @@ function avisosPenaltis(st, now, once) {
         if (now - amTs(k) > 7 * 864e5) continue;
         // reto recién enviado: p es el retador y el retado aún no ha respondido
         if (e.f === 1 && !f && !e.x && now - amTs(k) <= 48 * HORA && !o.sim && o.regAt && once(`i:${k}:${o.id}`))
-          out.push({ pid: o.id, tag: "reto-" + k, title: "🤝 Te han retado a penaltis", body: `${p.name} te reta a una tanda de penaltis. Acepta el reto desde la pestaña Jugar.` });
+          out.push({ pid: o.id, tag: "reto-" + k, title: "🤝 Te han retado a penaltis", body: `${p.name} te reta a una tanda de penaltis. Acepta el reto desde la pestaña de inicio.` });
       }
       if (!f || e.x || f.x || p.sim || !p.regAt) continue;
       const nx = penSiguiente(e, f);
