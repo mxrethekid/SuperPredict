@@ -124,19 +124,19 @@ export class Store extends DurableObject {
   // Presencia: la app avisa cada 25 s mientras está abierta y a la vista. Quien está dentro no recibe avisos (los verá en la propia app).
   _dentro(pid) { const t = this._pres && this._pres[pid]; return !!t && Date.now() - t < 55e3; }
   async presencia(pid, on) { this._pres ||= {}; if (on) this._pres[pid] = Date.now(); else delete this._pres[pid]; return true; }
-  _jobs(msgs, st, forzar) {   // cada aviso se convierte en un envío por cada móvil suscrito del jugador (salvo si está dentro de la app)
+  _jobs(msgs, st, forzar, autor) {   // cada aviso se convierte en un envío por cada móvil suscrito del jugador (salvo si está dentro de la app)
     if (!msgs.length) return [];
     const subs = this._subs().subs, jobs = [];
     const now = Date.now();
     for (const m of msgs) {
-      if (!forzar && this._dentro(m.pid)) continue;   // ya está en la app: no hace falta avisarle
+      if (!forzar && m.pid !== autor && this._dentro(m.pid)) continue;   // ya está en la app: no hace falta avisarle (salvo a quien ha hecho el cambio: así se pueden probar los avisos desde el mismo móvil)
       const tab = TAB_AVISO[String(m.tag || "").split("-")[0]], n = pendientes(st, m.pid, now);
       for (const s of subs[m.pid] || []) jobs.push({ sub: s, payload: { t: m.title, b: m.body, tag: m.tag, url: tab ? "/#" + tab : "/", n } });
     }
     return jobs;
   }
   // Igual que applyOps, pero además devuelve los avisos que provocan los cambios (jornada nueva, resultado, penaltis).
-  async applyOpsN(ops) {
+  async applyOpsN(ops, autor) {
     const st = this._state(); let jobs = [];
     if (Array.isArray(ops) && ops.length) {
       const antes = { ids: new Set(st.matches.map((m) => m.id)), res: Object.fromEntries(st.matches.map((m) => [m.id, !!m.result])), mods: modsActuales(st), info: Object.fromEntries(st.matches.map((m) => [m.id, { round: m.round, home: m.home, away: m.away }])) };
@@ -159,7 +159,7 @@ export class Store extends DurableObject {
       try {   // un fallo en los avisos nunca debe impedir que se guarde
         const now = Date.now(), L = this._logOnce();
         const msgs = [...avisosNuevaJornada(st, antes, now, L.once), ...avisosResultado(st, antes, L.once), ...avisosPocion(st, antes, L.once), ...avisosPenaltis(st, now, L.once)];
-        L.save(); jobs = this._jobs(msgs, st);
+        L.save(); jobs = this._jobs(msgs, st, false, typeof autor === "string" ? autor : "");
       } catch (e) { console.error("avisos:", e && e.message); }
     }
     return { st, jobs };
@@ -950,7 +950,7 @@ export default {
       if (req.method === "POST") {
         let body;
         try { body = await req.json(); } catch { return json({ error: "bad json" }, 400); }
-        const r = await estado.applyOpsN(body && body.ops);
+        const r = await estado.applyOpsN(body && body.ops, body && body.by);
         st = r.st;
         if (r.jobs && r.jobs.length) ctx.waitUntil(enviar(env, estado, r.jobs).catch((e) => console.error("avisos:", e && e.message)));   // avisos en segundo plano
       } else st = await estado.getState();
