@@ -10,6 +10,7 @@ self.addEventListener("push", (e) => {
     icon: "/icon-192.png",
     badge: "/icon-192.png",
     tag: d.tag || undefined,
+    renotify: !!d.tag,   // misma etiqueta (p. ej. dos pruebas seguidas): el aviso vuelve a sonar en vez de cambiarse en silencio
     data: { url: d.url || "/" },
   }));
 });
@@ -21,5 +22,18 @@ self.addEventListener("notificationclick", (e) => {
     const wins = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
     for (const w of wins) if ("focus" in w) return w.focus();   // si la app ya está abierta, se trae al frente
     return self.clients.openWindow(url);
+  })());
+});
+
+// Si el navegador renueva o invalida la suscripción por su cuenta, se vuelve a suscribir y se lo cuenta al servidor
+self.addEventListener("pushsubscriptionchange", (e) => {
+  e.waitUntil((async () => {
+    try {
+      const old = e.oldSubscription;
+      const key = (old && old.options && old.options.applicationServerKey) || (e.newSubscription && e.newSubscription.options && e.newSubscription.options.applicationServerKey);
+      const sub = e.newSubscription || (key ? await self.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }) : null);
+      if (!sub || !old) return;
+      await fetch("/api/push/resub", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ old: old.endpoint, sub: sub.toJSON() }) });
+    } catch (_) {}
   })());
 });

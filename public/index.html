@@ -793,6 +793,20 @@ td .crest{width:30px;height:30px}
 #votBox .vt-ok{text-align:center}
 #votBox .vt-ok b{font:700 17px/1.3 var(--b)}
 #votBox .vt-ok .btn{margin:10px auto 0}
+#bdoBox .ja-t{margin:0 0 10px}
+#bdoBox .vt-n{text-align:center;margin:0 0 10px;font-size:13px;line-height:1.4}
+#bdoBox .vt-l{max-height:min(62vh,540px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:2px}
+#bdoBox .vt-r{width:100%;display:flex;align-items:center;gap:14px;padding:10px 12px;margin:0 0 6px;text-align:left;background:#0e1419;border:1px solid var(--line);border-radius:12px;color:var(--text);font:600 17px var(--b);cursor:pointer;-webkit-tap-highlight-color:transparent}
+#bdoBox .vt-r .crest{width:38px;height:38px;flex:none}
+#bdoBox .vt-r .vt-t{flex:1;min-width:0}
+#bdoBox .vt-r.on{border-color:var(--cyan);background:#0f2a33}
+#bdoBox .vt-r:active{background:#12313b}
+#bdoBox .vt-ok{text-align:center}
+#bdoBox .vt-ok b{font:700 17px/1.3 var(--b)}
+#bdoBox .vt-ok .btn{margin:10px auto 0}
+#bdoBox .vt-r.gan{border-color:#e9b93c;background:#2a2410}
+#bdoBox .vt-r b.pc{font:700 17px var(--b);color:var(--cyan);flex:none}
+#bdoBox .vt-r.gan b.pc{color:#e9b93c}
 /* ===== Sobres / PredictCoin ===== */
 #sobres h2{font:700 17px/1.3 var(--b)!important;letter-spacing:.12em!important;text-transform:uppercase;text-align:center;color:var(--mute)!important;-webkit-text-fill-color:currentColor!important;background:none!important;filter:none!important;animation:none!important;margin-bottom:14px}
 #sobres{position:relative}
@@ -2342,7 +2356,7 @@ function recentAdd(ops) {
     else if (o.c === "players") {   // título equipado, compras, logros, escudo y lo que cambia el admin (pagado, trofeos)
       const k = "u|" + o.id;
       if (o.rm) { RECENT.delete(k); return; }
-      const st = {}; ["titulo", "marco", "comprados", "logros", "team", "paid", "trofeos", "vis", "pen", "fav", "vot", "vctl"].forEach(f => { if (o.set && f in o.set) st[f] = o.set[f]; });
+      const st = {}; ["titulo", "marco", "comprados", "logros", "team", "paid", "trofeos", "premios", "bdo", "vis", "pen", "fav", "vot", "vctl"].forEach(f => { if (o.set && f in o.set) st[f] = o.set[f]; });
       if (!Object.keys(st).length) return;
       const e = RECENT.get(k); RECENT.set(k, { o: { c: "players", id: o.id, set: { ...(e ? e.o.set : {}), ...st } }, t: now });
     }
@@ -2412,6 +2426,8 @@ function adopt(st, silent) {
       if ("paid" in st && !!p.paid !== !!st.paid) { p.paid = !!st.paid; healed = true; }
       if ("trofeos" in st && JSON.stringify(p.trofeos || []) !== JSON.stringify(st.trofeos || [])) { p.trofeos = clone(st.trofeos || []); healed = true; }
       if ("fav" in st && JSON.stringify(p.fav || []) !== JSON.stringify(st.fav || [])) { p.fav = clone(st.fav || []); healed = true; }
+      if (st.bdo && (!p.bdo || p.bdo.s !== st.bdo.s || (p.bdo.v == null && st.bdo.v != null))) { p.bdo = clone(st.bdo); healed = true; }   // apertura y voto del Balón de Oro
+      if (Array.isArray(st.premios)) { const cur = Array.isArray(p.premios) ? p.premios : [], miss = st.premios.filter(x => !cur.includes(x)); if (miss.length) { p.premios = cur.concat(miss); healed = true; } }   // copas ya repartidas: solo crecen
       if (st.vot && JSON.stringify(p.vot || null) !== JSON.stringify(st.vot)) { p.vot = clone(st.vot); healed = true; }   // voto de la semana
       if (st.vctl && JSON.stringify(p.vctl || null) !== JSON.stringify(st.vctl)) { p.vctl = clone(st.vctl); healed = true; }   // cancelar/repetir votación
       if (st.pen) { const mg = penMerge(p.pen, st.pen); if (mg) { p.pen = mg; healed = true; } }   // elecciones del duelo de penaltis: solo crecen
@@ -4118,7 +4134,7 @@ function renderJugar() {
   const box = $("#jugarBox"), y = window.scrollY, keep = null;   // con una animación en marcha se conservan los duelos tal cual (no se vacían ni se pierde el escenario)
   draftSave(box); renderJugarBase(); draftLoad(box); mountShelf();
   if (keep) ["#penBox", "#penAmBox"].forEach((sel, i) => { const nw = $(sel); if (keep[i] && nw && nw !== keep[i]) nw.replaceWith(keep[i]); });
-  renderPen(); renderAm(); votMount();
+  renderPen(); renderAm(); votMount(); bdoMount();
   if (Math.abs(window.scrollY - y) > 2) window.scrollTo({ top: y, behavior: "instant" });   // reconstruir la pestaña no debe mover la pantalla
 }
 
@@ -4647,6 +4663,115 @@ const TROFEOS = [
 ];
 const trofeosDe = p => Array.isArray(p && p.trofeos) ? p.trofeos.filter(id => TROFEOS.some(t => t.id === id)) : [];   // una entrada por copa: un mismo id repetido = varias copas iguales
 const MAX_COPAS = 9;
+// Trofeos automáticos: quien gana la liga o una final europea recibe la copa en su vitrina (una sola vez por temporada y competición).
+// Se apunta en p.premios ("<inicio de temporada>:<trofeo>") para no repetirla aunque el admin quite o cambie copas a mano.
+function autoTrofeos() {
+  try {
+    if (!synced) return;
+    if (S.players.some(p => p.sim)) return;   // temporada simulada: no se reparten copas
+    const lg = leagueMs().map(m => Date.parse(m.kickoff)).filter(Boolean); if (!lg.length) return;
+    const T = "s" + new Date(Math.min(...lg)).toISOString().slice(0, 10), ganados = [];
+    if (calcRounds().includes(CONFIG.jornadas)) { const L = standings(); if (L[0]) ganados.push([L[0].id, "spl"]); }
+    Object.keys(CUP_ID).forEach(c => { const fin = eMatch(c, "final"); if (fin && fin.result) { const w = eWinner(fin); if (w) ganados.push([w, CUP_ID[c]]); } });
+    const bf = bdoFase();
+    if (bf && bf.estado === "no" && bdoListo()) { if (bdoAbrir()) toast("🏅 ¡Se abre la votación del Balón de Oro!"); }
+    else if (bf && bf.estado === "cerrada") { const g = bdoGanador(bf)[0]; if (g) ganados.push([g.id, "bdo"]); }
+    let ch = false;
+    ganados.forEach(([pid, id]) => {
+      const p = S.players.find(x => x.id === pid); if (!p || !p.regAt) return;
+      const k = T + ":" + id, pr = Array.isArray(p.premios) ? p.premios : [];
+      if (pr.includes(k)) return;
+      const got = trofeosDe(p);
+      if (got.filter(x => x === id).length < MAX_COPAS) p.trofeos = got.concat(id);
+      p.premios = pr.concat(k); ch = true;
+      if (p.id === me) { const t = TROFEOS.find(x => x.id === id); toast("🏆 ¡Nuevo trofeo en tu vitrina: " + (t ? t.nombre : "") + "!"); }
+    });
+    if (ch) save();
+  } catch (e) {}
+}
+
+// ===== Balón de Oro: 3 nominados (los de más méritos) y votación de los demás; el ganador mezcla 60 % méritos + 40 % votos =====
+// Méritos: 1 por punto de liga + 2 extra por pleno + 1 por jornada con pronóstico enviado + 10 Champions / 6 Europa League / 4 Conference + 15 por ganar la liga.
+const BDO_PM = 60;   // peso mínimo de los méritos (%); los votos pesan hasta el 40 % restante, en proporción a cuánta gente vota
+const BDO_MS = 48 * 36e5, BDO_TIT = { champions: 10, europa: 6, conference: 4 }, BDO_LIGA = 15;
+let BDO_TEST = null;   // prueba del admin: solo en este móvil, no guarda nada
+function bdoSeason() { const lg = leagueMs().map(m => Date.parse(m.kickoff)).filter(Boolean); return lg.length ? "s" + new Date(Math.min(...lg)).toISOString().slice(0, 10) : null; }
+const bdoListo = () => calcRounds().includes(CONFIG.jornadas) && Object.keys(CUP_ID).every(c => { const f = eMatch(c, "final"); return !!f && !!f.result && !!eWinner(f); });
+function bdoMeritos() {
+  const fin = calcRounds().includes(CONFIG.jornadas), M = {};
+  standings().forEach((p, i) => { M[p.id] = { id: p.id, pos: i, pts: p.pt, plenos: p.ex, part: p.env || 0, tit: 0, liga: fin && i === 0 ? BDO_LIGA : 0 }; });
+  Object.keys(CUP_ID).forEach(c => { const f = eMatch(c, "final"), w = f && f.result ? eWinner(f) : null; if (w && M[w]) M[w].tit += BDO_TIT[c]; });
+  return Object.values(M).map(x => ({ ...x, m: x.pts + 2 * x.plenos + x.part + x.tit + x.liga })).sort((a, b) => b.m - a.m || a.pos - b.pos);
+}
+function bdoFase() {
+  const T = bdoSeason(); if (!T) return null;
+  const ts = S.players.filter(p => p.regAt && p.bdo && p.bdo.s === T && p.bdo.t).map(p => p.bdo.t);
+  if (!ts.length) return { T, estado: "no" };
+  const t = Math.min(...ts), close = t + BDO_MS, ab = Date.now() < close;
+  return { T, t, close, ab, estado: ab ? "abierta" : "cerrada", nom: bdoMeritos().slice(0, 3) };
+}
+function bdoGanador(f, extra) {   // [{ ...nominado, v: votos, pct }] ordenado: el primero gana
+  const nom = f.nom, vt = {}; nom.forEach(n => { vt[n.id] = 0; });
+  S.players.forEach(p => { if (p.regAt && p.bdo && p.bdo.s === f.T && vt[p.bdo.v] != null && !nom.some(n => n.id === p.id)) vt[p.bdo.v]++; });
+  if (extra) Object.keys(extra).forEach(k => { if (vt[k] != null) vt[k] += extra[k]; });
+  const sm = nom.reduce((a, n) => a + n.m, 0) || 1, sv = nom.reduce((a, n) => a + vt[n.id], 0);
+  const el = S.players.filter(p => p.regAt && !nom.some(n => n.id === p.id)).length, vw = el ? (100 - BDO_PM) * Math.min(1, sv / el) : 0;   // los votos pesan en proporción a cuánta gente ha votado (todos = 40; la mitad = 20…); lo que sobra va a los méritos
+  return nom.map(n => ({ ...n, v: vt[n.id], pct: (100 - vw) * n.m / sm + (sv ? vw * vt[n.id] / sv : 0) })).sort((a, b) => b.pct - a.pct || b.m - a.m);
+}
+function bdoAbrir() {   // abre la votación en todos los jugadores a la vez (la hora de apertura es la más temprana que haya apuntada)
+  const T = bdoSeason(), regs = S.players.filter(p => p.regAt); if (!T || regs.length < 4) return false;   // 3 nominados + al menos 1 votante
+  const t = Date.now(); regs.forEach(p => { p.bdo = { s: T, t, v: p.bdo && p.bdo.s === T ? p.bdo.v : null }; });
+  save(); return true;
+}
+function bdoMount() {
+  const box = $("#jugarBox"), p = meP(); if (!box || !p) return;
+  let f = null;
+  if (BDO_TEST) { const nom = bdoMeritos().slice(0, 3); if (nom.length >= 2) f = { T: "test", t: Date.now(), close: Date.now() + BDO_MS, estado: "abierta", nom, test: true }; }
+  else f = bdoFase();
+  const old = document.getElementById("bdoBox");
+  if (!f || f.estado === "no") { if (old) old.remove(); return; }
+  const el = old || document.createElement("div"); el.id = "bdoBox";
+  if (!old) { const ref = box.querySelector("#votBox") || box.querySelector("h2.ja-t") || box.querySelector("#penBox") || box.querySelector(".pc-sec"); if (ref) ref.before(el); else box.appendChild(el); }
+  bdoPaint(el, f, p);
+}
+function bdoPaint(el, f, p) {
+  const hd = '<h2 class="ja-t">BALÓN DE ORO</h2>', esNom = !f.test && f.nom.some(n => n.id === p.id);
+  const mine = f.test ? (BDO_TEST && BDO_TEST.v) : (p.bdo && p.bdo.s === f.T ? p.bdo.v : null);
+  const row = (n, o = {}) => {
+    const q = pById(n.id) || {}, tag = o.btn ? "button" : "div";
+    const det = `${n.m} méritos · ${n.pts} pts + ${n.plenos * 2} plenos + ${n.part} particip.` + (n.tit + n.liga ? ` + ${n.tit + n.liga} títulos` : "") + (o.v != null ? ` · ${o.v} ${o.v === 1 ? "voto" : "votos"}` : "");
+    return `<${tag}${o.btn ? ` type="button" data-id="${esc(n.id)}"` : ""} class="vt-r${mine === n.id ? " on" : ""}${o.gan ? " gan" : ""}">${crest(q.team)}<span class="vt-t">${esc(q.name || "")}<small class="muted" style="display:block;font:500 12px var(--b);margin-top:2px">${det}</small></span>${o.pct != null ? `<b class="pc">${Math.round(o.pct)}%</b>` : ""}</${tag}>`;
+  };
+  const cierre = new Date(f.close).toLocaleString("es-ES", { weekday: "long", hour: "2-digit", minute: "2-digit" });
+  if (f.estado === "cerrada" || (f.test && mine)) {
+    const R = bdoGanador(f, f.test ? { [mine]: 1 } : null), g = R[0], gp = pById(g.id) || {};
+    el.innerHTML = hd + `<p class="muted vt-n">${f.test ? "Resultado de prueba (solo cuenta tu voto)." : "Votación cerrada."} Gana el Balón de Oro <b>${esc(gp.name || "")}</b> 🏆</p>` + R.map((n, i) => row(n, { gan: i === 0, pct: n.pct, v: n.v })).join("");
+    el.onclick = null; return;
+  }
+  const votantes = S.players.filter(x => x.regAt && !f.nom.some(n => n.id === x.id)), nV = votantes.filter(x => x.bdo && x.bdo.s === f.T && f.nom.some(n => n.id === x.bdo.v)).length;
+  const note = f.test ? `<p class="muted vt-n">Prueba: tu voto no se guarda.</p>` : `<p class="muted vt-n">Estos son los 3 con más méritos. Votan los que no son nominados. Cierra el ${cierre} · han votado ${nV}/${votantes.length}.</p>`;
+  if (esNom) { el.innerHTML = hd + note + `<p class="muted vt-n"><b>Eres nominado ⭐</b> y no puedes votar. ¡Suerte!</p>` + f.nom.map(n => row(n)).join(""); el.onclick = null; return; }
+  if (mine) { const q = pById(mine) || {}; el.innerHTML = hd + `<div class="card vt-ok"><b>Voto hecho ✅</b><div class="muted" style="margin-top:4px">Tu voto: ${esc(q.name || "")}</div></div>` + f.nom.map(n => row(n)).join(""); el.onclick = null; return; }
+  el.innerHTML = hd + note + f.nom.map(n => row(n, { btn: true })).join("");
+  el.onclick = e => {
+    const b = e.target.closest("button[data-id]"); if (!b) return;
+    if (f.test) { BDO_TEST.v = b.dataset.id; toast("Voto hecho ✅"); bdoMount(); return; }
+    if (Date.now() >= f.close) { toast("La votación ya se ha cerrado."); bdoMount(); return; }
+    p.bdo = { s: f.T, t: f.t, v: b.dataset.id }; save(); toast("Voto hecho ✅"); bdoMount();
+  };
+}
+let bdoSigV = "";
+setInterval(() => { try { const f = bdoFase(), s = f ? f.estado : ""; if (s !== bdoSigV) { bdoSigV = s; if (meP()) bdoMount(); } } catch (e) {} }, 15000);
+function bdoAdminHtml() {
+  const f = bdoFase(); let est = "Sin temporada en marcha.";
+  if (f) {
+    const reg = S.players.filter(q => q.regAt);
+    if (f.estado === "no") est = bdoListo() ? "Todo listo: se abre en cuanto alguien entre en la app." : "Se abre sola cuando acaban la liga y las tres finales europeas. Votación: 48 h.";
+    else if (f.estado === "abierta") est = `Abierta · cierra el ${new Date(f.close).toLocaleString("es-ES", { weekday: "long", hour: "2-digit", minute: "2-digit" })} · han votado ${reg.filter(q => q.bdo && q.bdo.s === f.T && q.bdo.v && !f.nom.some(n => n.id === q.id)).length}/${reg.filter(q => !f.nom.some(n => n.id === q.id)).length}`;
+    else { const g = bdoGanador(f)[0], gp = g && pById(g.id); est = "Cerrada · ganador: " + (gp ? gp.name : "—"); }
+  }
+  return `<div class="card" style="margin-top:22px"><h3>🏅 Balón de Oro</h3><p class="muted">${esc(est)}</p><div class="adb">${f && f.estado === "no" ? '<button class="btn ghost" id="bdoOpen">Abrir votación ahora</button>' : ""}<button class="btn ghost" id="bdoTst">${BDO_TEST ? "Quitar prueba" : "🧪 Probar votación"}</button></div>${BDO_TEST ? '<p class="muted">Prueba activa: ve a Inicio. Solo la ves tú y no se guarda nada.</p>' : ""}</div>`;
+}
 const mixC = (h, a) => { const n = parseInt(h.slice(1), 16), f = c => Math.max(0, Math.min(255, Math.round(a > 0 ? c + (255 - c) * a : c * (1 + a)))); return "#" + [n >> 16, n >> 8 & 255, n & 255].map(c => f(c).toString(16).padStart(2, "0")).join(""); };
 // Curva Catmull-Rom (asas curvas) y textura de grabado/placa del trofeo de la Champions
 const crPts = (P, n = 14) => { const o = []; for (let i = 0; i < P.length - 1; i++) { const p0 = P[Math.max(i - 1, 0)], p1 = P[i], p2 = P[i + 1], p3 = P[Math.min(i + 2, P.length - 1)]; for (let k = 0; k < n; k++) { const u = k / n, u2 = u * u, u3 = u2 * u; o.push([0, 1].map(d => .5 * (2 * p1[d] + (-p0[d] + p2[d]) * u + (2 * p0[d] - 5 * p1[d] + 4 * p2[d] - p3[d]) * u2 + (-p0[d] + 3 * p1[d] - 3 * p2[d] + p3[d]) * u3))); } } o.push(P[P.length - 1]); return o; };
@@ -5655,7 +5780,7 @@ function adJornada(el) {
     ${sched.length ? `<h3 class="ads">🟡 Programadas (futuras)</h3>${secSch}` : ""}
     ${fin.length ? `<h3 class="ads">📁 Jornadas finalizadas</h3>${secFin}` : ""}
     ${rs.length ? "" : `<p class="muted" style="text-align:center;margin-top:18px">Aún no hay jornadas. Crea la primera con el botón de arriba.</p>`}
-    ${votAdminHtml()}<div class="card" style="margin-top:22px"><h3>Temporada ${temporada()}</h3>
+    ${votAdminHtml()}${bdoAdminHtml()}<div class="card" style="margin-top:22px"><h3>Temporada ${temporada()}</h3>
       <p class="muted">Cuando acabe la temporada, empieza una nueva: jornadas y clasificación a cero, y se conservan participantes y trofeos.</p>
       <button class="btn del" id="newSeason" style="width:100%">${simOn() ? "Quitar simulación (nueva temporada)" : "Nueva temporada"}</button>
       <label for="seasonN">Número de temporada actual</label>
@@ -5671,6 +5796,8 @@ function adJornada(el) {
 
   $("#newSeason").onclick = nuevaTemporada;
   if ($("#votTst")) $("#votTst").onclick = votPrueba;
+  if ($("#bdoTst")) $("#bdoTst").onclick = () => { BDO_TEST = BDO_TEST ? null : { v: null }; const b = document.getElementById("bdoBox"); if (b && !BDO_TEST) b.remove(); AD.msg = BDO_TEST ? "Prueba del Balón de Oro activada: ve a Inicio. Solo la ves tú." : "Prueba quitada."; AD.cls = "ok"; render(); };
+  if ($("#bdoOpen")) $("#bdoOpen").onclick = async () => { if (!(await ask("¿Abrir ya la votación del Balón de Oro? Durará 48 horas y los nominados serán los 3 con más méritos ahora mismo.", "Abrir"))) return; AD.msg = bdoAbrir() ? "Votación abierta." : "No se pudo abrir (hacen falta al menos 4 jugadores)."; AD.cls = "ok"; render(); };
   if ($("#votCan")) $("#votCan").onclick = votCancelar;
   if ($("#votRep")) $("#votRep").onclick = votRepetir;
   if ($("#simGo")) $("#simGo").onclick = simular;
@@ -7638,12 +7765,35 @@ async function pshSub() { try { const reg = await navigator.serviceWorker.getReg
 if (!LOCAL && "serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
 
 let pshSynced = "", pshLast = "";
-async function pshSync() {   // apunta este móvil al jugador que ha entrado (si ya tenía los avisos activados)
-  const p = meP(); if (!PUSH_OK || !p || Notification.permission !== "granted") return;
-  const s = await pshSub(); if (!s) return;
+async function pshSync(intento) {   // apunta este móvil al jugador que ha entrado (si ya tenía los avisos activados)
+  if (!PUSH_OK || Notification.permission !== "granted") return;
+  const p = meP(); if (!p) { if ((intento || 0) < 5) setTimeout(() => pshSync((intento || 0) + 1), 3000); return; }   // la partida aún no ha cargado
+  let s = await pshSub();
+  if (!s) {   // el permiso sigue dado pero el navegador perdió la suscripción: se renueva sin molestar al jugador
+    try {
+      const reg = await navigator.serviceWorker.ready, { key } = await (await fetch("/api/push/key")).json();
+      if (key) s = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: pshKey(key) });
+    } catch (e) {}
+    if (!s) return;
+  }
   const id = p.id + "|" + s.endpoint; if (pshSynced === id) return;
   try { await pshPost("/api/push/sub", { pid: p.id, sub: s.toJSON() }); pshSynced = id; } catch (e) {}
 }
+// Cada vez que se vuelve a la app se confirma al servidor que este móvil sigue suscrito (por si lo había borrado)
+document.addEventListener("visibilitychange", () => { const v = document.visibilityState === "visible"; if (v) { pshSynced = ""; pshSync(); } pshLatido(v); });
+// Presencia: mientras la app está abierta y a la vista avisa al servidor cada 25 s; así no se mandan avisos a quien ya está dentro
+function pshLatido(on) {
+  try {
+    if (!PUSH_OK || Notification.permission !== "granted") return;
+    const p = meP(); if (!p) return;
+    const body = JSON.stringify({ pid: p.id, on: !!on });
+    if (!on && navigator.sendBeacon) { navigator.sendBeacon("/api/push/presence", new Blob([body], { type: "application/json" })); return; }
+    fetch("/api/push/presence", { method: "POST", headers: { "content-type": "application/json" }, body, keepalive: true }).catch(() => {});
+  } catch (e) {}
+}
+window.addEventListener("pagehide", () => pshLatido(false));
+setInterval(() => { if (document.visibilityState === "visible") pshLatido(true); }, 25000);
+setTimeout(() => { if (document.visibilityState === "visible") pshLatido(true); }, 2500);
 async function pshState() {
   if (!PUSH_OK) return PUSH_IOS && !PUSH_APP ? "instalar" : "nosoporte";
   if (Notification.permission === "denied") return "bloqueado";
@@ -7772,9 +7922,24 @@ async function adAvisos(el) {
     <select id="pshU" aria-label="Destinatario"><option value="*">Todos los jugadores</option>${jug.map(p => `<option value="${p.id}"${dest === p.id ? " selected" : ""}>${esc(p.name)}</option>`).join("")}</select>
     <label for="pshT">Título</label><input id="pshT" maxlength="60" autocomplete="off" placeholder="Ej.: ¡Última jornada!" value="${esc(AD.pshT || "")}">
     <label for="pshB">Mensaje</label><textarea id="pshB" maxlength="240" rows="3" placeholder="Escribe el mensaje…">${esc(AD.pshB || "")}</textarea>
-    <button class="btn" id="pshSend" style="width:100%">Enviar aviso</button><p class="msg" id="pshRes"></p></div>`;
+    <button class="btn" id="pshSend" style="width:100%">Enviar aviso</button><p class="msg" id="pshRes"></p></div>
+    <div class="card"><h3>Probar avisos</h3>
+    <p class="muted">Manda un aviso de prueba al móvil del jugador elegido arriba en «Para». Se puede repetir las veces que quieras y llega aunque esté dentro de la app.</p>
+    <div id="pshDemo" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${[["jornada", "🆕 Nueva jornada"], ["cierre", "⏰ Queda 1 h"], ["resultado", "🏁 Final"], ["pocion", "🧪 Poción"], ["votacion", "🗳️ Votación abierta"], ["votacion_re", "🗳️ Votación reabierta"], ["votorec", "🗳️ Quedan 6 h"], ["reto", "🤝 Reto penaltis"], ["turno", "⚽ Te toca tirar"], ["duelo", "⚽ Duelo listo"]].map(([k, t]) => `<button class="btn" data-k="${k}" style="padding:10px 6px;font-size:14px">${t}</button>`).join("")}</div>
+    <p class="msg" id="pshDRes"></p></div>`;
   const res = (t, c) => { const m = $("#pshRes"); if (m) { m.className = "msg" + (c ? " " + c : ""); m.textContent = t; } };
   $("#pshU").onchange = e => { AD.pshU = e.target.value; };
+  const dres = (t, c) => { const m = $("#pshDRes"); if (m) { m.className = "msg" + (c ? " " + c : ""); m.textContent = t; } };
+  el.querySelectorAll("#pshDemo button").forEach(bt => bt.onclick = async () => {
+    const u = $("#pshU").value, pl = jug.find(p => p.id === u);
+    if (!pl) return dres("Elige un jugador en «Para» (no vale «Todos»).", "err");
+    bt.disabled = true; dres("Enviando…");
+    try {
+      const j = await pshPost("/api/push/demo", { pin: CONFIG.pin, kind: bt.dataset.k, pid: pl.id });
+      dres(j.sinAvisos ? pl.name + " no tiene los avisos activados." : j.enviados ? "Enviado a " + pl.name + "." : "No se pudo entregar (móviles fallidos: " + j.fallidos + ").", j.enviados ? "ok" : "err");
+    } catch (e) { dres(e.message || "No se pudo enviar.", "err"); }
+    bt.disabled = false;
+  });
   $("#pshT").oninput = e => { AD.pshT = e.target.value; };
   $("#pshB").oninput = e => { AD.pshB = e.target.value; };
   $("#pshSend").onclick = async () => {
@@ -7784,8 +7949,9 @@ async function adAvisos(el) {
     const b = $("#pshSend"); b.disabled = true; res("Enviando…");
     try {
       const j = await pshPost("/api/push/admin", { pin: CONFIG.pin, title, body, to: pl ? [pl.id] : null });
-      if (!j.jugadores) res(pl ? pl.name + " no tiene los avisos activados." : "Todavía nadie tiene los avisos activados.", "err");
-      else { res(`Enviado a ${j.jugadores} ${j.jugadores === 1 ? "jugador" : "jugadores"}` + (j.fallidos ? ` (${j.fallidos} ${j.fallidos === 1 ? "móvil falló" : "móviles fallaron"})` : "") + ".", j.enviados ? "ok" : "err"); if (j.enviados) { AD.pshT = ""; AD.pshB = ""; $("#pshT").value = ""; $("#pshB").value = ""; } }
+      if (!j.jugadores && j.omitidos) res("No se envió: " + (j.omitidos === 1 ? "ese jugador está" : "todos los que tienen avisos están") + " dentro de la app ahora mismo.", "err");
+      else if (!j.jugadores) res(pl ? pl.name + " no tiene los avisos activados." : "Todavía nadie tiene los avisos activados.", "err");
+      else { res(`Enviado a ${j.jugadores} ${j.jugadores === 1 ? "jugador" : "jugadores"}` + (j.fallidos ? ` (${j.fallidos} ${j.fallidos === 1 ? "móvil falló" : "móviles fallaron"})` : "") + (j.omitidos ? ` · ${j.omitidos} dentro de la app, sin aviso` : "") + ".", j.enviados ? "ok" : "err"); if (j.enviados) { AD.pshT = ""; AD.pshB = ""; $("#pshT").value = ""; $("#pshB").value = ""; } }
     } catch (e) { res(e.message || "No se pudo enviar.", "err"); }
     b.disabled = false;
   };
@@ -7796,7 +7962,7 @@ async function adAvisos(el) {
   } catch (e) {}
 }
 
-function render() { applyMaint(); renderEquipo(); if (pend) return; renderCuenta(); renderJugar(); renderEuroPlay(); renderTabla(); renderEuro(); renderHistorial(); renderEuroHist(); renderSobres(); checkRound(); checkCoins(); renderLogros(); renderAvisos(); renderAdmin(); }
+function render() { applyMaint(); renderEquipo(); if (pend) return; autoTrofeos(); renderCuenta(); renderJugar(); renderEuroPlay(); renderTabla(); renderEuro(); renderHistorial(); renderEuroHist(); renderSobres(); checkRound(); checkCoins(); renderLogros(); renderAvisos(); renderAdmin(); }
 setMe(me);
 go(meP() ? "jugar" : "cuenta");
 // Sin zoom en móvil: iOS Safari ignora user-scalable=no, así que se bloquean también los gestos de pellizco (el doble toque ya lo evita touch-action)
