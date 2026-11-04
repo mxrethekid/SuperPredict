@@ -9,7 +9,7 @@ const day = (ms) => new Date(ms).toISOString().slice(0, 10);
 
 // ======================= Base de datos (Durable Object) =======================
 const CH = 100000;   // los valores se parten en trozos para no pasar el límite de tamaño por fila
-const emptyState = () => ({ players: [], matches: [], preds: {} });
+const emptyState = () => ({ players: [], matches: [], preds: {}, archivo: [] });   // archivo = jugadores archivados: no juegan esta temporada pero conservan sus datos
 
 function applyOps(st, ops) {   // misma lógica que tenía api.mjs
   for (const o of ops) {
@@ -18,8 +18,8 @@ function applyOps(st, ops) {   // misma lógica que tenía api.mjs
       if (o.v === null) delete m[o.p];
       else m[o.p] = o.v;
       if (!Object.keys(m).length) delete st.preds[o.m];
-    } else if (o.c === "players" || o.c === "matches") {
-      const arr = st[o.c];
+    } else if (o.c === "players" || o.c === "matches" || o.c === "archivo") {
+      const arr = (st[o.c] = st[o.c] || []);
       const i = arr.findIndex((x) => x.id === o.id);
       if (o.rm) {
         if (i >= 0) arr.splice(i, 1);
@@ -53,7 +53,7 @@ export class Store extends DurableObject {
   async set(k, v) { this._set(k, v); return true; }
   _state() {
     const st = this._get("state") || emptyState();
-    st.players ||= []; st.matches ||= []; st.preds ||= {};
+    st.players ||= []; st.matches ||= []; st.preds ||= {}; st.archivo ||= [];
     return st;
   }
   async getState() { return this._state(); }
@@ -62,6 +62,54 @@ export class Store extends DurableObject {
     const st = this._state();
     if (Array.isArray(ops) && ops.length) { applyOps(st, ops); this._set("state", st); }
     return st;
+  }
+
+  // ---- Copias de seguridad del estado (jugadores, partidos y predicciones) ----
+  // Se guardan en la misma base de datos: una al día (se conservan las 14 últimas) y las permanentes
+  // (manuales, fin de temporada, antes de empezar otra temporada o de restaurar), que no se borran solas.
+  _snaps() { return this._get("snaps") || []; }
+  _snapMake(label, tipo, ref) {
+    const st = this._state(), now = Date.now();
+    const id = tipo + "-" + now.toString(36) + Math.random().toString(36).slice(2, 5);
+    const bytes = JSON.stringify(st).length;
+    this._set("snap:" + id, st);
+    let list = this._snaps();
+    const meta = { id, t: now, tipo, label, ref: ref || "", bytes, jugadores: st.players.length, partidos: st.matches.length };
+    list.push(meta);
+    if (tipo === "auto") {   // de las diarias solo se guardan las 14 más recientes
+      const viejas = list.filter((x) => x.tipo === "auto").sort((a, b) => b.t - a.t).slice(14), fuera = new Set(viejas.map((x) => x.id));
+      for (const x of viejas) this.sql.exec("DELETE FROM kv WHERE k = ?", "snap:" + x.id);
+      list = list.filter((x) => !fuera.has(x.id));
+    }
+    this._set("snaps", list);
+    return meta;
+  }
+  async backupLista() { return this._snaps().sort((a, b) => b.t - a.t); }
+  async backupCrear(label, tipo) { return this._snapMake(String(label || "").slice(0, 80) || "Copia manual", ["manual", "temporada", "pre"].includes(tipo) ? tipo : "manual"); }
+  async backupExportar(id) {   // sin id: el estado actual
+    if (!id) return { st: this._state(), meta: null };
+    const meta = this._snaps().find((x) => x.id === id), st = meta ? this._get("snap:" + id) : null;
+    return st ? { st, meta } : null;
+  }
+  async backupRestaurar(id) {   // antes de sustituir el estado se guarda una copia del actual, por si te arrepientes
+    const meta = this._snaps().find((x) => x.id === id), st = meta ? this._get("snap:" + id) : null;
+    if (!st || !Array.isArray(st.players) || !Array.isArray(st.matches) || !st.preds || typeof st.preds !== "object") return false;
+    this._snapMake("Antes de restaurar «" + meta.label + "»", "pre");
+    this._set("state", st);
+    return true;
+  }
+  async backupBorrar(id) {
+    const list = this._snaps();
+    if (!list.some((x) => x.id === id)) return false;
+    this.sql.exec("DELETE FROM kv WHERE k = ?", "snap:" + id);
+    this._set("snaps", list.filter((x) => x.id !== id));
+    return true;
+  }
+  async backupCron() {   // lo llama el cron: copia diaria y copia de fin de temporada
+    const st = this._state(), now = Date.now();
+    if (st.players.length && !this._snaps().some((x) => x.tipo === "auto" && day(x.t) === day(now))) this._snapMake("Copia diaria", "auto");   // nunca con la base vacía: no machacar copias buenas
+    const fin = st.matches.find((m) => !m.comp && m.round === VOT_JORNADAS && m.result);   // la jornada final ya tiene resultado
+    if (fin && !this._snaps().some((x) => x.tipo === "fin" && x.ref === fin.id)) this._snapMake("Fin de la temporada", "fin", fin.id);
   }
 
   // ---- Avisos push ----
@@ -73,10 +121,14 @@ export class Store extends DurableObject {
     };
   }
   _subs() { const d = this._get("push") || {}; d.subs ||= {}; return d; }
-  _jobs(msgs) {   // cada aviso se convierte en un envío por cada móvil suscrito del jugador
+  _jobs(msgs, st) {   // cada aviso se convierte en un envío por cada móvil suscrito del jugador
     if (!msgs.length) return [];
     const subs = this._subs().subs, jobs = [];
-    for (const m of msgs) for (const s of subs[m.pid] || []) jobs.push({ sub: s, payload: { t: m.title, b: m.body, tag: m.tag, url: "/" } });
+    const now = Date.now();
+    for (const m of msgs) {
+      const tab = TAB_AVISO[String(m.tag || "").split("-")[0]], n = pendientes(st, m.pid, now);
+      for (const s of subs[m.pid] || []) jobs.push({ sub: s, payload: { t: m.title, b: m.body, tag: m.tag, url: tab ? "/#" + tab : "/", n } });
+    }
     return jobs;
   }
   // Igual que applyOps, pero además devuelve los avisos que provocan los cambios (jornada nueva, resultado, penaltis).
@@ -85,18 +137,20 @@ export class Store extends DurableObject {
     if (Array.isArray(ops) && ops.length) {
       const antes = { ids: new Set(st.matches.map((m) => m.id)), res: Object.fromEntries(st.matches.map((m) => [m.id, !!m.result])), mods: modsActuales(st) };
       applyOps(st, ops); this._set("state", st);
+      const arch = ops.filter((o) => o && o.c === "archivo" && !o.rm && o.id).map((o) => o.id);   // jugador archivado: deja de recibir avisos
+      if (arch.length) { const d = this._subs(); let ch = false; for (const id of arch) if (d.subs[id]) { delete d.subs[id]; ch = true; } if (ch) this._set("push", d); }
       try {   // un fallo en los avisos nunca debe impedir que se guarde
         const now = Date.now(), L = this._logOnce();
         const msgs = [...avisosNuevaJornada(st, antes, now, L.once), ...avisosResultado(st, antes, L.once), ...avisosPocion(st, antes, L.once), ...avisosPenaltis(st, now, L.once)];
-        L.save(); jobs = this._jobs(msgs);
+        L.save(); jobs = this._jobs(msgs, st);
       } catch (e) { console.error("avisos:", e && e.message); }
     }
     return { st, jobs };
   }
   async pushReminders() {   // lo llama el cron: recordatorios de cierre
     try {
-      const st = this._state(), L = this._logOnce(), msgs = avisosCierre(st, Date.now(), L.once);
-      L.save(); return this._jobs(msgs);
+      const st = this._state(), L = this._logOnce(), msgs = [...avisosCierre(st, Date.now(), L.once), ...avisosVotacion(st, Date.now(), L.once), ...avisosVotoRecordatorio(st, Date.now(), L.once)];
+      L.save(); return this._jobs(msgs, st);
     } catch (e) { console.error("recordatorios:", e && e.message); return []; }
   }
   async pushSubscribe(pid, sub) {
@@ -117,9 +171,10 @@ export class Store extends DurableObject {
     if (ch) this._set("push", d); return ch;
   }
   async pushJobsPara(pids, payload) {   // pids = null → todos
-    const subs = this._subs().subs, jobs = []; let jugadores = 0;
+    const subs = this._subs().subs, jobs = [], vivos = new Set(this._state().players.map((p) => p.id)); let jugadores = 0;
     for (const pid of Object.keys(subs)) {
       if (pids && !pids.includes(pid)) continue;
+      if (!vivos.has(pid)) continue;   // archivados o eliminados: sin avisos
       jugadores++; for (const s of subs[pid]) jobs.push({ sub: s, payload });
     }
     return { jobs, jugadores };
@@ -421,7 +476,20 @@ async function pushEnviar(env, sub, payload, ttl) {
 //  - Mensaje del admin (ruta /api/push/admin)                         → todos o un jugador
 // Cada aviso se apunta en un registro ("pushlog") para no enviarse dos veces.
 const HORA = 36e5, CIERRE = 36e5;   // las apuestas cierran 1 h antes del partido, igual que en la app
-const RECORDATORIOS = [6, 3, 1];    // horas que quedan para el cierre
+// Pestaña que se abre al tocar cada aviso (por el principio de la etiqueta del aviso): jugar = Inicio, tabla = Clasificación
+const TAB_AVISO = { jornada: "jugar", cierre: "jugar", votacion: "jugar", votorec: "jugar", pocion: "jugar", reto: "jugar", turno: "jugar", duelo: "jugar", resultado: "tabla" };
+// Partidos de liga abiertos que el jugador aún no ha pronosticado: es el número rojo del icono de la app
+const pendientes = (st, pid, now) => {
+  let n = 0;
+  for (const m of st.matches || []) {
+    if (m.comp || m.result) continue;
+    const k = Date.parse(m.kickoff); if (!k || k - CIERRE <= now) continue;
+    const q = ((st.preds || {})[m.id] || {})[pid];
+    if (!(q && typeof q.h === "number")) n++;
+  }
+  return n;
+};
+const RECORDATORIOS = [1];    // horas que quedan para el cierre (solo 1 hora antes, para no saturar)
 const esp = (ms, o) => new Date(ms).toLocaleString("es-ES", Object.assign({ timeZone: "Europe/Madrid" }, o));
 const fechaEs = (ms) => esp(ms, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 const horaEs = (ms) => esp(ms, { hour: "2-digit", minute: "2-digit" });
@@ -535,6 +603,135 @@ function avisosPocion(st, antes, once) {
   return out;
 }
 
+// ==== VOTACION START ====
+// Votación del siguiente partido: se abre el viernes a las 14:00 y cierra el domingo a las 23:59 (hora de Madrid), igual que en la app.
+// El administrador puede cancelarla o repetirla (queda en p.vctl de cada ficha). Cada jugador guarda su voto en p.vot.
+const VOT_INI = "2026-11-06", VOT_JORNADAS = 20;   // primera votación y número total de jornadas (CONFIG.jornadas de la app)
+function madridWall(ms) {   // hora de Madrid expresada como si fuera UTC, para sumar días sin líos de cambio de hora
+  const p = {};
+  for (const x of new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Madrid", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date(ms))) p[x.type] = x.value;
+  return Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute);
+}
+function madridEpoch(wall) {   // al revés: de "hora de Madrid como UTC" al instante real
+  let e = wall - 36e5;
+  e = wall - Math.round((madridWall(e) - e) / 36e5) * 36e5;
+  return wall - Math.round((madridWall(e) - e) / 36e5) * 36e5;
+}
+function votFase(st, now) {   // misma lógica que votFase() de la app
+  const wall = madridWall(now), d = new Date(wall), back = (d.getUTCDay() - 5 + 7) % 7;
+  let fri = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - back, 14, 0);
+  if (fri > wall) fri -= 7 * 864e5;   // viernes antes de las 14:00: aún cuenta la votación anterior
+  const mid = fri - 14 * 36e5;
+  let c = { r: 0, c: 0, x: 0, t: -1 };   // lo que haya fijado el admin (cancelar / repetir)
+  const w = new Date(fri).toISOString().slice(0, 10);
+  for (const q of st.players || []) { const v = q.vctl; if (v && v.w === w && ((v.r || 0) > c.r || ((v.r || 0) === c.r && (v.t || 0) > c.t))) c = { r: v.r || 0, c: v.c ? 1 : 0, x: v.x || 0, t: v.t || 0 }; }
+  const close = c.x || madridEpoch(mid + 2 * 864e5 + 23 * 36e5 + 59 * 6e4 + 59e3);   // domingo 23:59:59 (o la nueva hora si se repitió tarde)
+  return { w, r: c.r, x: c.x, can: !!c.c, close, ab: !c.c && now <= close, cerrada: !c.c && now > close, desde: new Date(mid + 3 * 864e5).toISOString().slice(0, 10) };
+}
+const votFinalCreada = (st) => (st.matches || []).some((m) => !m.comp && m.round === VOT_JORNADAS);   // jornada final ya creada: no hay más votaciones
+const votSinVotar = (st, f) => reales(st).filter((p) => !(p.vot && p.vot.w === f.w && (p.vot.r || 0) === f.r));
+const votCierreTxt = (f) => (f.x ? esp(f.x, { weekday: "long" }) + " a las " + horaEs(f.x) : "domingo a las 23:59");
+
+// Aviso: votación abierta (o reabierta si el admin la repite). Quien ya votó no lo recibe.
+function avisosVotacion(st, now, once) {
+  const f = votFase(st, now);
+  if (f.w < VOT_INI || !f.ab || votFinalCreada(st)) return [];
+  const aviso = votSinVotar(st, f);
+  if (!aviso.length || !once(`v:${f.w}:${f.r}`)) return [];
+  const title = f.r ? "🗳️ Votación reabierta" : "🗳️ ¡Votación abierta!";
+  const body = (f.r ? "Se han borrado los votos: vuelve a votar." : "Elige el partido de la próxima jornada.") + `\nCierra el ${votCierreTxt(f)}.`;
+  return aviso.map((p) => ({ pid: p.id, tag: "votacion-" + f.w, title, body }));
+}
+// Aviso: quedan 6 horas para votar (solo a quien aún no ha votado)
+function avisosVotoRecordatorio(st, now, once) {
+  const f = votFase(st, now);
+  if (f.w < VOT_INI || !f.ab || votFinalCreada(st)) return [];
+  const quedan = f.close - now, T = 6;
+  if (!(quedan <= T * HORA && quedan > T * HORA - 25 * 6e4)) return [];   // ventana de 25 min por si algún cron se retrasa
+  const aviso = votSinVotar(st, f);
+  if (!aviso.length || !once(`vr:${f.w}:${f.r}`)) return [];
+  const body = `Aún no has votado el partido de la próxima jornada.\nCierra a las ${horaEs(f.close)}.`;
+  return aviso.map((p) => ({ pid: p.id, tag: "votorec-" + f.w, title: `🗳️ Quedan ${T} horas para votar`, body }));
+}
+
+// ---- Cierre automático: al cerrarse la votación, el partido ganador pasa a ser el partido de la semana (antes lo creaba el primer móvil que abría la app) ----
+const votN = NF;
+// Nivel de cada equipo (0-10) para elegir los mejores partidos de la semana. Los que no estén aquí cuentan como 3.
+const VOT_NV = Object.fromEntries(Object.entries({
+  "Real Madrid": 10, "Barcelona": 10, "Atlético de Madrid": 9, "Villarreal": 7, "Athletic Club": 7, "Real Betis": 6.5, "Real Sociedad": 6, "Sevilla FC": 5.5, "Valencia": 5, "Celta de Vigo": 5, "Osasuna": 4.5, "Getafe": 4.5, "Rayo Vallecano": 4.5, "Alavés": 4, "Espanyol": 4, "Elche": 3.5, "Levante": 3.5, "Deportivo": 3, "Málaga": 3, "Racing de Santander": 3,
+  "Manchester City": 10, "Arsenal": 10, "Liverpool": 9.5, "Chelsea": 8.5, "Manchester United": 8, "Tottenham": 8, "Newcastle United": 8, "Aston Villa": 7.5, "Brighton": 6, "Crystal Palace": 6, "Bournemouth": 6, "Nottingham Forest": 5.5, "Brentford": 5.5, "Fulham": 5.5, "Everton": 5.5, "Leeds United": 5, "Sunderland": 4.5, "Coventry City": 3.5, "Ipswich Town": 3.5, "Hull City": 3,
+  "Bayern München": 10, "Bayer Leverkusen": 8.5, "Borussia Dortmund": 8.5, "RB Leipzig": 8, "Eintracht Frankfurt": 6.5, "Stuttgart": 6.5, "Freiburg": 5.5, "Hoffenheim": 5, "Borussia Mönchengladbach": 4.5, "Werder Bremen": 4.5, "Union Berlin": 4.5, "Mainz 05": 4.5, "Augsburg": 4, "Köln": 4, "Hamburger SV": 4, "Schalke 04": 3.5, "Paderborn": 3, "Elversberg": 3,
+  "Inter": 9.5, "Napoli": 8.5, "Juventus": 8.5, "Milan": 8.5, "Atalanta": 8, "Roma": 7.5, "Lazio": 7, "Fiorentina": 6, "Bologna": 6, "Torino": 5, "Como": 5, "Genoa": 4.5, "Udinese": 4.5, "Sassuolo": 4, "Cagliari": 4, "Parma": 4, "Lecce": 3.5, "Monza": 3.5, "Venezia": 3.5, "Frosinone": 3,
+  "Paris Saint-Germain": 9.5, "Marseille": 7, "Monaco": 7, "Lille": 6.5, "Lyon": 6.5, "Lens": 6, "Nice": 5.5, "Rennes": 5.5, "Strasbourg": 5, "Brest": 4.5, "Toulouse": 4, "Paris FC": 4, "Lorient": 3.5, "Auxerre": 3.5, "Angers": 3, "Le Havre": 3, "Le Mans": 2.5, "Troyes": 2.5,
+  "Sporting CP": 7, "Porto": 6.5, "PSV": 6.5, "Club Brugge": 6, "Feyenoord": 6, "Galatasaray": 6, "Fenerbahçe": 5.5, "Bodø/Glimt": 4.5, "Shaktar": 4.5, "Slavia Praha": 4.5, "PAE AEK": 4, "LASK": 3, "Sl. Bratislava": 3, "Viking": 3, "Sabah FK": 2.5
+}).map(([k, v]) => [votN(k), v]));
+const votNv = n => { const v = VOT_NV[votN(n)]; return v == null ? 3 : v; };
+// Nivel del partido: pesa más que los dos equipos sean fuertes (un grande contra un flojo puntúa menos); la Champions suma un extra. También desempata la votación.
+const votScore = c => { const a = votNv(c.h), b = votNv(c.a); return a + b + Math.min(a, b) + (c.c === "CL" ? 1.5 : 0); };
+// Derbis: entran siempre en la votación (dentro del máximo de 8)
+const VOT_DERBIS = new Set([
+  ["Real Madrid", "Atlético de Madrid"], ["Real Madrid", "Barcelona"], ["Barcelona", "Espanyol"], ["Sevilla FC", "Real Betis"], ["Athletic Club", "Real Sociedad"], ["Valencia", "Levante"], ["Deportivo", "Celta de Vigo"],
+  ["Manchester United", "Manchester City"], ["Manchester United", "Liverpool"], ["Liverpool", "Everton"], ["Arsenal", "Tottenham"], ["Arsenal", "Chelsea"], ["Chelsea", "Tottenham"], ["Crystal Palace", "Brighton"], ["Newcastle United", "Sunderland"],
+  ["Borussia Dortmund", "Schalke 04"], ["Bayern München", "Borussia Dortmund"], ["Hamburger SV", "Werder Bremen"], ["Köln", "Borussia Mönchengladbach"], ["Eintracht Frankfurt", "Mainz 05"],
+  ["Inter", "Milan"], ["Roma", "Lazio"], ["Juventus", "Torino"], ["Juventus", "Inter"],
+  ["Paris Saint-Germain", "Marseille"], ["Paris Saint-Germain", "Paris FC"], ["Lyon", "Marseille"], ["Monaco", "Nice"], ["Lille", "Lens"],
+  ["Galatasaray", "Fenerbahçe"]
+].map(([x, y]) => [votN(x), votN(y)].sort().join("|")));
+const votDerbi = (h, a) => VOT_DERBIS.has([votN(h), votN(a)].sort().join("|"));
+function votTop(list) {   // máximo 8: primero los derbis (siempre entran) y el resto de huecos, con los mejores por nivel; de mejor a peor
+  const ord = list.slice().sort((x, y) => votScore(y) - votScore(x) || Date.parse(x.t) - Date.parse(y.t) || (x.k < y.k ? -1 : 1));
+  const der = ord.filter(c => votDerbi(c.h, c.a)).slice(0, 8), usado = new Set(der.map(c => c.k));
+  const res = der.concat(ord.filter(c => !usado.has(c.k)).slice(0, 8 - der.length)), ks = new Set(res.map(c => c.k));
+  return ord.filter(c => ks.has(c.k));
+}
+const VOT_EQUIPOS = ["Alavés", "Athletic Club", "Atlético de Madrid", "Barcelona", "Celta de Vigo", "Deportivo", "Elche", "Espanyol", "Getafe", "Levante", "Málaga", "Osasuna", "Racing de Santander", "Rayo Vallecano", "Real Betis", "Real Madrid", "Real Sociedad", "Sevilla FC", "Valencia", "Villarreal", "Arsenal", "Aston Villa", "Bournemouth", "Brentford", "Brighton", "Chelsea", "Coventry City", "Crystal Palace", "Everton", "Fulham", "Hull City", "Ipswich Town", "Leeds United", "Liverpool", "Manchester City", "Manchester United", "Newcastle United", "Nottingham Forest", "Sunderland", "Tottenham", "Augsburg", "Bayer Leverkusen", "Bayern München", "Borussia Dortmund", "Borussia Mönchengladbach", "Eintracht Frankfurt", "Elversberg", "Freiburg", "Hamburger SV", "Hoffenheim", "Köln", "Mainz 05", "Paderborn", "RB Leipzig", "Schalke 04", "Stuttgart", "Union Berlin", "Werder Bremen", "Atalanta", "Bologna", "Cagliari", "Como", "Fiorentina", "Frosinone", "Genoa", "Inter", "Juventus", "Lazio", "Lecce", "Milan", "Monza", "Napoli", "Parma", "Roma", "Sassuolo", "Torino", "Udinese", "Venezia", "Angers", "Auxerre", "Brest", "Le Havre", "Le Mans", "Lens", "Lille", "Lorient", "Lyon", "Marseille", "Monaco", "Nice", "Paris FC", "Paris Saint-Germain", "Rennes", "Strasbourg", "Toulouse", "Troyes", "Bodø/Glimt", "Club Brugge", "Fenerbahçe", "Feyenoord", "Galatasaray", "LASK", "PAE AEK", "Porto", "PSV", "Sabah FK", "Shaktar", "Sl. Bratislava", "Slavia Praha", "Sporting CP", "Viking"];
+const votMapW = (t) => {   // equipo de la API → nombre de la app (misma lógica que votMap de la app)
+  const ns = [NF(t && t.name), NF(t && t.shortName), NF(t && t.tla)].filter(Boolean);
+  let best = null, bs = 0;
+  for (const a of VOT_EQUIPOS) {
+    const n = NF(a), ta = TF(n);
+    const sc = ns.includes(n) || (ALIAS_F[n] || []).some((x) => ns.includes(x)) ? 3 : ns.some((x) => (" " + x + " ").includes(" " + n + " ")) ? 2 : ns.some((x) => ta.length && ta.every((q) => TF(x).includes(q))) ? 1 : 0;
+    if (sc > bs) { bs = sc; best = a; }
+  }
+  return bs >= 1 ? best : null;
+};
+async function votCandidatos(env, f) {   // partidos de la semana siguiente (lunes a domingo): los 8 mejores + derbis. Solo si nadie ha votado
+  const token = env.FOOTBALL_DATA_TOKEN; if (!token) { console.error("Falta FOOTBALL_DATA_TOKEN"); return []; }
+  const ini = Date.parse(f.desde + "T00:00:00Z"), fin = ini + 7 * DIA, min = f.close + CIERRE;
+  const r = await fetch(`https://api.football-data.org/v4/matches?competitions=${CAL_COMPS}&dateFrom=${f.desde}&dateTo=${day(fin)}`, { headers: { "X-Auth-Token": token } });
+  if (!r.ok) { console.error("votación: football-data.org respondió", r.status); return []; }
+  const { matches = [] } = await r.json(), seen = new Set();
+  const list = matches
+    .filter((m) => !["CANCELLED", "POSTPONED", "SUSPENDED"].includes(m.status))
+    .filter((m) => { const k = Date.parse(m.utcDate); return k >= ini && k < fin; })
+    .map((m) => { const h = votMapW(m.homeTeam), a = votMapW(m.awayTeam), ms = Date.parse(m.utcDate); return h && a && ms > min ? { k: h + "|" + a + "|" + ms, h, a, t: new Date(ms).toISOString(), c: (m.competition && m.competition.code) || "" } : null; })
+    .filter((c) => c && !seen.has(c.k) && seen.add(c.k));
+  return votTop(list);
+}
+async function votCierreServidor(env, estado) {   // lo llama el cron cada 5 min
+  const st = (await estado.getState()) || {};
+  st.players ||= []; st.matches ||= []; st.preds ||= {};
+  const now = Date.now(), f = votFase(st, now);
+  if (!st.players.length || !f.cerrada || f.w < VOT_INI || votFinalCreada(st)) return;
+  const id = "vt" + f.w + (f.r ? "r" + f.r : "");
+  if (st.matches.some((m) => m.id === id || m.vw === f.w)) return;   // ya creado (por aquí o por un móvil)
+  const cuenta = {};
+  for (const q of st.players) { const v = q.vot; if (v && v.w === f.w && (v.r || 0) === f.r && v.k) (cuenta[v.k] ||= { n: 0, c: v }).n++; }
+  let L = Object.values(cuenta);
+  if (L.length) { const mx = Math.max(...L.map((x) => x.n)); L = L.filter((x) => x.n === mx); }   // más votado; si hay empate, el mejor partido
+  else L = (await votCandidatos(env, f)).map((c) => ({ n: 0, c }));   // nadie votó: el mejor de la semana
+  if (!L.length) return;
+  L.sort((x, y) => votScore(y.c) - votScore(x.c) || Date.parse(x.c.t) - Date.parse(y.c.t));
+  const g = L[0].c, lg = st.matches.filter((m) => !m.comp);
+  const round = lg.length ? Math.min(VOT_JORNADAS, Math.max(...lg.map((m) => m.round)) + 1) : 1;
+  const m = { id, vw: f.w, round, home: g.h, away: g.a, kickoff: g.t, result: null };
+  if (lg.some((x) => x.round === round) || Date.parse(m.kickoff) - CIERRE <= now) return;   // tope de jornadas, o el partido ya no se puede predecir
+  const r2 = await estado.applyOpsN([{ c: "matches", id, set: m }]);   // además de guardar, devuelve el aviso de "Nueva jornada"
+  console.log("Votación cerrada: partido elegido", g.h, "-", g.a);
+  await enviar(env, estado, r2.jobs);
+}
+// ==== VOTACION END ====
+
 function avisosCierre(st, now, once) {
   const out = [];
   for (const m of st.matches) {
@@ -600,6 +797,25 @@ async function enviar(env, estado, jobs) {
   return { enviados, fallidos };
 }
 
+// ======================= Copias de seguridad (solo con el PIN de administrador) =======================
+async function backupRoutes(req, env, estado, p) {
+  if (req.method !== "POST") return json({ error: "método no permitido" }, 405);
+  let b; try { b = await req.json(); } catch { return json({ error: "bad json" }, 400); }
+  b = b || {};
+  if (!env.ADMIN_PIN) return json({ error: "Falta el secreto ADMIN_PIN en Cloudflare" }, 500);
+  if (String(b.pin || "") !== String(env.ADMIN_PIN)) return json({ error: "PIN incorrecto" }, 403);
+  const id = b.id ? String(b.id) : "";
+  if (p === "/api/backup/list") return json({ copias: await estado.backupLista() });
+  if (p === "/api/backup/save") return json({ ok: true, copia: await estado.backupCrear(b.label, b.tipo) });
+  if (p === "/api/backup/export") {
+    const r = await estado.backupExportar(id);
+    return r ? json({ app: "SuperPredict", version: 1, exportado: new Date().toISOString(), copia: r.meta, state: r.st }) : json({ error: "copia no encontrada" }, 404);
+  }
+  if (p === "/api/backup/restore") return (await estado.backupRestaurar(id)) ? json({ ok: true }) : json({ error: "copia no encontrada o no válida" }, 404);
+  if (p === "/api/backup/delete") return (await estado.backupBorrar(id)) ? json({ ok: true }) : json({ error: "copia no encontrada" }, 404);
+  return json({ error: "ruta desconocida" }, 404);
+}
+
 async function pushRoutes(req, env, estado, ctx, p) {
   if (p === "/api/push/key" && req.method === "GET") return json({ key: env.VAPID_PUBLIC || "" });
   if (req.method !== "POST") return json({ error: "método no permitido" }, 405);
@@ -655,6 +871,7 @@ export default {
       return json({ state: st });
     }
     if (p.startsWith("/api/push/")) return pushRoutes(req, env, estado, ctx, p);
+    if (p.startsWith("/api/backup/")) return backupRoutes(req, env, estado, p);
     if (p === "/.netlify/functions/calendario") return calendario(req, env);
     if (p === "/.netlify/functions/forma") return forma(req, env, env.STORE.get(env.STORE.idFromName("cache")));
     // la página y el resto de archivos de la carpeta public
@@ -665,6 +882,8 @@ export default {
     const estado = env.STORE.get(env.STORE.idFromName("estado"));
     ctx.waitUntil((async () => {
       try { await resultados(env, estado); } catch (e) { console.error("resultados:", e && e.message); }
+      try { await votCierreServidor(env, estado); } catch (e) { console.error("votación:", e && e.message); }   // cierra la votación y crea el partido ganador
+      try { await estado.backupCron(); } catch (e) { console.error("copia de seguridad:", e && e.message); }   // copia diaria y de fin de temporada
       try { await enviar(env, estado, await estado.pushReminders()); } catch (e) { console.error("recordatorios:", e && e.message); }   // recordatorios de cierre
     })());
   },
