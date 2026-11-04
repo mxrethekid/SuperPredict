@@ -807,6 +807,43 @@ td .crest{width:30px;height:30px}
 #bdoBox .vt-r.gan{border-color:#e9b93c;background:#2a2410}
 #bdoBox .vt-r b.pc{font:700 17px var(--b);color:var(--cyan);flex:none}
 #bdoBox .vt-r.gan b.pc{color:#e9b93c}
+#bdoBox .vt-r.on .bd-star{display:inline}
+#bdoBox .bd-hd{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+#bdoBox .bd-hd::before{content:"";width:62px;flex:none}
+#bdoBox .bd-hd .ja-t{flex:1;margin:0;text-align:center}
+#bdoBox .bd-cup{position:relative;width:62px;height:82px;flex:none;pointer-events:none}
+#bdoBox .bd-cup svg{display:block;height:100%;width:auto;margin:0 auto}
+#bdoBox .bd-cup canvas.cup3d{position:absolute;top:0;left:50%;height:100%;aspect-ratio:.85;transform:translateX(-50%);opacity:0;transition:opacity .4s}
+#bdoBox .bd-cup.on3 canvas.cup3d{opacity:1}
+#bdoBox .bd-cup.on3 svg{visibility:hidden}
+#bdoBox .bd-cup.on3{filter:drop-shadow(0 0 14px rgba(235,185,60,.45))}
+/* Fin de temporada: premios arriba y clasificación de la liga plegada tras un botón */
+#tabla.lgmin>h2,#tabla.lgmin>#wrapTopBtn,#tabla.lgmin>#tablaNav,#tabla.lgmin>.lgt,#tabla.lgmin>.lgleg,#tabla.lgmin>#evolBtn,#tabla.lgmin>#evolCard{display:none!important}
+#premTop:empty{display:none}
+.prm{margin:0 0 14px;padding:12px 14px}
+.prm h3{text-align:center;margin:0 0 6px;font:700 15px/1.3 var(--b);letter-spacing:.12em;text-transform:uppercase;color:var(--cyan)}
+.pm-p{padding:10px 0;border-top:1px solid rgba(255,255,255,.08)}
+.pm-p:first-of-type{border-top:0}
+.pm-h{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.pm-h b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16px}
+.pm-t{flex:none;margin-left:auto;text-align:right;font:700 17px var(--b);color:#ffe066}
+.pm-t small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.pm-l{display:flex;align-items:center;gap:8px;padding:2px 0;font-size:13px;color:var(--mute)}
+.pm-l span{flex:1;min-width:0}
+.pm-l em{font-style:normal;font-weight:700;color:#fff}
+.pm-c{display:block;width:30px;height:38px;flex:none}
+.pm-c svg{display:block;height:100%;width:auto;margin:0 auto}
+#ligaToggle{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin:0 0 14px;padding:8px 14px;border-radius:99px;border:1px solid rgba(170,140,255,.55);background:linear-gradient(rgba(170,140,255,.24),rgba(170,140,255,.1)),#0c1115;color:#fff;font:700 13px var(--b);letter-spacing:.04em;box-shadow:0 4px 14px -6px rgba(0,0,0,.8)}
+#ligaToggle[hidden]{display:none}
+#ligaToggle.on{outline:2px solid var(--cyan);outline-offset:2px;box-shadow:0 0 14px -2px var(--cyan)}
+#ligaToggle .pm-c{width:22px;height:28px}
+#bdoBox .bd-star{display:none;margin-left:6px;font-size:15px}
+#bdoBox .bd-s{display:block;font:500 12.5px/1.35 var(--b);margin-top:3px;color:var(--mute)}
+#bdoBox .bd-trs{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+#bdoBox .bd-t{display:flex;flex-direction:column;align-items:center;width:54px}
+#bdoBox .bd-t svg{height:34px;width:22px;display:block}
+#bdoBox .bd-t.w svg{width:37px}
+#bdoBox .bd-t em{font:600 9.5px/1.15 var(--b);font-style:normal;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);margin-top:3px;text-align:center}
 /* ===== Sobres / PredictCoin ===== */
 #sobres h2{font:700 17px/1.3 var(--b)!important;letter-spacing:.12em!important;text-transform:uppercase;text-align:center;color:var(--mute)!important;-webkit-text-fill-color:currentColor!important;background:none!important;filter:none!important;animation:none!important;margin-bottom:14px}
 #sobres{position:relative}
@@ -2016,14 +2053,16 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 
 <!-- TABLA -->
 <section id="tabla">
-  <div id="euroTop"></div>
+  <div id="premTop"></div>
+  <button type="button" class="btn ghost" id="ligaToggle" aria-expanded="false" hidden></button>
   <h2>Super Predict League</h2>
   <button type="button" class="btn" id="wrapTopBtn" style="width:100%;margin:0 0 14px" hidden>✨ Ver Wrapped</button>
   <div id="tablaNav"></div>
   <div class="card lgt" style="padding:6px 10px"><div class="lg-cup" aria-hidden="true"><canvas class="cup3d" data-cup="spl" data-z="7"></canvas></div><div id="tablaBox"></div></div>
-  <div class="muted" style="margin:12px 0;line-height:1.6"><div>- <b>PG</b>: Puntos ganados en la jornada</div><div>- <b>PT</b>: Puntos totales</div></div>
+  <div class="muted lgleg" style="margin:12px 0;line-height:1.6"><div>- <b>PG</b>: Puntos ganados en la jornada</div><div>- <b>PT</b>: Puntos totales</div></div>
   <button type="button" class="btn ghost" id="evolBtn" style="width:100%;margin:0 0 14px" aria-expanded="false" aria-controls="evolCard" hidden>Ver evolución de posiciones</button>
   <div class="card" id="evolCard" style="margin-bottom:18px" hidden><h3 style="text-align:center;color:var(--cyan)">Evolución de posiciones</h3><div id="evolBox"></div></div>
+  <div id="euroTop"></div>
   <div class="badges">
     <button type="button" class="badge z-ucl ecp" data-eb="champions" aria-pressed="false" aria-controls="euroBox">Champions</button>
     <button type="button" class="badge z-uel ecp" data-eb="europa" aria-pressed="false" aria-controls="euroBox">Europa League</button>
@@ -2886,12 +2925,33 @@ function mountCups() {
   }).catch(() => { CupHub.starting = false; cupFail(); });
 }
 let euroSel = null;   // competición cuyo cuadro se está viendo en la pestaña Clasificación (null = ninguna)
+let ligaOpen = false;   // fin de temporada: la tabla de la liga va plegada tras un botón
+const EU_PREMIO = { champions: 12.5, europa: 7.5, conference: 5 };
+function premiosTemporada() {
+  const L = standings(), res = {}, pos = {};
+  const add = (id, o) => { const r = res[id] || (res[id] = { id, it: [], tot: 0 }); r.it.push(o); r.tot += o.v; };
+  L.forEach((q, i) => { pos[q.id] = i; if (i < PREMIOS_LIGA.length) add(q.id, { k: "spl", n: "Liga · " + (i + 1) + "º", v: PREMIOS_LIGA[i] }); });
+  Object.keys(CUP_ID).forEach(c => { const fin = eMatch(c, "final"); if (!fin || !fin.result) return; const w = eWinner(fin); if (w) add(w, { k: CUP_ID[c], n: COMPS[c].nombre + " · Campeón", v: EU_PREMIO[c] }); });
+  return Object.values(res).sort((a, b) => b.tot - a.tot || (pos[a.id] ?? 99) - (pos[b.id] ?? 99));
+}
+function renderPrem(over) {
+  const tb = $("#tabla"), pt = $("#premTop"), bt = $("#ligaToggle"); if (!tb || !pt || !bt) return;
+  tb.classList.toggle("lgmin", over && !ligaOpen);
+  bt.hidden = !over; bt.classList.toggle("on", over && ligaOpen); bt.setAttribute("aria-expanded", String(over && ligaOpen));
+  if (!over) { pt._h = ""; pt.innerHTML = ""; bt._h = ""; return; }
+  const cups = {}, cup = k => cups[k] || (cups[k] = (() => { try { return trofeoSvg(TROFEOS.find(t => t.id === k), true).replace('viewBox="-1.75 -.05 3.5 3.2"', 'viewBox="-1 -.05 2 3.2"'); } catch (e) { return "🏆"; } })());
+  if (!bt._h) { bt._h = 1; bt.innerHTML = `<i class="pm-c">${cup("spl")}</i><span>Clasificación de la liga</span>`; }
+  bt.onclick = () => { ligaOpen = !ligaOpen; renderPrem(true); };
+  const D = premiosTemporada();
+  const h = D.length ? `<div class="card prm"><h3>Premios de la temporada</h3>${D.map(d => { const q = pById(d.id) || {}; return `<div class="pm-p"><div class="pm-h">${crest(q.team)}<b>${esc(q.name || "")}</b><span class="pm-t"><small>Total</small>${eur(d.tot)}</span></div>${d.it.map(o => `<div class="pm-l"><span>${esc(o.n)}</span><em>${eur(o.v)}</em><i class="pm-c">${cup(o.k)}</i></div>`).join("")}</div>`; }).join("")}</div>` : "";
+  if (pt._h !== h) { pt._h = h; pt.innerHTML = h; }
+}
 function renderEuro() {
   const box = $("#euroBox"); if (!box) return;
-  const over = calcRounds().includes(CONFIG.jornadas), top = $("#euroTop");   // liga terminada: los tres cuadros arriba, uno bajo otro
-  document.querySelectorAll("#tabla .badges, #tabla .eb-h").forEach(x => { x.style.display = over ? "none" : ""; });
-  if (top) { const h = over ? "<h2>Competiciones europeas</h2>" + Object.keys(COMPS).map(k => `<div class="ecard ${COMPS[k].z}">${ecT(COMPS[k])}${eBracket(k, false)}</div>`).join('<div class="eu-sep"></div>') + '<div class="eu-sep"></div>' : ""; if (top._h !== h) { top._h = h; top.innerHTML = h; } }
-  if (over) { box.innerHTML = ""; return; }
+  const over = calcRounds().includes(CONFIG.jornadas), top = $("#euroTop");
+  try { renderPrem(over); } catch (e) { console.error(e); }   // liga terminada: los tres cuadros arriba, uno bajo otro
+  document.querySelectorAll("#tabla .badges, #tabla .eb-h").forEach(x => { x.style.display = ""; });   // también al final de temporada: los cuadros europeos van plegados tras sus botones
+  if (top && top._h) { top._h = ""; top.innerHTML = ""; }
   document.querySelectorAll("#tabla .badges [data-eb]").forEach(b => {
     const on = b.dataset.eb === euroSel; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on));
     b.onclick = () => { euroSel = euroSel === b.dataset.eb ? null : b.dataset.eb; renderEuro(); if (euroSel) box.scrollIntoView({ behavior: "smooth", block: "start" }); };
@@ -4699,8 +4759,8 @@ function bdoSeason() { const lg = leagueMs().map(m => Date.parse(m.kickoff)).fil
 const bdoListo = () => calcRounds().includes(CONFIG.jornadas) && Object.keys(CUP_ID).every(c => { const f = eMatch(c, "final"); return !!f && !!f.result && !!eWinner(f); });
 function bdoMeritos() {
   const fin = calcRounds().includes(CONFIG.jornadas), M = {};
-  standings().forEach((p, i) => { M[p.id] = { id: p.id, pos: i, pts: p.pt, plenos: p.ex, part: p.env || 0, tit: 0, liga: fin && i === 0 ? BDO_LIGA : 0 }; });
-  Object.keys(CUP_ID).forEach(c => { const f = eMatch(c, "final"), w = f && f.result ? eWinner(f) : null; if (w && M[w]) M[w].tit += BDO_TIT[c]; });
+  standings().forEach((p, i) => { M[p.id] = { id: p.id, pos: i, pts: p.pt, plenos: p.ex, part: p.env || 0, tit: 0, cups: [], liga: fin && i === 0 ? BDO_LIGA : 0 }; });
+  Object.keys(CUP_ID).forEach(c => { const f = eMatch(c, "final"), w = f && f.result ? eWinner(f) : null; if (w && M[w]) { M[w].tit += BDO_TIT[c]; M[w].cups.push(c); } });
   return Object.values(M).map(x => ({ ...x, m: x.pts + 2 * x.plenos + x.part + x.tit + x.liga })).sort((a, b) => b.m - a.m || a.pos - b.pos);
 }
 function bdoFase() {
@@ -4732,27 +4792,33 @@ function bdoMount() {
   if (!f || f.estado === "no") { if (old) old.remove(); return; }
   const el = old || document.createElement("div"); el.id = "bdoBox";
   if (!old) { const ref = box.querySelector("#votBox") || box.querySelector("h2.ja-t") || box.querySelector("#penBox") || box.querySelector(".pc-sec"); if (ref) ref.before(el); else box.appendChild(el); }
-  bdoPaint(el, f, p);
+  bdoPaint(el, f, p); setTimeout(mountCups, 0);
 }
 function bdoPaint(el, f, p) {
-  const hd = '<h2 class="ja-t">BALÓN DE ORO</h2>', esNom = !f.test && f.nom.some(n => n.id === p.id);
+  let cup2d = ""; try { cup2d = trofeoSvg(TROFEOS.find(t => t.id === "bdo"), true); } catch (e) {}
+  const hd = `<div class="bd-hd"><h2 class="ja-t">NOMINADOS: BALLON D’OR</h2><div class="bd-cup" aria-hidden="true">${cup2d}<canvas class="cup3d" data-cup="bdo" data-z="7"></canvas></div></div>`, esNom = !f.test && f.nom.some(n => n.id === p.id);
   const mine = f.test ? (BDO_TEST && BDO_TEST.v) : (p.bdo && p.bdo.s === f.T ? p.bdo.v : null);
+  const CUPN = { champions: "Champions League", europa: "Europa League", conference: "Conference League" }, CUPS = { champions: "Champions", europa: "Europa", conference: "Conference" };
+  const ligaSvg = () => { try { return trofeoSvg(TROFEOS.find(t => t.id === "spl"), true); } catch (e) { return "🏆"; } };
   const row = (n, o = {}) => {
-    const q = pById(n.id) || {}, tag = o.btn ? "button" : "div";
-    const det = `${n.m} méritos · ${n.pts} pts + ${n.plenos * 2} plenos + ${n.part} particip.` + (n.tit + n.liga ? ` + ${n.tit + n.liga} títulos` : "") + (o.v != null ? ` · ${o.v} ${o.v === 1 ? "voto" : "votos"}` : "");
-    return `<${tag}${o.btn ? ` type="button" data-id="${esc(n.id)}"` : ""} class="vt-r${mine === n.id ? " on" : ""}${o.gan ? " gan" : ""}">${crest(q.team)}<span class="vt-t">${esc(q.name || "")}<small class="muted" style="display:block;font:500 12px var(--b);margin-top:2px">${det}</small></span>${o.pct != null ? `<b class="pc">${Math.round(o.pct)}%</b>` : ""}</${tag}>`;
+    const q = pById(n.id) || {}, tag = o.btn ? "button" : "div", mia = esNom && n.id === p.id;
+    const tr = (n.liga ? [`<span class="bd-t w" title="Liga">${ligaSvg()}<em>Liga</em></span>`] : []).concat((n.cups || []).map(c => `<span class="bd-t" title="${CUPN[c]}">${cupSvg(c)}<em>${CUPS[c]}</em></span>`)).join("");
+    const seed = n.pos + 1, zc = seed <= 4 ? "champions" : seed <= 6 ? "europa" : seed <= 8 ? "conference" : null;
+    let eu = "";
+    if (zc && !(n.cups || []).includes(zc)) { const fm = eMatch(zc, "final"); eu = fm && fm.result && fm.pl && fm.pl.includes(n.id) ? `Finalista de la ${CUPN[zc]}` : `Clasificado a la ${CUPN[zc]}`; }
+    else if (!zc && !tr) eu = "Sin competición europea";
+    const st = `${n.pts} pts en liga · ${n.plenos} ${n.plenos === 1 ? "pleno" : "plenos"} · ${n.pos + 1}º en la tabla`;
+    return `<${tag}${o.btn ? ` type="button" data-id="${esc(n.id)}"` : ""} class="vt-r${mine === n.id || mia ? " on" : ""}${o.gan ? " gan" : ""}">${crest(q.team)}<span class="vt-t">${esc(q.name || "")}<span class="bd-star">⭐</span><small class="bd-s">${st}${o.v != null ? ` · ${o.v} ${o.v === 1 ? "voto" : "votos"}` : ""}</small>${eu ? `<small class="bd-s">${eu}</small>` : ""}${tr ? `<span class="bd-trs">${tr}</span>` : ""}</span>${o.pct != null ? `<b class="pc">${Math.round(o.pct)}%</b>` : ""}</${tag}>`;
   };
-  const cierre = new Date(f.close).toLocaleString("es-ES", { weekday: "long", hour: "2-digit", minute: "2-digit" });
   if (f.estado === "cerrada" || (f.test && mine)) {
     const R = bdoGanador(f, f.test ? { [mine]: 1 } : null), g = R[0], gp = pById(g.id) || {};
     el.innerHTML = hd + `<p class="muted vt-n">${f.test ? "Resultado de prueba (solo cuenta tu voto)." : "Votación cerrada."} Gana el Balón de Oro <b>${esc(gp.name || "")}</b> 🏆</p>` + R.map((n, i) => row(n, { gan: i === 0, pct: n.pct, v: n.v })).join("");
     el.onclick = null; return;
   }
-  const votantes = S.players.filter(x => x.regAt && !f.nom.some(n => n.id === x.id)), nV = votantes.filter(x => x.bdo && x.bdo.s === f.T && f.nom.some(n => n.id === x.bdo.v)).length;
-  const note = f.test ? `<p class="muted vt-n">Prueba: tu voto no se guarda.</p>` : `<p class="muted vt-n">Estos son los 3 con más méritos. Votan los que no son nominados. Cierra el ${cierre} · han votado ${nV}/${votantes.length}.</p>`;
-  if (esNom) { el.innerHTML = hd + note + `<p class="muted vt-n"><b>Eres nominado ⭐</b> y no puedes votar. ¡Suerte!</p>` + f.nom.map(n => row(n)).join(""); el.onclick = null; return; }
+  const note = f.test ? `<p class="muted vt-n">Prueba: tu voto no se guarda.</p>` : "";
+  if (esNom) { el.innerHTML = hd + note + `<p class="muted vt-n"><b>Estás nominado ⭐️</b></p>` + f.nom.map(n => row(n)).join(""); el.onclick = null; return; }
   if (mine) { const q = pById(mine) || {}; el.innerHTML = hd + `<div class="card vt-ok"><b>Voto hecho ✅</b><div class="muted" style="margin-top:4px">Tu voto: ${esc(q.name || "")}</div></div>` + f.nom.map(n => row(n)).join(""); el.onclick = null; return; }
-  el.innerHTML = hd + note + f.nom.map(n => row(n, { btn: true })).join("");
+  el.innerHTML = hd + note + `<p class="muted vt-n">Vota objetivamente a quien hizo mejor temporada en tu opinión 🗳️</p>` + f.nom.map(n => row(n, { btn: true })).join("");
   el.onclick = e => {
     const b = e.target.closest("button[data-id]"); if (!b) return;
     if (f.test) { BDO_TEST.v = b.dataset.id; toast("Voto hecho ✅"); bdoMount(); return; }
