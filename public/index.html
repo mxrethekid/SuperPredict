@@ -2377,7 +2377,7 @@ async function flush() {
       const snap = clone(S), ops = diff(base, snap);
       if (!ops.length) { break; }
       wseq++;
-      r = await api({ ops });
+      r = await api({ ops, by: me || "" });
       recentAdd(ops);
       base = snap; cacheSave();
     } while (again);
