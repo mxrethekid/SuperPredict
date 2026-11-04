@@ -121,11 +121,15 @@ export class Store extends DurableObject {
     };
   }
   _subs() { const d = this._get("push") || {}; d.subs ||= {}; return d; }
-  _jobs(msgs, st) {   // cada aviso se convierte en un envío por cada móvil suscrito del jugador
+  // Presencia: la app avisa cada 25 s mientras está abierta y a la vista. Quien está dentro no recibe avisos (los verá en la propia app).
+  _dentro(pid) { const t = this._pres && this._pres[pid]; return !!t && Date.now() - t < 55e3; }
+  async presencia(pid, on) { this._pres ||= {}; if (on) this._pres[pid] = Date.now(); else delete this._pres[pid]; return true; }
+  _jobs(msgs, st, forzar) {   // cada aviso se convierte en un envío por cada móvil suscrito del jugador (salvo si está dentro de la app)
     if (!msgs.length) return [];
     const subs = this._subs().subs, jobs = [];
     const now = Date.now();
     for (const m of msgs) {
+      if (!forzar && this._dentro(m.pid)) continue;   // ya está en la app: no hace falta avisarle
       const tab = TAB_AVISO[String(m.tag || "").split("-")[0]], n = pendientes(st, m.pid, now);
       for (const s of subs[m.pid] || []) jobs.push({ sub: s, payload: { t: m.title, b: m.body, tag: m.tag, url: tab ? "/#" + tab : "/", n } });
     }
@@ -135,8 +139,21 @@ export class Store extends DurableObject {
   async applyOpsN(ops) {
     const st = this._state(); let jobs = [];
     if (Array.isArray(ops) && ops.length) {
-      const antes = { ids: new Set(st.matches.map((m) => m.id)), res: Object.fromEntries(st.matches.map((m) => [m.id, !!m.result])), mods: modsActuales(st) };
+      const antes = { ids: new Set(st.matches.map((m) => m.id)), res: Object.fromEntries(st.matches.map((m) => [m.id, !!m.result])), mods: modsActuales(st), info: Object.fromEntries(st.matches.map((m) => [m.id, { round: m.round, home: m.home, away: m.away }])) };
       applyOps(st, ops); this._set("state", st);
+      try {   // si borras un partido (o le quitas el resultado), sus avisos "ya enviados" se olvidan: al volver a crearlo / ponerle resultado se mandan otra vez
+        const quitar = [];
+        for (const id of Object.keys(antes.info)) {
+          const i = antes.info[id], vivo = st.matches.find((x) => x.id === id);
+          if (!vivo) quitar.push(`j:${i.round}|${i.home}|${i.away}`, "r:" + id, `c:${id}:`, `p:${id}:`);
+          else if (antes.res[id] && !vivo.result) quitar.push("r:" + id);
+        }
+        if (quitar.length) {
+          const log = this._get("pushlog") || {}; let ch = false;
+          for (const k of Object.keys(log)) if (quitar.some((q) => k === q || (q.endsWith(":") && k.startsWith(q)))) { delete log[k]; ch = true; }
+          if (ch) this._set("pushlog", log);
+        }
+      } catch (e) { console.error("registro de avisos:", e && e.message); }
       const arch = ops.filter((o) => o && o.c === "archivo" && !o.rm && o.id).map((o) => o.id);   // jugador archivado: deja de recibir avisos
       if (arch.length) { const d = this._subs(); let ch = false; for (const id of arch) if (d.subs[id]) { delete d.subs[id]; ch = true; } if (ch) this._set("push", d); }
       try {   // un fallo en los avisos nunca debe impedir que se guarde
@@ -162,6 +179,39 @@ export class Store extends DurableObject {
     while (arr.length > 5) arr.shift();
     this._set("push", d); return true;
   }
+  async pushDemo(kind, pid) {   // aviso de prueba al móvil de un jugador: se puede repetir tantas veces como quieras
+    const subs = this._subs().subs[pid] || [];
+    if (!subs.length) return { jobs: [], sinAvisos: true };
+    const st = this._state(), now = Date.now();
+    const m = st.matches.filter((x) => !x.comp).sort((a, b) => Date.parse(b.kickoff) - Date.parse(a.kickoff))[0] || { round: 1, home: "Equipo A", away: "Equipo B", kickoff: new Date(now + 864e5).toISOString() };
+    const k = Date.parse(m.kickoff) || now + 864e5, f = votFase(st, now), rival = (st.players.find((p) => p.id !== pid && p.regAt) || { name: "Un rival" }).name;
+    const D = {
+      jornada: ["🆕 ¡Nueva jornada!", `J${m.round}: ${m.home} vs ${m.away}.\nCierre: ${fechaEs(k - CIERRE)}.`],
+      cierre: ["⏰ ¡Queda 1 hora para el cierre!", `J${m.round}: ${m.home} vs ${m.away}\nCierra a las ${horaEs(k - CIERRE)} y aún no has puesto tu pronóstico…`],
+      resultado: [`🏁 Final: ${m.home} 2-1 ${m.away}`, "+3 puntos ✅ +1 por racha 🔥"],
+      pocion: ["🧪 ¡Te han lanzado una poción!", `${rival} ha usado Cambiaforma.\n+1 gol a ${m.home}.`],
+      votacion: ["🗳️ ¡Votación abierta!", `Elige el partido de la próxima jornada.\nCierra el ${votCierreTxt(f)}.`],
+      votacion_re: ["🗳️ Votación reabierta", `Se han borrado los votos: vuelve a votar.\nCierra el ${votCierreTxt(f)}.`],
+      votorec: ["🗳️ Quedan 6 horas para votar", `Aún no has votado el partido de la próxima jornada.\nCierra a las ${horaEs(f.close)}.`],
+      reto: ["🤝 Te han retado a penaltis", `${rival} te reta a una tanda de penaltis. Acepta el reto desde la pestaña de inicio.`],
+      turno: ["⚽ ¡Te toca tirar!", `${rival} ya ha jugado la ronda 2 de vuestra tanda. Es tu turno.`],
+      duelo: ["⚽ Duelo de penaltis", `Tienes una tanda contra ${rival}. ¡Entra a jugarla!`],
+    }[kind];
+    if (!D) return { jobs: [], desconocido: true };
+    const tag = kind.split("_")[0] + "-prueba-" + now, tab = TAB_AVISO[kind.split("_")[0]], n = pendientes(st, pid, now);
+    return { jobs: subs.map((s) => ({ sub: s, payload: { t: "🧪 PRUEBA · " + D[0], b: D[1], tag, url: tab ? "/#" + tab : "/", n } })) };
+  }
+  async pushResub(oldEndpoint, sub) {
+    const d = this._subs();
+    for (const k of Object.keys(d.subs)) {
+      if (d.subs[k].some((s) => s.e === oldEndpoint)) {
+        d.subs[k] = d.subs[k].filter((s) => s.e !== oldEndpoint && s.e !== sub.e);
+        d.subs[k].push({ e: sub.e, p: sub.p, a: sub.a, t: Date.now() });
+        this._set("push", d); return true;
+      }
+    }
+    return false;
+  }
   async pushUnsubscribe(endpoints) {   // quita suscripciones (el jugador las desactiva o el servicio de push dice que caducaron)
     const lista = Array.isArray(endpoints) ? endpoints : [endpoints], d = this._subs(); let ch = false;
     for (const k of Object.keys(d.subs)) {
@@ -171,13 +221,14 @@ export class Store extends DurableObject {
     if (ch) this._set("push", d); return ch;
   }
   async pushJobsPara(pids, payload) {   // pids = null → todos
-    const subs = this._subs().subs, jobs = [], vivos = new Set(this._state().players.map((p) => p.id)); let jugadores = 0;
+    const subs = this._subs().subs, jobs = [], vivos = new Set(this._state().players.map((p) => p.id)); let jugadores = 0, omitidos = 0;
     for (const pid of Object.keys(subs)) {
       if (pids && !pids.includes(pid)) continue;
       if (!vivos.has(pid)) continue;   // archivados o eliminados: sin avisos
+      if (this._dentro(pid)) { omitidos++; continue; }   // dentro de la app: sin aviso
       jugadores++; for (const s of subs[pid]) jobs.push({ sub: s, payload });
     }
-    return { jobs, jugadores };
+    return { jobs, jugadores, omitidos };
   }
   async pushJobsEndpoint(endpoint, payload) {
     const subs = this._subs().subs, jobs = [];
@@ -455,13 +506,14 @@ async function vapidFirma(env, audience) {
 }
 
 // Envía un aviso a una suscripción { e: endpoint, p, a }. Devuelve el código HTTP del servicio de push (404/410 = suscripción caducada).
-async function pushEnviar(env, sub, payload, ttl) {
+async function pushEnviar(env, sub, payload, ttl, signal) {
   const cuerpo = await pushCifrar(sub, JSON.stringify(payload));
   const jwt = await vapidFirma(env, new URL(sub.e).origin);
   const r = await fetch(sub.e, {
     method: "POST",
     headers: { "Content-Encoding": "aes128gcm", "Content-Type": "application/octet-stream", TTL: String(ttl || 6 * 3600), Urgency: "high", Authorization: "vapid t=" + jwt + ", k=" + env.VAPID_PUBLIC },
     body: cuerpo,
+    signal,
   });
   return r.status;
 }
@@ -786,12 +838,27 @@ async function enviar(env, estado, jobs) {
   if (!jobs || !jobs.length) return { enviados: 0, fallidos: 0 };
   if (!env.VAPID_PUBLIC || !env.VAPID_PRIVATE) { console.error("Faltan VAPID_PUBLIC / VAPID_PRIVATE"); return { enviados: 0, fallidos: jobs.length, error: "Faltan las claves VAPID" }; }
   const caducadas = []; let enviados = 0, fallidos = 0;
+  const espera = (ms) => new Promise((r) => setTimeout(r, ms));
   await Promise.all(jobs.map(async (j) => {
-    try {
-      const code = await pushEnviar(env, j.sub, j.payload);
-      if (code >= 200 && code < 300) enviados++;
-      else { fallidos++; if (code === 404 || code === 410) caducadas.push(j.sub.e); else console.error("push respondió", code); }
-    } catch (e) { fallidos++; console.error("push:", e && e.message); }
+    // hasta 3 intentos: los servicios de push (Apple, Google, Mozilla) fallan a veces con 429/5xx o cortes de red
+    let code = 0, err = null;
+    for (let i = 0; i < 3; i++) {
+      try {
+        const ac = new AbortController(), to = setTimeout(() => ac.abort(), 8000);
+        try { code = await pushEnviar(env, j.sub, j.payload, 0, ac.signal); } finally { clearTimeout(to); }
+        err = null;
+        if (code >= 200 && code < 300) break;
+        if (code === 404 || code === 410) break;   // suscripción caducada: no tiene sentido reintentar
+        if (code !== 429 && code < 500) break;     // error nuestro (400/401/403…): reintentar no lo arregla
+      } catch (e) { err = e; code = 0; }
+      if (i < 2) await espera(500 * (i + 1) * (i + 1));
+    }
+    if (code >= 200 && code < 300) enviados++;
+    else {
+      fallidos++;
+      if (code === 404 || code === 410) caducadas.push(j.sub.e);
+      else console.error("push falló", code, err && err.message, new URL(j.sub.e).origin);
+    }
   }));
   if (caducadas.length) { try { await estado.pushUnsubscribe(caducadas); } catch (e) {} }
   return { enviados, fallidos };
@@ -824,11 +891,30 @@ async function pushRoutes(req, env, estado, ctx, p) {
   const admin = () => !!env.ADMIN_PIN && String(b.pin || "") === String(env.ADMIN_PIN);
   const cut = (s, n) => String(s || "").slice(0, n);
 
+  if (p === "/api/push/presence") {   // latido de la app abierta (on) o aviso de que se ha cerrado / pasado a segundo plano (off)
+    if (typeof b.pid !== "string" || b.pid.length > 80) return json({ error: "jugador no válido" }, 400);
+    await estado.presencia(b.pid, !!b.on); return json({ ok: true });
+  }
+  if (p === "/api/push/demo") {   // avisos de prueba desde el panel del admin
+    if (!env.ADMIN_PIN) return json({ error: "Falta el secreto ADMIN_PIN en Cloudflare" }, 500);
+    if (!admin()) return json({ error: "PIN incorrecto" }, 403);
+    const r = await estado.pushDemo(String(b.kind || ""), String(b.pid || ""));
+    if (r.desconocido) return json({ error: "aviso desconocido" }, 400);
+    if (r.sinAvisos) return json({ ok: true, enviados: 0, fallidos: 0, sinAvisos: true });
+    const e = await enviar(env, estado, r.jobs);
+    return json({ ok: true, ...e });
+  }
   if (p === "/api/push/sub") {
     const s = b.sub || {}, k = s.keys || {};
     if (typeof s.endpoint !== "string" || !/^https:\/\//.test(s.endpoint) || s.endpoint.length > 600 || !k.p256dh || !k.auth || typeof b.pid !== "string") return json({ error: "suscripción no válida" }, 400);
     const ok = await estado.pushSubscribe(b.pid, { e: s.endpoint, p: String(k.p256dh), a: String(k.auth) });
     return ok ? json({ ok: true }) : json({ error: "jugador desconocido" }, 404);
+  }
+  if (p === "/api/push/resub") {   // el navegador renovó la suscripción por su cuenta: se sustituye la antigua por la nueva
+    const s = b.sub || {}, k = s.keys || {};
+    if (typeof s.endpoint !== "string" || !/^https:\/\//.test(s.endpoint) || s.endpoint.length > 600 || !k.p256dh || !k.auth || typeof b.old !== "string") return json({ error: "suscripción no válida" }, 400);
+    const ok = await estado.pushResub(b.old, { e: s.endpoint, p: String(k.p256dh), a: String(k.auth) });
+    return ok ? json({ ok: true }) : json({ error: "suscripción antigua desconocida" }, 404);
   }
   if (p === "/api/push/unsub") { await estado.pushUnsubscribe(String(b.endpoint || "")); return json({ ok: true }); }
   if (p === "/api/push/test") {   // aviso de prueba al propio móvil
@@ -847,10 +933,10 @@ async function pushRoutes(req, env, estado, ctx, p) {
     const t = cut(b.title, 80).trim(), cuerpo = cut(b.body, 300).trim();
     if (!t || !cuerpo) return json({ error: "Falta el título o el mensaje" }, 400);
     const pids = Array.isArray(b.to) ? b.to.map(String) : null;   // null = todos
-    const { jobs, jugadores } = await estado.pushJobsPara(pids, { t, b: cuerpo, tag: "admin-" + Date.now(), url: "/" });
-    if (!jobs.length) return json({ ok: true, enviados: 0, fallidos: 0, jugadores: 0 });
+    const { jobs, jugadores, omitidos } = await estado.pushJobsPara(pids, { t, b: cuerpo, tag: "admin-" + Date.now(), url: "/" });
+    if (!jobs.length) return json({ ok: true, enviados: 0, fallidos: 0, jugadores: 0, omitidos });
     const r = await enviar(env, estado, jobs);
-    return json({ ok: true, jugadores, ...r });
+    return json({ ok: true, jugadores, omitidos, ...r });
   }
   return json({ error: "ruta desconocida" }, 404);
 }
