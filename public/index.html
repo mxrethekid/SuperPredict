@@ -1597,6 +1597,7 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 .en.wide .br-cup.on3{filter:drop-shadow(0 0 16px rgba(255,200,60,.5))}
 /* Copa de la Súper Predict League: apoyada arriba a la izquierda de la clasificación */
 #tabla .lgt{position:relative;overflow:visible;margin-top:26px}
+#tabla>h2{padding-left:40px}   /* título un poco más a la derecha, separado del trofeo */
 .lg-cup{position:absolute;left:8px;bottom:100%;width:62px;height:82px;margin-bottom:-1px;pointer-events:none;z-index:3}
 .lg-cup canvas.cup3d{position:absolute;left:50%;bottom:0;height:100%;aspect-ratio:.85;transform:translate(-50%,13%);opacity:0;transition:opacity .4s}
 .lg-cup.on3 canvas.cup3d{opacity:1}
@@ -1836,6 +1837,41 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 #pshBox #pshMsg:empty{display:none}
 #pshBox #pshMsg{margin:10px 2px 0;font-size:14px}
 @media (prefers-reduced-motion:reduce){#pshBox .psh-sw,#pshBox .psh-sw i{transition:none}}
+/* ===== Marco Balón de Oro: dorado con barrido de brillo y destellos aleatorios (solo quien gana un Balón de Oro) ===== */
+@keyframes bdoGlow{0%,100%{box-shadow:inset 0 1px 0 rgba(255,226,122,.55),inset 0 -1px 0 rgba(255,226,122,.55),inset 0 0 14px rgba(245,185,46,.28)}50%{box-shadow:inset 0 1px 0 rgba(255,240,170,.9),inset 0 -1px 0 rgba(255,240,170,.9),inset 0 0 22px rgba(245,185,46,.5)}}
+@keyframes bdoGlowMy{0%,100%{box-shadow:0 0 12px rgba(245,185,46,.5),0 0 26px rgba(245,185,46,.22),inset 0 0 12px rgba(245,185,46,.3)}50%{box-shadow:0 0 18px rgba(255,214,102,.85),0 0 36px rgba(245,185,46,.4),inset 0 0 18px rgba(245,185,46,.5)}}
+@keyframes bdoGlowHero{0%,100%{box-shadow:0 0 26px -6px rgba(245,185,46,.7),0 0 56px -14px rgba(245,185,46,.45),inset 0 0 0 1px rgba(255,226,122,.9),inset 0 0 0 4px #120e06,inset 0 0 0 5px rgba(233,185,73,.6),inset 0 0 26px 4px rgba(245,185,46,.22)}50%{box-shadow:0 0 38px -4px rgba(255,214,102,.95),0 0 70px -12px rgba(245,185,46,.65),inset 0 0 0 1px rgba(255,240,170,1),inset 0 0 0 4px #120e06,inset 0 0 0 5px rgba(255,214,102,.85),inset 0 0 30px 6px rgba(245,185,46,.36)}}
+@keyframes bdoSweep{0%{background-position:170% 0}55%,100%{background-position:-70% 0}}
+@keyframes bdoTw{0%{opacity:0;transform:scale(.2) rotate(0)}30%{opacity:1;transform:scale(1) rotate(30deg)}55%,100%{opacity:0;transform:scale(.2) rotate(90deg)}}
+.bsw{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:2}
+.bs{position:absolute;display:block;pointer-events:none;opacity:0;margin:-5px 0 0 -5px;background:radial-gradient(circle,#fff 0 18%,#ffeaa0 19% 42%,rgba(255,200,60,0) 72%);-webkit-clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%)}
+#tabla tr.rbdo td{position:relative;isolation:isolate;text-shadow:0 1px 3px rgba(0,0,0,.75);background:linear-gradient(180deg,rgba(255,214,102,.16),rgba(184,134,11,.10));box-shadow:inset 0 1px 0 rgba(255,226,122,.55),inset 0 -1px 0 rgba(255,226,122,.55),inset 0 0 14px rgba(245,185,46,.28)}
+#tabla tr.rbdo td:not(.pos)::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,244,190,.5) 50%,transparent 65%);background-size:220% 100%;background-repeat:no-repeat;background-position:170% 0}
+#tabla tr.rbdo .pl .me,#tabla tr.rbdo .pl span{text-shadow:0 0 8px rgba(255,200,60,.55),0 1px 3px rgba(0,0,0,.75)}
+#myPos.bdof{overflow:hidden;border-color:#e9b949;background:linear-gradient(180deg,rgba(255,214,102,.26),rgba(184,134,11,.14)),rgba(24,19,8,.96);box-shadow:0 0 12px rgba(245,185,46,.5),0 0 26px rgba(245,185,46,.22),inset 0 0 12px rgba(245,185,46,.3)}
+#myPos.bdof::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,244,190,.4) 50%,transparent 65%);background-size:220% 100%;background-repeat:no-repeat;background-position:170% 0}
+#historial .pf-hero.bdof{overflow:hidden;border-color:rgba(255,214,102,.95);background:radial-gradient(120% 90% at 50% 0%,rgba(255,226,122,.30),transparent 60%),radial-gradient(120% 90% at 50% 100%,rgba(184,134,11,.38),transparent 65%),linear-gradient(180deg,#261d0b,#120e06);box-shadow:0 0 26px -6px rgba(245,185,46,.7),0 0 56px -14px rgba(245,185,46,.45),inset 0 0 0 1px rgba(255,226,122,.9),inset 0 0 0 4px #120e06,inset 0 0 0 5px rgba(233,185,73,.6),inset 0 0 26px 4px rgba(245,185,46,.22)}
+#historial .pf-hero.bdof::after{display:none}
+#historial .pf-hero>.pf-bdo{position:absolute;inset:0;overflow:hidden;border-radius:inherit;z-index:0;pointer-events:none}
+.pf-bdo .hx{position:absolute;inset:0;opacity:.09;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill='%23ffd24a' fill-rule='evenodd'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/svg%3E");background-size:28px 49px}
+.pf-bdo .sw{position:absolute;inset:0;background:linear-gradient(110deg,transparent 38%,rgba(255,244,190,.34) 50%,transparent 62%);background-size:240% 100%;background-repeat:no-repeat;background-position:170% 0}
+.ti-r.mkb.ok{border-color:#ffd24a88}
+.ti-r.mkb.on{border-color:#ffd24a;box-shadow:0 0 14px -4px rgba(255,210,74,.8)}
+.mk-pv.bdo{border-color:#e9b949;background:linear-gradient(180deg,rgba(255,214,102,.26),rgba(184,134,11,.14)),rgba(24,19,8,.96);box-shadow:0 0 12px rgba(245,185,46,.5),0 0 26px rgba(245,185,46,.22),inset 0 0 12px rgba(245,185,46,.3);animation:none}
+.mk-pv.bdo::before{opacity:1;filter:none;animation:none;background:linear-gradient(105deg,transparent 35%,rgba(255,244,190,.5) 50%,transparent 65%);background-size:220% 100%;background-repeat:no-repeat;background-position:170% 0}
+.mk-pv.bdo::after{background:none;animation:none}
+.mk-pv.bdo .mk-t{color:#ffe9a6}
+@media(prefers-reduced-motion:no-preference){
+#tabla tr.rbdo td{animation:bdoGlow 4s ease-in-out infinite}
+#tabla tr.rbdo td:not(.pos)::after{animation:bdoSweep 5s ease-in-out infinite}
+#tabla tr.rbdo td:nth-child(3)::after{animation-delay:.25s}#tabla tr.rbdo td:nth-child(4)::after{animation-delay:.5s}#tabla tr.rbdo td:nth-child(5)::after{animation-delay:.75s}
+#myPos.bdof{animation:bdoGlowMy 4s ease-in-out infinite}
+#myPos.bdof::after,.pf-bdo .sw,.mk-pv.bdo::before{animation:bdoSweep 5s ease-in-out infinite}
+#historial .pf-hero.bdof{animation:bdoGlowHero 4s ease-in-out infinite}
+.mk-pv.bdo{animation:bdoGlowMy 4s ease-in-out infinite}
+.bs{animation:bdoTw 3s ease-in-out infinite}
+}
+@media(prefers-reduced-motion:reduce){.bs{opacity:.8}}
 </style>
 </head>
 <body>
@@ -2769,7 +2805,8 @@ const leagueMs = () => S.matches.filter(m => !m.comp);
 const eMatch = (c, k) => S.matches.find(m => m.comp === c && m.stage === k);
 const pById = id => S.players.find(p => p.id === id);
 // Pasa quien más se acerque en ese partido (3 exacto, 1 acierto de goles de un equipo, 0); si empatan, desempata la clasificación de la liga
-// Quién pasa en un cruce: 1º más puntos en el partido; 2º acertar el signo; 3º menor error en goles; 4º duelo de penaltis entre los dos
+// Quién pasa en un cruce: 1º más puntos en el partido; 2º acertar el signo; 3º menor error en goles; 4º más plenos en la liga; 5º más aciertos de signo en la liga;
+// 6º mayor racha de jornadas puntuando en la liga; 7º duelo de penaltis entre los dos
 // (24 h desde que se calcula: si solo uno juega, pasa ese —más rondas jugadas—; si ninguno, el mejor clasificado de la liga).
 // Los partidos calculados antes de existir los penaltis (sin m.calcAt) siguen con el criterio antiguo (clasificación de la liga).
 const E_PEN_MS = 24 * 36e5, eKey = m => "e" + m.id;
@@ -2782,6 +2819,8 @@ function eCmp(m) {   // { w: id del ganador (null = pendiente de penaltis), pen:
   const sg = (a, b) => Math.sign(a - b), ok = q => !!q && sg(q.h, q.a) === sg(r.h, r.a), er = q => q ? Math.abs(q.h - r.h) + Math.abs(q.a - r.a) : 99;
   if (ok(P[0]) !== ok(P[1])) return { w: ok(P[0]) ? m.pl[0] : m.pl[1] };
   if (er(P[0]) !== er(P[1])) return { w: er(P[0]) < er(P[1]) ? m.pl[0] : m.pl[1] };
+  const T = standings(), lv = id => T.find(x => x.id === id) || {};   // 3º más plenos, 4º más aciertos de signo y 5º mayor racha, todos en la liga
+  for (const k of ["ex", "sig", "rmax"]) { const a = lv(m.pl[0])[k] || 0, b = lv(m.pl[1])[k] || 0; if (a !== b) return { w: a > b ? m.pl[0] : m.pl[1] }; }
   const A = pById(m.pl[0]), B = pById(m.pl[1]), d = A && B && penOfKey(A, eKey(m)), st = d && penState(d);
   if (st && st.winner) return { w: st.winner.id, pen: true };
   const n = p => { const e = (p && p.pen && p.pen[eKey(m)]) || {}; return Math.min((e.s || []).length, (e.k || []).length); };
@@ -4594,7 +4633,7 @@ function renderTabla() {
   const nav = rs.length ? `<div class="jhead"><div class="jn">${rs.length > 1 ? `<button class="jb" data-jd="-1" ${idx <= 0 ? "disabled" : ""} aria-label="Jornada anterior">‹</button>` : ""}<b>Jornada ${cur}</b>${rs.length > 1 ? `<button class="jb" data-jd="1" ${idx >= rs.length - 1 ? "disabled" : ""} aria-label="Jornada siguiente">›</button>` : ""}</div></div>` : "";
   $("#tablaNav").innerHTML = nav;
   $("#tablaBox").innerHTML = `<table><thead><tr><th class="n">Pos</th><th>Jugador</th><th class="n">PG</th><th class="n">PT</th><th class="arr"><button type="button" class="tdb" id="tdInfo" aria-label="Criterios de desempate" title="Criterios de desempate"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="7.3" r="1.5" fill="currentColor"/></svg></button></th></tr></thead><tbody>` +
-    t.map((p, i) => `<tr data-pid="${p.id}" class="${i < 4 ? "z-ucl" : i < 6 ? "z-uel" : i < 8 ? "z-uecl" : ""}${p.id === me ? " mine" : ""}${marcoOn(p) ? " rcol" : p.rc >= 3 ? " rfire" : ""}"><td class="pos">${i + 1}º</td><td><div class="pl">${p.team ? crest(p.team, false) : ""}<span class="plw"><span class="${p.id === me ? "me" : ""}">${esc(p.name)}</span>${ttlHtml(p, "tb")}</span></div></td><td class="n ${p.pg > 0 ? "pg-up" : p.pg < 0 ? "pg-dn" : "pg-0"}">${p.pg > 0 ? "+" + p.pg : p.pg < 0 ? p.pg : "0"}</td><td class="n pt">${p.pt}</td><td class="arr">${mvIcon(p.mv)}</td></tr>`).join("") + "</tbody></table>";
+    t.map((p, i) => `<tr data-pid="${p.id}" class="${i < 4 ? "z-ucl" : i < 6 ? "z-uel" : i < 8 ? "z-uecl" : ""}${p.id === me ? " mine" : ""}${marcoOn(p) ? " rcol" : marcoBdo(p) ? " rbdo" : p.rc >= 3 ? " rfire" : ""}"><td class="pos">${i + 1}º</td><td><div class="pl">${p.team ? crest(p.team, false) : ""}<span class="plw"><span class="${p.id === me ? "me" : ""}">${esc(p.name)}</span>${ttlHtml(p, "tb")}</span></div>${marcoBdo(p) ? bdoSp(3) : ""}</td><td class="n ${p.pg > 0 ? "pg-up" : p.pg < 0 ? "pg-dn" : "pg-0"}">${p.pg > 0 ? "+" + p.pg : p.pg < 0 ? p.pg : "0"}</td><td class="n pt">${p.pt}${marcoBdo(p) ? bdoSp(2) : ""}</td><td class="arr">${mvIcon(p.mv)}</td></tr>`).join("") + "</tbody></table>";
   $("#tablaNav").querySelectorAll("[data-jd]").forEach(b => b.onclick = () => { const n = rs[idx + +b.dataset.jd]; if (n == null) return; tv = n === last ? null : n; renderTabla(); });
   fitTitulos($("#tablaBox"));
   setupMyPos(t);
@@ -4615,7 +4654,10 @@ function abrirDesempate(eu) {
   if (eu) o.innerHTML = `<div class="box"><h3>Criterios de desempate</h3><p class="tdp">Si los dos finalistas empatan a puntos en el partido, pasa uno u otro en este orden, pasando al siguiente solo si persiste el empate:</p><ol>
     <li><span><b>Acertar el signo</b><small>Victoria local, empate o victoria visitante, aunque no clavaras el marcador.</small></span></li>
     <li><span><b>Menor error en goles</b><small>Se suman los goles que fallas con cada equipo; gana quien falle menos.</small></span></li>
-    <li><span><b>Duelo de penaltis</b><small>Los dos juegan una tanda al mejor de 3 rondas desde la pestaña Inicio (si uno ya no puede alcanzar al otro, se acaba antes) y pasa quien la gane. Hay 24 horas desde que se calcula el partido: si solo uno juega, pasa ese; si ninguno, pasa el mejor clasificado de la liga.</small></span></li></ol>
+    <li><span><b>Más plenos</b><small>Resultados exactos acertados en la liga (3 puntos).</small></span></li>
+    <li><span><b>Más aciertos de signo</b><small>Victoria local, empate o victoria visitante, aunque no clavaras el marcador en la liga.</small></span></li>
+    <li><span><b>Mayor racha de jornadas puntuando</b><small>Más jornadas seguidas sumando al menos 1 punto en la liga.</small></span></li>
+    <li><span><b>Duelo de penaltis</b><small>Los dos juegan una tanda de penaltis que se cerrará a las 24 horas.</small></span></li></ol>
     <button type="button" class="btn" id="tdOk" style="width:100%">Entendido</button></div>`;
   document.body.appendChild(o);
   const onKey = e => { if (e.key === "Escape") cerrar(); };
@@ -4635,10 +4677,10 @@ function setupMyPos(t) {
   if (myOff) { myOff(); myOff = null; }
   const i = t.findIndex(x => x.id === me), row = $("#tablaBox").querySelector("tr.mine");
   const over = calcRounds().includes(CONFIG.jornadas);   // liga terminada: la barra fija "mi posición" se desactiva
-  if (over || i < 0 || !row) { box.hidden = true; box.classList.remove("fire", "colf"); sec.classList.remove("hasMy"); return; }
+  if (over || i < 0 || !row) { box.hidden = true; box.classList.remove("fire", "colf", "bdof"); sec.classList.remove("hasMy"); return; }
   const p = t[i];
-  box.classList.toggle("colf", marcoOn(p)); box.classList.toggle("fire", p.rc >= 3 && !marcoOn(p));   // racha: la barra se llena de llamas
-  box.innerHTML = `<span class="mp-pos mp-c">${i + 1}º</span><div class="mp-pl">${p.team ? crest(p.team, false) : ""}<span class="mp-name">${esc(p.name)}</span></div><span class="mp-pg mp-c ${p.pg > 0 ? "pg-up" : p.pg < 0 ? "pg-dn" : "pg-0"}">${p.pg > 0 ? "+" + p.pg : p.pg < 0 ? p.pg : "0"}</span><span class="mp-pt mp-c">${p.pt}</span><span class="mp-mv mp-c">${mvIcon(p.mv)}</span>`;
+  const mb = marcoBdo(p); box.classList.toggle("colf", marcoOn(p)); box.classList.toggle("bdof", mb); box.classList.toggle("fire", p.rc >= 3 && !marcoOn(p) && !mb);   // racha: la barra se llena de llamas
+  box.innerHTML = `<span class="mp-pos mp-c">${i + 1}º</span><div class="mp-pl">${p.team ? crest(p.team, false) : ""}<span class="mp-name">${esc(p.name)}</span></div><span class="mp-pg mp-c ${p.pg > 0 ? "pg-up" : p.pg < 0 ? "pg-dn" : "pg-0"}">${p.pg > 0 ? "+" + p.pg : p.pg < 0 ? p.pg : "0"}</span><span class="mp-pt mp-c">${p.pt}</span><span class="mp-mv mp-c">${mvIcon(p.mv)}</span>${mb ? bdoSp(4) : ""}`;
   sec.classList.add("hasMy");
   box.onclick = () => row.scrollIntoView({ behavior: "smooth", block: "center" });
   const nav = $("#mainNav"), ub = $("#userBar");
@@ -4743,8 +4785,8 @@ function autoTrofeos() {
       if (pr.includes(k)) return;
       const got = trofeosDe(p);
       if (got.filter(x => x === id).length < MAX_COPAS) p.trofeos = got.concat(id);
-      p.premios = pr.concat(k); ch = true;
-      if (p.id === me) { const t = TROFEOS.find(x => x.id === id); toast("🏆 ¡Nuevo trofeo en tu vitrina: " + (t ? t.nombre : "") + "!"); }
+      p.premios = pr.concat(k, "t" + temporada() + ":" + id); ch = true;
+      if (p.id === me) { const t = TROFEOS.find(x => x.id === id); { const tc = ttlCopa(id, temporada()); toast("🏆 ¡Nuevo trofeo en tu vitrina: " + (t ? t.nombre : "") + "!" + (tc ? " Título desbloqueado: «" + tc.n + "»" : "") + (id === "bdo" ? " y Marco Balón de Oro" : "")); } }
     });
     if (ch) save();
   } catch (e) {}
@@ -5434,10 +5476,10 @@ function renderHistorial() {
   const vis = m => !other || m.result || isClosed(m);
   const rounds = [...new Set(leagueMs().filter(vis).map(m => m.round))].sort((a, b) => a - b);
   const tt = standings(), ix = tt.findIndex(p => p.id === pid);
-  const colOn = marcoOn(who), fireOn = ix >= 0 && tt[ix].rc >= 3 && !colOn;   // en racha: el recuadro del perfil lleva llamas
+  const colOn = marcoOn(who), bdoOn = marcoBdo(who), fireOn = ix >= 0 && tt[ix].rc >= 3 && !colOn && !bdoOn;   // en racha: el recuadro del perfil lleva llamas
   const rk = rachaRec(who);   // mayor racha conseguida (no baja nunca; para la cabecera)
   const head = (other ? `<div class="pf-top"><button class="pf-back" id="pfBack" aria-label="Volver">‹ Volver</button>${penRetoBtn(other)}</div>` : "") + `
-    <div class="pf-hero${ix < 0 ? "" : ix < 4 ? " z-ucl" : ix < 6 ? " z-uel" : ix < 8 ? " z-uecl" : ""}${fireOn ? " fire" : ""}${colOn ? " colf" : ""}">${fireOn ? '<span class="pf-fire" aria-hidden="true"><i class="u"></i></span>' : ""}${colOn ? '<span class="pf-col" aria-hidden="true"><i class="w"></i><i class="s s1"></i><i class="s s2"></i><i class="s s3"></i><i class="s s4"></i><i class="s s5"></i></span>' : ""}<div class="pf-crest">${crest(who.team)}</div><div class="pf-name" role="heading" aria-level="2">${esc(who.name)}</div>${ttlHtml(who, "ptl")}
+    <div class="pf-hero${ix < 0 ? "" : ix < 4 ? " z-ucl" : ix < 6 ? " z-uel" : ix < 8 ? " z-uecl" : ""}${fireOn ? " fire" : ""}${colOn ? " colf" : ""}${bdoOn ? " bdof" : ""}">${fireOn ? '<span class="pf-fire" aria-hidden="true"><i class="u"></i></span>' : ""}${colOn ? '<span class="pf-col" aria-hidden="true"><i class="w"></i><i class="s s1"></i><i class="s s2"></i><i class="s s3"></i><i class="s s4"></i><i class="s s5"></i></span>' : ""}${bdoOn ? `<span class="pf-bdo" aria-hidden="true"><i class="hx"></i><i class="sw"></i>${bdoSi(9)}</span>` : ""}<div class="pf-crest">${crest(who.team)}</div><div class="pf-name" role="heading" aria-level="2">${esc(who.name)}</div>${ttlHtml(who, "ptl")}
     <div class="pf-badges"><span class="gd">${ix >= 0 ? ix + 1 + "º" : "—"}</span><span>${ix >= 0 ? tt[ix].pt : 0}<small>PT</small></span><span class="fr" title="Mayor racha" aria-label="Mayor racha: ${rk}">${rk}<i aria-hidden="true">🔥</i></span></div></div>` + (other ? `
     <p class="pf-sec">Sus predicciones</p>` : `
     <h2>Historial</h2>`);
@@ -7484,9 +7526,36 @@ const TIENDA = ["Menos hablar y más predecir", "Esto es futbol papa", "Chilling
   "La suerte me esquiva", "100%", "A un punto de la gloria (mentira)", "He venido a hablar de mi libro", "Mañana dimito"
 ].map((n, i) => ({ id: "s" + String(i + 1).padStart(2, "0"), n }));
 const TIENDA_N = 6;   // títulos a la venta cada semana (los 30 salen una vez cada 5 semanas, en orden aleatorio)
+// Títulos de trofeo: uno por cada temporada en que se gana la copa (liga, Balón de Oro o final europea), p. ej. «Champions League T2».
+// Solo aparecen en la lista cuando se tienen. La temporada de cada victoria se apunta en p.premios como "t<temporada>:<trofeo>" al repartir la copa;
+// las copas que el admin da a mano (sin ese apunte) toman la temporada actual y, si ya está cogida, el primer número libre. Sin la copa en la vitrina, el título desaparece.
+const TCOPA = [
+  { tro: "spl", nom: "Super Predict League", d: "Campeón de la Super Predict League" },
+  { tro: "bdo", nom: "Ballon d’Or", d: "Ganador del Ballon d’Or" },
+  { tro: "ucl", nom: "Champions League", d: "Campeón de la Champions League" },
+  { tro: "uel", nom: "Europa League", d: "Campeón de la Europa League" },
+  { tro: "uecl", nom: "Conference League", d: "Campeón de la Conference League" }
+];
+const ttlCopa = (tro, n) => { const c = TCOPA.find(x => x.tro === tro); return c ? { id: "tr-" + tro + "-" + n, tro, n: c.nom + " T" + n, d: c.d + " · Temporada " + n } : null; };
+function copaTitulos(p) {   // títulos de trofeo de un jugador, de la temporada más reciente a la más antigua
+  if (!p) return [];
+  const got = trofeosDe(p), pr = Array.isArray(p.premios) ? p.premios : [], out = [];
+  TCOPA.forEach(c => {
+    const copies = got.filter(x => x === c.tro).length; if (!copies) return;
+    const ns = [...new Set(pr.map(x => { const m = /^t(\d+):(\w+)$/.exec(x); return m && m[2] === c.tro ? +m[1] : 0; }).filter(Boolean))].sort((a, b) => a - b).slice(-copies);
+    if (ns.length < copies) { const cand = [temporada(), ...Array.from({ length: 99 }, (_, i) => i + 1)]; for (const n of cand) { if (ns.length >= copies) break; if (!ns.includes(n)) ns.push(n); } }
+    ns.sort((a, b) => b - a).forEach(n => out.push(ttlCopa(c.tro, n)));
+  });
+  return out;
+}
 const marcoOn = p => !!p && p.marco === "col" && (p.logros || []).includes("l22");   // Marco Coleccionista equipado (solo si tiene el logro)
-const ttlFind = id => TITULOS.find(x => x.id === id) || TIENDA.find(x => x.id === id);
-const ttlName = p => { const t = p && p.titulo ? ttlFind(p.titulo) : null; return t ? t.n : ""; };
+const marcoBdo = p => !!p && p.marco === "bdo" && trofeosDe(p).includes("bdo");   // Marco Balón de Oro equipado (solo si tiene un Balón de Oro en la vitrina)
+// Destellos dorados del Marco Balón de Oro: posición, tamaño y ritmo al azar; al terminar cada destello (ya invisible) salta a otro sitio
+const bdoSi = n => { let h = ""; for (let i = 0; i < n; i++) { const sz = 6 + Math.random() * 7; h += `<i class="bs" style="left:${(4 + Math.random() * 90).toFixed(1)}%;top:${(8 + Math.random() * 78).toFixed(1)}%;width:${sz.toFixed(1)}px;height:${sz.toFixed(1)}px;animation-duration:${(1.8 + Math.random() * 2.6).toFixed(2)}s;animation-delay:${(-Math.random() * 5).toFixed(2)}s"></i>`; } return h; };
+const bdoSp = n => `<span class="bsw" aria-hidden="true">${bdoSi(n)}</span>`;
+document.addEventListener("animationiteration", e => { const el = e.target; if (el && el.classList && el.classList.contains("bs")) { el.style.left = (4 + Math.random() * 90).toFixed(1) + "%"; el.style.top = (8 + Math.random() * 78).toFixed(1) + "%"; } }, true);
+const ttlFind = id => TITULOS.find(x => x.id === id) || TIENDA.find(x => x.id === id) || ((m) => m ? ttlCopa(m[1], +m[2] || 1) : null)(/^tr-([a-z]+)(?:-(\d+))?$/.exec(id || ""));
+const ttlName = p => { let id = p && p.titulo; if (!id) return ""; if (/^tr-[a-z]+$/.test(id)) id += "-1"; if (/^tr-/.test(id)) { const t = copaTitulos(p).find(x => x.id === id); return t ? t.n : ""; } const t = ttlFind(id); return t ? t.n : ""; };
 const ttlHtml = (p, c) => ttlName(p) ? `<small class="mtl ${c || ""}${/^s/.test(p.titulo) ? " sh" : ""}${p.titulo === "l22" ? " col" : ""}">${esc(ttlName(p))}</small>` : "";
 // Selección semanal de la tienda: igual para todos los jugadores; cambia cada lunes (a las 00:00, hora del dispositivo)
 // Orden aleatorio (fijo para todos) de los 30 títulos de un ciclo de 5 semanas
@@ -7575,7 +7644,8 @@ function renderLogros() {
   const box = $("#logrosBox"); if (!box) return;
   const p = meP(); if (!p) { box.innerHTML = ""; navDot("historial", false); return; }
   const real = p !== pend && S.players.includes(p), s = statsDe(p), have = new Set((p.logros || []).filter(id => TITULOS.some(t => t.id === id)));
-  const had0 = new Set(have);
+  const copT = copaTitulos(p), copIds = copT.map(t => t.id);   // títulos de trofeo que tiene
+  const had0 = new Set([...have, ...copIds]);
   if (real && synced) {   // los logros desbloqueados se guardan para siempre en el jugador (solo tras leer el servidor, para no recrear fichas borradas)
     const nu = TITULOS.filter(t => !have.has(t.id) && s[t.k] >= t.v);
     if (nu.length) { nu.forEach(t => have.add(t.id)); p.logros = [...have]; save(); toastLater("¡Título desbloqueado: " + nu[0].n + "!" + (nu.length > 1 ? " (+" + (nu.length - 1) + ")" : "")); if (nu.some(t => t.id === "l22")) toastLater("¡Marco Coleccionista desbloqueado! Equípalo en tus títulos"); }
@@ -7584,25 +7654,27 @@ function renderLogros() {
   if (real && synced) {
     let seen = vistosLoad(p.id);
     if (!seen) { seen = [...had0]; vistosSave(p.id, seen); }   // primera vez en este dispositivo: lo ya desbloqueado no cuenta como nuevo
-    nuevos = new Set([...have].filter(id => !seen.includes(id)));
+    nuevos = new Set([...have, ...copIds].filter(id => !seen.includes(id)));
   }
   navDot("historial", nuevos.size > 0);
   if (viewId && viewId !== me) { box.innerHTML = ""; return; }   // en el perfil de otro jugador no se muestran
   const own = new Set((p.comprados || []).filter(id => TIENDA.some(t => t.id === id)));
-  const lst = [...TITULOS.filter(t => have.has(t.id)), ...TIENDA.filter(t => own.has(t.id)), ...TITULOS.filter(t => !have.has(t.id))]
+  const lst = [...TITULOS.filter(t => have.has(t.id)), ...TIENDA.filter(t => own.has(t.id)), ...copT, ...TITULOS.filter(t => !have.has(t.id))]
     .sort((a, b) => ((b.id === p.titulo) * 2 + nuevos.has(b.id)) - ((a.id === p.titulo) * 2 + nuevos.has(a.id)));   // el equipado, arriba del todo
   const hasM = have.has("l22"), onM = hasM && p.marco === "col";
-  const marcoHtml = `<div class="ti-g"><div class="ti-r mk${hasM ? " ok" : ""}${onM ? " on" : ""}"><div class="ti-i"><em class="ti-k">Marco animado</em><b>Marco Coleccionista</b><span>${hasM ? "Estrellas fugaces y brillo cromático en tu fila de la clasificación y en tu perfil" : "Se desbloquea con el logro «El Coleccionista»"}</span></div>${hasM ? `<button type="button" class="ti-b" data-mk="col">${onM ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}<div class="mk-pv" role="img" aria-label="Vista previa de la animación del Marco Coleccionista"><span class="mk-n">1º</span>${p.team ? crest(p.team, false) : ""}<span class="mk-u">${esc(p.name)}</span><span class="mk-t">Vista previa</span></div></div></div>`;
+  const hasB = trofeosDe(p).includes("bdo"), onB = hasB && p.marco === "bdo";
+  const bdoRow = `<div class="ti-r mk mkb${hasB ? " ok" : ""}${onB ? " on" : ""}"><div class="ti-i"><em class="ti-k">Marco animado</em><b>Marco Balón de Oro</b><span>${hasB ? "Dorado con destellos aleatorios en tu fila de la clasificación y en tu perfil" : "Solo lo consiguen quienes ganan un Balón de Oro"}</span></div>${hasB ? `<button type="button" class="ti-b" data-mk="bdo">${onB ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}<div class="mk-pv bdo" role="img" aria-label="Vista previa de la animación del Marco Balón de Oro"><span class="mk-n">1º</span>${p.team ? crest(p.team, false) : ""}<span class="mk-u">${esc(p.name)}</span><span class="mk-t">Vista previa</span>${bdoSp(4)}</div></div>`;
+  const marcoHtml = `<div class="ti-g"><div class="ti-r mk${hasM ? " ok" : ""}${onM ? " on" : ""}"><div class="ti-i"><em class="ti-k">Marco animado</em><b>Marco Coleccionista</b><span>${hasM ? "Estrellas fugaces y brillo cromático en tu fila de la clasificación y en tu perfil" : "Se desbloquea con el logro «El Coleccionista»"}</span></div>${hasM ? `<button type="button" class="ti-b" data-mk="col">${onM ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}<div class="mk-pv" role="img" aria-label="Vista previa de la animación del Marco Coleccionista"><span class="mk-n">1º</span>${p.team ? crest(p.team, false) : ""}<span class="mk-u">${esc(p.name)}</span><span class="mk-t">Vista previa</span></div></div>${bdoRow}</div>`;
   box.innerHTML = `<h2 style="margin-top:26px">Títulos de personalización</h2>
     <p class="muted" style="text-align:center;margin:-4px 8px 12px">Equipa uno para que salga bajo tu nombre.<br>Logros: ${have.size}/${TITULOS.length} · Comprados: ${own.size}</p>
     <div class="ti-g">${(titulosAbiertos ? lst : lst.slice(0, 5)).map(t => {
-      const sh = /^s/.test(t.id), ok = sh || have.has(t.id), on = p.titulo === t.id, c = sh ? 0 : Math.min(s[t.k], t.v);
-      return `<div class="ti-r${sh ? " sh" : ""}${ok ? " ok" : ""}${on ? " on" : ""}${nuevos.has(t.id) ? " nw" : ""}" data-id="${t.id}"><div class="ti-i"><em class="ti-k">${sh ? "Comprado" : "Logro"}</em><b>${esc(t.n)}</b><span>${sh ? "Título de Personalización" : esc(t.d)}</span>${ok ? "" : `<i class="ti-p"><u style="width:${c / t.v * 100}%"></u></i><em>${c}/${t.v}</em>`}</div>${ok ? `<button type="button" class="ti-b" data-ti="${t.id}">${on ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}</div>`;
+      const sh = /^s/.test(t.id), cp = !!t.tro, ok = sh || cp || have.has(t.id), on = p.titulo === t.id, c = sh || cp ? 0 : Math.min(s[t.k], t.v);
+      return `<div class="ti-r${sh ? " sh" : ""}${ok ? " ok" : ""}${on ? " on" : ""}${nuevos.has(t.id) ? " nw" : ""}" data-id="${t.id}"><div class="ti-i"><em class="ti-k">${sh ? "Comprado" : cp ? "Trofeo" : "Logro"}</em><b>${esc(t.n)}</b><span>${sh ? "Título de Personalización" : esc(t.d)}</span>${ok ? "" : `<i class="ti-p"><u style="width:${c / t.v * 100}%"></u></i><em>${c}/${t.v}</em>`}</div>${ok ? `<button type="button" class="ti-b" data-ti="${t.id}">${on ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}</div>`;
     }).join("")}</div>${lst.length > 5 ? `<button type="button" class="ti-more" id="tiMore">${titulosAbiertos ? "Ver menos" : "Ver más (" + (lst.length - 5) + ")"}</button>` : ""}<h2 style="margin-top:26px">Marcos animados</h2>${marcoHtml}`;
   const visto = id => {   // quita el puntito de ese título y, si ya no queda ninguno nuevo, el de la pestaña
     const seen = vistosLoad(p.id) || []; if (!seen.includes(id)) { seen.push(id); vistosSave(p.id, seen); }
     const el = box.querySelector('.ti-r[data-id="' + id + '"]'); if (el) el.classList.remove("nw");
-    navDot("historial", [...have].some(x => !seen.includes(x)));
+    navDot("historial", [...have, ...copIds].some(x => !seen.includes(x)));
   };
   if (nuevos.size) {
     box.querySelectorAll(".ti-r.nw").forEach(el => el.addEventListener("click", () => visto(el.dataset.id)));
@@ -7615,13 +7687,14 @@ function renderLogros() {
     }
   }
   box.querySelectorAll("[data-mk]").forEach(b => b.onclick = () => {
-    if (!real || !synced || !have.has("l22")) return;
+    const k = b.dataset.mk;
+    if (!real || !synced || !(k === "bdo" ? trofeosDe(meP()).includes("bdo") : have.has("l22"))) return;
     const q = meP(); if (!q || !S.players.includes(q)) return;
-    q.marco = q.marco === "col" ? "" : "col"; save(); render();
+    q.marco = q.marco === k ? "" : k; save(); render();
   });
   const mb = box.querySelector("#tiMore"); if (mb) mb.onclick = () => { titulosAbiertos = !titulosAbiertos; renderLogros(); };
   box.querySelectorAll("[data-ti]").forEach(b => b.onclick = () => {
-    const id = b.dataset.ti; if (!real || !synced || !(have.has(id) || own.has(id))) return;
+    const id = b.dataset.ti; if (!real || !synced || !(have.has(id) || own.has(id) || copIds.includes(id))) return;
     const q = meP(); if (!q || !S.players.includes(q)) return;   // el jugador actual: una lectura del servidor pudo sustituir al que había al dibujar
     q.titulo = q.titulo === id ? "" : id; save(); render();
   });
