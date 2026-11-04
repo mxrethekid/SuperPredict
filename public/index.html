@@ -2193,7 +2193,7 @@ const KEY = "superpredict_v1";
 const MAX_PLAYERS = 20;
 const okPl = p => !!p && typeof p.name === "string" && p.name !== "";   // una ficha sin nombre no es un jugador (se descarta y se borra del servidor)
 const clone = o => JSON.parse(JSON.stringify(o));
-const norm = d => { d = d && typeof d === "object" ? d : {}; return Object.assign({}, d, { players: Array.isArray(d.players) ? d.players : [], matches: Array.isArray(d.matches) ? d.matches : [], preds: d.preds && typeof d.preds === "object" ? d.preds : {} }); };
+const norm = d => { d = d && typeof d === "object" ? d : {}; return Object.assign({}, d, { players: Array.isArray(d.players) ? d.players : [], matches: Array.isArray(d.matches) ? d.matches : [], preds: d.preds && typeof d.preds === "object" ? d.preds : {}, archivo: Array.isArray(d.archivo) ? d.archivo : [] }); };
 let S = norm(null), base = norm(null), busy = false, again = false, synced = false;   // synced: ya se ha leído el servidor al menos una vez
 try { const r = localStorage.getItem(KEY); if (r) S = norm(JSON.parse(r)); } catch (e) {}
 S.players = S.players.filter(okPl);
@@ -2272,8 +2272,8 @@ function localApi(body) {
         const m = st.preds[o.m] = st.preds[o.m] || {};
         if (o.v === null) delete m[o.p]; else m[o.p] = o.v;
         if (!Object.keys(m).length) delete st.preds[o.m];
-      } else if (o.c === "players" || o.c === "matches") {
-        const arr = st[o.c], i = arr.findIndex(x => x.id === o.id);
+      } else if (o.c === "players" || o.c === "matches" || o.c === "archivo") {
+        const arr = (st[o.c] = st[o.c] || []), i = arr.findIndex(x => x.id === o.id);
         if (o.rm) { if (i >= 0) arr.splice(i, 1); return; }
         const e = i >= 0 ? arr[i] : { id: o.id };
         Object.assign(e, o.set || {}); (o.del || []).forEach(k => delete e[k]);
@@ -2322,6 +2322,7 @@ function diff(a, b) {
   const ops = [];
   diffEnt("players", a.players, b.players, ops);
   diffEnt("matches", a.matches, b.matches, ops);
+  diffEnt("archivo", a.archivo, b.archivo, ops);   // jugadores archivados
   const ms = new Set([...Object.keys(a.preds || {}), ...Object.keys(b.preds || {})]);
   ms.forEach(m => {
     const x = (a.preds || {})[m] || {}, y = (b.preds || {})[m] || {};
@@ -2431,7 +2432,7 @@ function adopt(st, silent) {
   });
   const rec = mergeCromos() || healed; if (rec) same = false;
   cacheSave(); if (rec) flush();
-  if (me && !meP()) { setMe(""); if (!silent) { go("cuenta"); toast("No se pudo completar el registro. Inténtalo de nuevo."); } return; }
+  if (me && !meP()) { const arc = (S.archivo || []).some(x => x.id === me); setMe(""); if (!silent) { go("cuenta"); toast(arc ? "Tu cuenta está archivada. Pide al administrador que te reactive." : "No se pudo completar el registro. Inténtalo de nuevo."); } return; }
   try { chatUpdate(); } catch (e) {}   // chat abierto: mensajes nuevos al momento (aunque se esté escribiendo)
   applyMaint();   // modo mantenimiento: se echa a los jugadores aunque estén escribiendo
   if ((!same || firstSync) && !silent && !typing()) { setMe(me); render(); }
@@ -3192,9 +3193,11 @@ function renderCuenta() {
     msg.className = "msg"; msg.textContent = "Conectando…";
     if (!(await pull(true))) return fail("No hay conexión con el servidor. Inténtalo de nuevo.");
     let found = S.players.find(x => x.name.toLowerCase() === name.toLowerCase());
+    const arch = !found && (S.archivo || []).some(x => x.name.toLowerCase() === name.toLowerCase());   // nombre de un jugador archivado
     if (reg) {
       if (found && found.pin) return fail("Ese usuario ya está registrado. Usa la pestaña Iniciar sesión.");
       if (!found) {
+        if (arch) return fail("Ese usuario pertenece a un jugador archivado. Si eres tú, pide al administrador que te reactive.");
         if (Array.from(name).length > 10) return fail("El usuario puede tener 10 caracteres como máximo.");
         if (S.players.length >= MAX_PLAYERS) return fail("La liga está completa (20 jugadores).");
       }
@@ -3206,6 +3209,7 @@ function renderCuenta() {
         setMe(pend.id); go("equipo"); return;
       }
     } else {
+      if (arch) return fail("Tu cuenta está archivada porque no estás jugando esta temporada. Pide al administrador que te reactive.");
       if (found && !found.pin) return fail("Aún no te has registrado. Usa la pestaña Registrarme.");
       if (!found || found.pin !== await hashPin(found.name, pin)) return fail("Usuario o PIN incorrecto.");
       if (!found.pinEnc) { const e = await encPin(pin); if (e) found.pinEnc = e; }
@@ -5492,7 +5496,7 @@ async function delRound(r) {
 }
 // temporada en curso: las ya cerradas quedan en p.hist y p.tb es el número de temporada con el que empieza la cuenta (lo fija el admin; por defecto 1)
 const histLen = p => Array.isArray(p.hist) ? p.hist.length : 0;
-const temporada = () => Math.max(1, ...S.players.map(p => (Number.isInteger(p.tb) && p.tb > 0 ? p.tb : 1) + histLen(p)));
+const temporada = () => Math.max(1, ...S.players.concat(S.archivo || []).map(p => (Number.isInteger(p.tb) && p.tb > 0 ? p.tb : 1) + histLen(p)));
 // ===== Simulación de temporada (solo para hacer pruebas) =====
 // Rellena la liga hasta 20 participantes con usuarios inventados (p.sim = 1) y les da predicciones, resultados y puntos de varias jornadas.
 // Todo lo simulado se quita con «Nueva temporada» (jugadores, partidos y predicciones); los jugadores reales no se tocan.
@@ -5574,9 +5578,13 @@ async function nuevaTemporada() {
     AD.msg = `Simulación quitada (${n} usuarios inventados). La temporada vuelve a estar vacía.`; AD.cls = "ok";
     render(); return;
   }
+  const ina = S.players.filter(q => !q.sim && q.regAt && leagueMs().length && !leagueMs().some(m => (S.preds[m.id] || {})[q.id]));
   const n = temporada(), played = calcRounds().length > 0, nr = new Set(leagueMs().map(m => m.round)).size, np = Object.keys(S.preds).filter(k => k !== MKEY).reduce((a, k) => a + Object.keys(S.preds[k]).length, 0);
-  const txt = `¿Empezar la temporada ${n + 1}? Se borrarán ${nr} jornada${nr === 1 ? "" : "s"} y ${np} ${np === 1 ? "predicción" : "predicciones"}, la clasificación volverá a cero y todos pasarán a "Sin pagar". Se mantienen los participantes, sus escudos y sus trofeos${played ? `, y se guarda la posición final de cada uno en la temporada ${n}` : ""}. Si quieres una copia de seguridad, expórtala antes desde Participantes. No se puede deshacer.`;
+  const txt = `¿Empezar la temporada ${n + 1}? Se borrarán ${nr} jornada${nr === 1 ? "" : "s"} y ${np} ${np === 1 ? "predicción" : "predicciones"}, la clasificación volverá a cero y todos pasarán a "Sin pagar". Se mantienen los participantes, sus escudos y sus trofeos${played ? `, y se guarda la posición final de cada uno en la temporada ${n}` : ""}. ${ina.length ? ` Sin ningún pronóstico esta temporada: ${ina.map(q => q.name).join(", ")}. Si no van a jugar la siguiente, puedes archivarlos después en Participantes.` : ""} Antes de borrar nada se guarda una copia permanente en el servidor y se descarga otra en este dispositivo. Los datos de la temporada ${n} quedarán en esa copia.`;
   if (!(await ask(txt, "Nueva temporada"))) return;
+  try { await pshPost("/api/backup/save", { pin: CONFIG.pin, label: `Fin de la temporada ${n}`, tipo: "temporada" }); }
+  catch (e) { if (!(await ask("No se ha podido guardar la copia en el servidor (" + e.message + "). Te recomiendo cancelar y volver a intentarlo. ¿Empezar la temporada igualmente?", "Continuar igualmente"))) return; }
+  try { bkDescargar(`super-predict-temporada-${n}.json`, S); } catch (e) {}   // y otra copia en este dispositivo
   if (played) standings().forEach((q, i) => { const pl = S.players.find(x => x.id === q.id); if (pl) pl.hist = [...(Array.isArray(pl.hist) ? pl.hist : []), { t: n, pos: i + 1, pt: q.pt }]; });
   S.players.forEach(p => { if (p.paid) p.paid = false; delete p.vis; });
   S.matches = []; { const mk = S.preds[MKEY]; S.preds = mk ? { [MKEY]: mk } : {}; }   // nueva temporada: sin partidos ni predicciones (el aviso de mantenimiento se conserva)
@@ -5667,13 +5675,13 @@ function adJornada(el) {
   if ($("#votRep")) $("#votRep").onclick = votRepetir;
   if ($("#simGo")) $("#simGo").onclick = simular;
   $("#setSeason").onclick = async () => {
-    const n = parseInt($("#seasonN").value), mh = Math.max(0, ...S.players.map(histLen)), fail = t => { AD.msg = t; AD.cls = "err"; renderAdmin(); };
+    const n = parseInt($("#seasonN").value), mh = Math.max(0, ...S.players.concat(S.archivo || []).map(histLen)), fail = t => { AD.msg = t; AD.cls = "err"; renderAdmin(); };
     if (!S.players.length) return fail("Necesitas al menos un participante para guardar el número de temporada.");
     if (isNaN(n) || n < 1 || n > 99) return fail("Pon un número de temporada entre 1 y 99.");
     if (n < mh + 1) return fail(`Ya hay ${mh} temporada${mh === 1 ? "" : "s"} guardada${mh === 1 ? "" : "s"} en el historial: el número mínimo es ${mh + 1}.`);
     if (n === temporada()) return;
     if (!(await ask(`¿Poner la temporada actual como la ${n}? Solo cambia el número: no se borra nada.`, "Cambiar"))) return;
-    S.players.forEach(p => { p.tb = n - mh; });
+    S.players.concat(S.archivo || []).forEach(p => { p.tb = n - mh; });
     save(); AD.msg = `Ahora estás en la temporada ${n}.`; AD.cls = "ok"; renderAdmin(); window.scrollTo({ top: 0, behavior: "smooth" });
   };
   $("#resetCromos").onclick = async () => {
@@ -5759,14 +5767,82 @@ function adMonedas(el) {
   };
 }
 
+// ===== Jugadores archivados: salen de la liga (clasificación, plaza, avisos) pero conservan todos sus datos para cuando vuelvan =====
+function jugInfo(p) {   // resumen para decidir a quién archivar: pronósticos de esta temporada y cómo quedó en la última
+  let t = "";
+  const L = leagueMs(); if (L.length) { const n = L.filter(m => (S.preds[m.id] || {})[p.id]).length; t += ` · ${n} pronóstico${n === 1 ? "" : "s"}`; }
+  const h = Array.isArray(p.hist) && p.hist.length ? p.hist[p.hist.length - 1] : null;
+  if (h) t += ` · T${h.t}: ${h.pos}.º, ${h.pt} pt`;
+  return t;
+}
+async function archivarJugador(id) {
+  const p = S.players.find(x => x.id === id); if (!p) return;
+  if (!(await ask(`¿Archivar a ${p.name}? Sale de la clasificación y deja de ocupar plaza (ahora ${S.players.length} de ${MAX_PLAYERS}), pero se conservan todos sus datos (trofeos, cromos, historial y PIN) y podrás reactivarlo cuando quieras. Si la temporada en curso ya terminó, pulsa antes «Nueva temporada» para que su posición quede guardada en el historial.`, "Archivar"))) return;
+  const a = clone(p); a.archT = Date.now(); a.archN = temporada();
+  const pr = {};
+  Object.keys(S.preds).forEach(m => { if (m === MKEY) return; const q = (S.preds[m] || {})[p.id]; if (!q) return; pr[m] = q; delete S.preds[m][p.id]; if (!Object.keys(S.preds[m]).length) delete S.preds[m]; });
+  if (Object.keys(pr).length) a.preds = pr;   // si archivas a mitad de temporada, sus pronósticos viajan con él
+  S.archivo = [...(S.archivo || []), a];
+  S.players = S.players.filter(x => x.id !== p.id);
+  save(); if (me === p.id) setMe("");
+  toast(`${p.name} archivado.`); render();
+}
+async function reactivarJugador(id) {
+  const a = (S.archivo || []).find(x => x.id === id); if (!a) return;
+  if (S.players.length >= MAX_PLAYERS) return toast(`La liga está completa (${MAX_PLAYERS} jugadores). Archiva o elimina a alguien antes.`);
+  if (S.players.some(x => x.name.toLowerCase() === a.name.toLowerCase())) return toast(`Ya hay otro jugador que se llama «${a.name}». Cámbiale el nombre o elimínalo antes.`);
+  const p = clone(a), pr = p.preds || {}, antigua = !p.archN || p.archN < temporada();
+  delete p.archT; delete p.archN; delete p.preds;
+  let aviso = "";
+  if (p.team && S.players.some(x => x.team === p.team)) { aviso = ` Su escudo (${p.team}) ya lo tiene otro jugador: elegirá uno nuevo al entrar.`; delete p.team; }
+  if (antigua) { p.paid = false; delete p.vis; }   // viene de una temporada anterior: sin pagar y sin la poción de visión de entonces
+  Object.keys(pr).forEach(m => { if (S.matches.some(x => x.id === m)) (S.preds[m] = S.preds[m] || {})[p.id] = pr[m]; });   // solo los partidos que siguen existiendo
+  S.archivo = S.archivo.filter(x => x.id !== id);
+  S.players.push(p);
+  save(); toast(`${p.name} vuelve a la liga.` + aviso); render();
+}
+async function borrarArchivado(id) {
+  const a = (S.archivo || []).find(x => x.id === id); if (!a) return;
+  if (!(await ask(`¿Eliminar definitivamente a ${a.name}? Se pierden sus datos (trofeos, cromos, historial). No se puede deshacer, aunque queda en las copias de seguridad que ya existan.`, "Eliminar"))) return;
+  S.archivo = S.archivo.filter(x => x.id !== id); save(); render();
+}
+// ===== Copias de seguridad del servidor (panel de administrador) =====
+function bkDescargar(nombre, obj) { const u = URL.createObjectURL(new Blob([JSON.stringify(obj)], { type: "application/json" })); const a = document.createElement("a"); a.href = u; a.download = nombre; a.click(); setTimeout(() => URL.revokeObjectURL(u), 4000); }
+function bkMsg(t, ok) { const m = $("#bmsg"); if (m) { m.className = "msg" + (ok ? " ok" : " err"); m.textContent = t; } }
+const bkFecha = ms => new Date(ms).toLocaleString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+async function bkCargar() {
+  const box = $("#bkList"); if (!box) return;
+  try {
+    const { copias } = await pshPost("/api/backup/list", { pin: CONFIG.pin });
+    if (!$("#bkList")) return;
+    const TIPO = { auto: "Diaria", manual: "Manual", fin: "Fin de temporada", temporada: "Nueva temporada", pre: "De seguridad" }, bt = "margin:0;padding:6px 10px;font-size:13px";
+    box.innerHTML = copias.length ? copias.map(c => `<div class="item" style="flex-wrap:wrap;gap:8px"><span style="flex:1 1 100%;color:var(--text)"><b>${esc(c.label)}</b><br><span class="muted">${TIPO[c.tipo] || ""} · ${bkFecha(c.t)} · ${c.jugadores} jugadores · ${c.partidos} partidos · ${Math.max(1, Math.round(c.bytes / 1024))} KB</span></span><span style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn ghost" style="${bt}" data-bkd="${c.id}">Descargar</button><button class="btn ghost" style="${bt}" data-bkr="${c.id}">Restaurar</button><button class="btn del" data-bkx="${c.id}">Borrar</button></span></div>`).join("") : "Aún no hay copias. La primera se hace sola en los próximos minutos.";
+    const por = id => copias.find(c => c.id === id) || {};
+    box.querySelectorAll("[data-bkd]").forEach(b => b.onclick = async () => { try { const j = await pshPost("/api/backup/export", { pin: CONFIG.pin, id: b.dataset.bkd }), c = por(b.dataset.bkd); bkDescargar("super-predict-" + (c.tipo || "copia") + "-" + new Date(c.t || Date.now()).toISOString().slice(0, 10) + ".json", j); } catch (e) { bkMsg("No se pudo descargar: " + e.message); } });
+    box.querySelectorAll("[data-bkr]").forEach(b => b.onclick = async () => {
+      const c = por(b.dataset.bkr);
+      if (!(await ask(`¿Restaurar «${c.label}» (${bkFecha(c.t)})? Sustituye todo lo actual (jugadores, partidos y predicciones) por esa copia. Antes se guarda una copia del estado de ahora, por si te arrepientes.`, "Restaurar"))) return;
+      try { await pshPost("/api/backup/restore", { pin: CONFIG.pin, id: b.dataset.bkr }); toast("Copia restaurada."); setTimeout(() => location.reload(), 700); } catch (e) { bkMsg("No se pudo restaurar: " + e.message); }
+    });
+    box.querySelectorAll("[data-bkx]").forEach(b => b.onclick = async () => {
+      const c = por(b.dataset.bkx);
+      if (!(await ask(`¿Borrar la copia «${c.label}» (${bkFecha(c.t)})? No se puede deshacer.`, "Borrar"))) return;
+      try { await pshPost("/api/backup/delete", { pin: CONFIG.pin, id: b.dataset.bkx }); bkCargar(); } catch (e) { bkMsg("No se pudo borrar: " + e.message); }
+    });
+  } catch (e) { if ($("#bkList")) $("#bkList").textContent = "No se pudieron cargar las copias: " + e.message; }
+}
 function adParts(el) {
   const paid = S.players.filter(p => p.paid).length, cu = parseFloat(CONFIG.cuota);
   el.innerHTML = `<div class="card"><h3>Participantes (${S.players.length})</h3>
     <p class="muted" style="margin-bottom:6px">${paid} de ${S.players.length} han pagado la suscripción${isNaN(cu) ? "" : " · " + (paid * cu).toLocaleString("es-ES") + " € recaudados"}</p>
-    ${S.players.length ? S.players.map(p => `<div class="item" style="flex-wrap:wrap"><span class="pl" style="flex:1 1 100%">${p.team ? crest(p.team, false) : ""}<span>${esc(p.name)} <span class="muted">· ${p.sim ? "simulado" : p.pin ? "registrado" : "pendiente de registro"}${p.team ? " · " + esc(p.team) : ""}</span></span></span><span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><button class="btn ${p.paid ? "" : "ghost"}" style="margin:0;padding:6px 10px;font-size:13px" data-pay="${p.id}">${p.paid ? "Pagado ✓" : "Sin pagar"}</button>${p.pinEnc ? `<button class="btn ghost" style="margin:0;padding:6px 10px;font-size:13px" data-vp="${p.id}">Ver PIN</button>` : (p.pin ? '<span class="muted" style="font-size:13px">PIN aún sin guardar (se guarda cuando entre)</span>' : "")}<button class="btn del" data-dp="${p.id}">Eliminar</button></span></div>`).join("") : '<p class="muted" style="margin-top:10px">Todavía no hay participantes.</p>'}</div>
+    ${S.players.length ? S.players.map(p => `<div class="item" style="flex-wrap:wrap"><span class="pl" style="flex:1 1 100%">${p.team ? crest(p.team, false) : ""}<span>${esc(p.name)} <span class="muted">· ${p.sim ? "simulado" : p.pin ? "registrado" : "pendiente de registro"}${p.team ? " · " + esc(p.team) : ""}${p.sim ? "" : jugInfo(p)}</span></span></span><span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><button class="btn ${p.paid ? "" : "ghost"}" style="margin:0;padding:6px 10px;font-size:13px" data-pay="${p.id}">${p.paid ? "Pagado ✓" : "Sin pagar"}</button>${p.pinEnc ? `<button class="btn ghost" style="margin:0;padding:6px 10px;font-size:13px" data-vp="${p.id}">Ver PIN</button>` : (p.pin ? '<span class="muted" style="font-size:13px">PIN aún sin guardar (se guarda cuando entre)</span>' : "")}${p.sim ? "" : `<button class="btn ghost" style="margin:0;padding:6px 10px;font-size:13px" data-ar="${p.id}">Archivar</button>`}<button class="btn del" data-dp="${p.id}">Eliminar</button></span></div>`).join("") : '<p class="muted" style="margin-top:10px">Todavía no hay participantes.</p>'}</div>
+    <div class="card"><h3>Archivados (${(S.archivo || []).length})</h3>
+    <p class="muted" style="margin-bottom:6px">No juegan ni ocupan plaza, pero conservan sus datos (trofeos, cromos, historial y PIN). Al reactivarlos vuelven tal cual.</p>
+    ${(S.archivo || []).length ? S.archivo.map(a => `<div class="item" style="flex-wrap:wrap"><span class="pl" style="flex:1 1 100%">${a.team ? crest(a.team, false) : ""}<span>${esc(a.name)} <span class="muted">· archivado el ${new Date(a.archT || Date.now()).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}${jugInfo(a)}</span></span></span><span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><button class="btn" style="margin:0;padding:6px 10px;font-size:13px" data-rv="${a.id}">Reactivar</button><button class="btn del" data-ax="${a.id}">Eliminar</button></span></div>`).join("") : '<p class="muted" style="margin-top:10px">Nadie archivado todavía.</p>'}</div>
     <div class="card"><h3>Copia de seguridad</h3>
-    <p class="muted">Los datos se guardan en el servidor y los ven todos. Exporta una copia de seguridad o impórtala para restaurarla.</p>
-    <div class="row"><button class="btn ghost" id="exp">Exportar</button><button class="btn ghost" id="imp">Importar</button></div>
+    <p class="muted">El servidor guarda una copia cada día (las 14 últimas), otra al terminar la temporada y otra al empezar una nueva. Aquí puedes verlas, descargarlas o restaurarlas.</p>
+    <div class="row" style="flex-wrap:wrap"><button class="btn ghost" id="exp">Exportar</button><button class="btn ghost" id="imp">Importar</button><button class="btn ghost" id="bkNow">Guardar copia ahora</button></div>
+    <div id="bkList" class="muted" style="margin-top:14px">Cargando copias…</div>
     <input type="file" id="file" accept=".json" hidden><p class="msg" id="bmsg"></p></div>`;
   el.querySelectorAll("[data-pay]").forEach(b => b.onclick = () => { const p = S.players.find(x => x.id === b.dataset.pay); if (!p) return; p.paid = !p.paid; save(); renderAdmin(); });
   el.querySelectorAll("[data-vp]").forEach(b => b.onclick = async () => {
@@ -5774,6 +5850,9 @@ function adParts(el) {
     const p = S.players.find(x => x.id === b.dataset.vp), v = p ? await decPin(p.pinEnc) : "";
     b.textContent = v ? "PIN: " + v + " · ocultar" : "No se pudo leer"; if (v) b.dataset.on = "1";
   });
+  el.querySelectorAll("[data-ar]").forEach(b => b.onclick = () => archivarJugador(b.dataset.ar));
+  el.querySelectorAll("[data-rv]").forEach(b => b.onclick = () => reactivarJugador(b.dataset.rv));
+  el.querySelectorAll("[data-ax]").forEach(b => b.onclick = () => borrarArchivado(b.dataset.ax));
   el.querySelectorAll("[data-dp]").forEach(b => b.onclick = async () => {
     const p = S.players.find(x => x.id === b.dataset.dp); if (!p) return;
     if (!(await ask(`¿Eliminar a ${p.name}? Se borrarán también sus predicciones y su equipo quedará libre. No se puede deshacer.`, "Eliminar"))) return;
@@ -5782,9 +5861,11 @@ function adParts(el) {
     Object.keys(S.preds).forEach(m => { delete S.preds[m][p.id]; if (!Object.keys(S.preds[m]).length) delete S.preds[m]; });
     save(); if (me === p.id) setMe(""); render();
   });
-  $("#exp").onclick = () => { const u = URL.createObjectURL(new Blob([JSON.stringify(S)], { type: "application/json" })); const a = document.createElement("a"); a.href = u; a.download = "super-predict.json"; a.click(); URL.revokeObjectURL(u); };
+  $("#exp").onclick = () => bkDescargar("super-predict-" + new Date().toISOString().slice(0, 10) + ".json", S);
   $("#imp").onclick = () => $("#file").click();
-  $("#file").onchange = e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { try { const d = JSON.parse(r.result); if (!d.players || !d.matches) throw 0; S = norm(d); migrate(); save(); if (!meP()) setMe(""); AD.round = null; renderAdmin(); } catch (x) { $("#bmsg").className = "msg err"; $("#bmsg").textContent = "Archivo no válido."; } }; r.readAsText(f); };
+  $("#bkNow").onclick = async () => { try { await pshPost("/api/backup/save", { pin: CONFIG.pin, label: "Copia manual", tipo: "manual" }); bkMsg("Copia guardada en el servidor.", true); bkCargar(); } catch (e) { bkMsg("No se pudo guardar la copia: " + e.message); } };
+  bkCargar();
+  $("#file").onchange = e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = async () => { try { const d0 = JSON.parse(r.result), d = d0 && d0.state && d0.state.players ? d0.state : d0; if (!d || !d.players || !d.matches) throw 0; try { await pshPost("/api/backup/save", { pin: CONFIG.pin, label: "Antes de importar un archivo", tipo: "pre" }); } catch (e) {} S = norm(d); migrate(); save(); if (!meP()) setMe(""); AD.round = null; renderAdmin(); } catch (x) { $("#bmsg").className = "msg err"; $("#bmsg").textContent = "Archivo no válido."; } }; r.readAsText(f); };
 }
 
 // ===== PredictCoin: 1 por cada punto conseguido + 1 por cada predicción enviada (se calcula en directo) =====
@@ -7649,12 +7730,36 @@ setMe = function (id) {
   const was = me, r = _setMe.apply(this, arguments);
   try {
     if (PUSH_OK && was && !id) pshSub().then(s => { if (s) pshPost("/api/push/unsub", { endpoint: s.endpoint }).catch(() => {}); });
-    pshSynced = ""; if (id) setTimeout(pshSync, 1500); pshDotCheck();
+    pshSynced = ""; if (id) setTimeout(pshSync, 1500); pshDotCheck(); badgePend();
   } catch (e) {}
   return r;
 };
 setTimeout(pshSync, 3000);
 setTimeout(pshDotCheck, 3200); setTimeout(pshDotCheck, 9000);
+// Abrir la pestaña que toca al tocar un aviso (la URL del aviso lleva #jugar, #tabla...): si la app estaba cerrada, al abrirse; si estaba abierta, el service worker avisa
+const NAV_OK = ["jugar", "tabla", "sobres", "historial"];
+function navHash(u) {
+  const t = String(u || "").split("#")[1] || "";
+  if (!NAV_OK.includes(t)) return;
+  try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+  if (t === "historial") viewId = null;
+  go(t);
+}
+if ("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("message", e => { if (e.data && e.data.type === "nav") navHash(e.data.url); });
+window.addEventListener("hashchange", () => navHash(location.href));
+setTimeout(() => navHash(location.href), 700);
+// Número rojo en el icono de la app: partidos de liga abiertos que aún no has pronosticado (con la app instalada; el servidor lo actualiza también con cada aviso)
+function badgePend() {
+  try {
+    if (!PUSH_APP || !("setAppBadge" in navigator)) return;
+    const p = meP();
+    let n = 0;
+    if (p && S.players.includes(p)) n = leagueMs().filter(m => !m.result && !isClosed(m) && typeof ((S.preds[m.id] || {})[p.id] || {}).h !== "number").length;
+    (n > 0 ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(() => {});
+  } catch (e) {}
+}
+setTimeout(badgePend, 3500); setInterval(badgePend, 20000);
+document.addEventListener("visibilitychange", badgePend);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) pshDotCheck(); });
 
 // ---- Admin: mensaje personalizado ----
