@@ -1823,7 +1823,8 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 .en.wide .br-cup.on3{filter:drop-shadow(0 0 16px rgba(255,200,60,.5))}
 /* Copa de la Súper Predict League: apoyada arriba a la izquierda de la clasificación */
 #tabla .lgt{position:relative;overflow:visible;margin-top:26px}
-#tabla>h2{padding-left:40px}   /* título un poco más a la derecha, separado del trofeo */
+#tabla>h2{padding-left:40px;margin-top:18px}   /* título un poco más a la derecha, separado del trofeo, y algo más bajo */
+#tabla>#tablaNav{padding-left:40px;margin-top:8px}   /* el selector de jornada queda centrado justo bajo el título */
 .lg-cup{position:absolute;left:8px;bottom:100%;width:62px;height:82px;margin-bottom:-1px;pointer-events:none;z-index:3}
 .lg-cup canvas.cup3d{position:absolute;left:50%;bottom:0;height:100%;aspect-ratio:.85;transform:translate(-50%,13%);opacity:0;transition:opacity .4s}
 .lg-cup.on3 canvas.cup3d{opacity:1}
@@ -4022,7 +4023,6 @@ const mvIcon = mv => {
   return `<svg class="mv mv-${k}" viewBox="0 0 24 24" role="img" aria-label="${t}"><path d="${d}"/></svg>`;
 };
 const fmt = iso => new Date(iso).toLocaleString("es-ES", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
-const openMatch = () => leagueMs().filter(m => !m.result && closeAt(m) > Date.now()).sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff))[0];
 
 // Navegación
 let lastTab = "jugar";   // última pestaña distinta de info, para volver al cerrar info
@@ -5088,6 +5088,13 @@ function votFase(now = Date.now()) {
 let VOT_C = null;
 async function votCand(f) {   // todos los partidos de la semana siguiente (lunes a domingo) de las competiciones de la API cuyos dos equipos están en la app
   if (VOT_C && VOT_C.k === votCk(f) && Date.now() - VOT_C.t < 108e5) return VOT_C.list;
+  if (VOT_TEST) {   // prueba del admin: partidos inventados con equipos de la app (no se consulta el calendario real)
+    const out = [], base = Date.parse(f.desde + "T12:00:00"), add = (h, a) => { const ms = base + (out.length % 6) * 864e5 + 8 * 36e5 + (out.length % 3) * 36e5; out.push({ k: h + "|" + a + "|" + ms, h, a, t: new Date(ms).toISOString(), c: "" }); };
+    const all = CONFIG.ligas.flatMap(l => l.equipos);
+    [["Real Madrid", "Barcelona"], ["Inter", "Milan"], ["Arsenal", "Tottenham"], ["Sevilla FC", "Real Betis"]].forEach(([h, a]) => { if (all.includes(h) && all.includes(a)) add(h, a); });
+    CONFIG.ligas.forEach(l => { const eq = l.equipos.filter(t => !out.some(c => c.h === t || c.a === t)).sort(() => Math.random() - .5); for (let i = 0; i + 1 < eq.length && i < 4; i += 2) add(eq[i], eq[i + 1]); });
+    const list = votTop(out); VOT_C = { k: votCk(f), t: Date.now(), list }; return list;
+  }
   let r = { ok: false }, j = {};
   try { r = await fetch("/.netlify/functions/calendario?from=" + f.desde); j = await r.json().catch(() => ({})); } catch (e) { throw e; }
   if (!r.ok) throw new Error(j.error || "No se pudo cargar el calendario (" + r.status + ").");
@@ -5103,7 +5110,7 @@ function votMount() {
   const box = $("#jugarBox"), p = meP(); if (!box || !p) return;
   const f = votFase(); votSig = votSg(f);
   if (f.cerrada) votCierre();
-  if (leagueMs().some(m => m.round === CONFIG.jornadas)) { const o = document.getElementById("votBox"); if (o) o.remove(); return; }   // jornada final ya creada: no hay más votaciones
+  if (!VOT_TEST && leagueMs().some(m => m.round === CONFIG.jornadas)) { const o = document.getElementById("votBox"); if (o) o.remove(); return; }   // jornada final ya creada: no hay más votaciones
   if (!f.ab) return;
   const old = document.getElementById("votBox"); if (old) old.remove();
   const el = document.createElement("div"); el.id = "votBox";
@@ -5154,7 +5161,10 @@ function votAdminHtml() {
 function votPrueba() {   // activa o quita la votación de prueba (solo en este móvil)
   VOT_TEST = VOT_TEST ? null : { v: null }; VOT_C = null; VOT_UI.edit = false; VOT_UI.err = ""; VOT_UI.loading = false; VOT_UI.st = 0;
   if (!VOT_TEST) { const b = document.getElementById("votBox"); if (b) b.remove(); }
-  if ($("#votTst")) { AD.msg = VOT_TEST ? "Votación de prueba activada: ve a Inicio para verla. Solo la ves tú." : "Prueba quitada."; AD.cls = "ok"; render(); }
+  if ($("#votTst")) {
+    AD.msg = VOT_TEST ? "Votación de prueba activada con partidos inventados. Solo la ves tú y no se guarda nada." : "Prueba quitada."; AD.cls = "ok"; render();
+    if (VOT_TEST) { const b = document.querySelector('#mainNav [data-t="jugar"]'); if (b) setTimeout(() => b.click(), 150); }   // te lleva a Inicio para verla
+  }
   else renderJugar();
 }
 function votCtlSet(f, o) { const t = Date.now(); S.players.forEach(q => { q.vctl = { w: f.w, r: o.r, c: o.c, x: o.x || 0, t }; }); save(); }
@@ -6377,11 +6387,6 @@ function loadDraft(r) {
 }
 // Equipos de las 5 grandes ligas, agrupados por liga (solo se pueden elegir los de la lista)
 const todosEquipos = () => CONFIG.ligas.flatMap(l => l.equipos);
-const teamOpts = sel => {
-  const extra = sel && !todosEquipos().includes(sel) ? `<option selected>${esc(sel)}</option>` : "";   // partido ya creado con un equipo que no está en la lista: se conserva
-  return '<option value="">Elige equipo</option>' + extra +
-    CONFIG.ligas.map(l => `<optgroup label="${esc(l.nombre)}">${l.equipos.map(t => `<option ${t === sel ? "selected" : ""}>${esc(t)}</option>`).join("")}</optgroup>`).join("");
-};
 
 // Selector de equipo para crear partidos: buscador + filtro por liga + lista con escudos
 function elegirEquipo(titulo, sel, otro, cb) {
@@ -7747,12 +7752,6 @@ function penOfKey(p, k) {   // duelo guardado de un jugador en una semana (null 
 // Solo hay duelo en las semanas con partido de liga (la jornada cuyo primer partido cae esa semana) y el rival lo marca el número de jornada:
 // jornadas 1-19 = 19 rivales distintos, y la jornada 20 no tiene rival nuevo: repite el duelo de la jornada 1.
 const penFull = () => S.players.length >= MAX_PLAYERS;
-function penStart() {   // semana del sorteo: la primera con duelo para TODOS los jugadores (los duelos sueltos de antes de estar completa no cuentan)
-  const ws = {};
-  S.players.forEach(p => Object.keys(p.pen || {}).forEach(k => { if (k[0] === "w") { const x = +k.slice(1); ws[x] = (ws[x] || 0) + 1; } }));
-  const all = Object.keys(ws).map(Number).filter(x => ws[x] >= S.players.length).sort((x, y) => x - y);
-  return all.length ? all[0] : null;
-}
 function penRoundOf(w) {   // jornada del duelo de la semana w: la jornada de liga cuyo primer partido cae en esa semana (la más baja si hay varias); null si no hay partido esa semana
   const first = {};
   leagueMs().forEach(m => { const t = Date.parse(m.kickoff); if (!Number.isFinite(t) || !(+m.round >= 1)) return; if (!(m.round in first) || t < first[m.round]) first[m.round] = t; });
@@ -8551,7 +8550,8 @@ function renderLogros() {
   const euRow = ([k, nom, d]) => { const has = trofeosDe(p).includes(k), on = has && p.marco === k;
     return `<div class="ti-r mk mke e-${k}${has ? " ok" : ""}${on ? " on" : ""}"><div class="ti-i"><em class="ti-k">Marco animado</em><b>Marco ${nom}</b><span>${has ? "" : "Gana la " + nom}</span></div>${has ? `<button type="button" class="ti-b" data-mk="${k}">${on ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}<div class="mk-pv eu" role="img" aria-label="Vista previa de la animación del Marco ${nom}"><span class="mk-n">1º</span>${p.team ? crest(p.team, false) : ""}<span class="mk-u">${esc(p.name)}</span><span class="mk-t">Vista previa</span>${bdoSp(4)}</div></div>`; };
   const colRow = `<div class="ti-r mk${hasM ? " ok" : ""}${onM ? " on" : ""}"><div class="ti-i"><em class="ti-k">Marco animado</em><b>Marco Coleccionista</b><span>${hasM ? "Estrellas fugaces y brillo cromático en tu fila de la clasificación y en tu perfil · Eres el primero en completar el álbum" : dueno ? "Exclusivo del primero en completar el álbum: ya es de " + esc(dueno.name) : "Exclusivo del primero en completar el álbum de cromos. Aún nadie lo ha conseguido"}</span></div>${hasM ? `<button type="button" class="ti-b" data-mk="col">${onM ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}<div class="mk-pv" role="img" aria-label="Vista previa de la animación del Marco Coleccionista"><span class="mk-n">1º</span>${p.team ? crest(p.team, false) : ""}<span class="mk-u">${esc(p.name)}</span><span class="mk-t">Vista previa</span></div></div>`;
-  const mkList = [["col", colRow], ["bdo", bdoRow], ["spl", splRow], ...EUM.map(e => [e[0], euRow(e)])].sort((x, y) => (y[0] === p.marco) - (x[0] === p.marco));   // el equipado, arriba del todo
+  const mkOwn = { col: hasM, bdo: hasB, spl: hasS }; EUM.forEach(e => { mkOwn[e[0]] = trofeosDe(p).includes(e[0]); });
+  const mkList = [["col", colRow], ["bdo", bdoRow], ["spl", splRow], ...EUM.map(e => [e[0], euRow(e)])].sort((x, y) => ((y[0] === p.marco) * 2 + !!mkOwn[y[0]]) - ((x[0] === p.marco) * 2 + !!mkOwn[x[0]]));   // el equipado arriba del todo, luego los conseguidos y al final los bloqueados
   const marcoHtml = `<div class="ti-g">${(marcosAbiertos ? mkList : mkList.slice(0, 3)).map(x => x[1]).join("")}</div>${mkList.length > 3 ? `<button type="button" class="ti-more" id="mkMore">${marcosAbiertos ? "Ver menos" : "Ver más (" + (mkList.length - 3) + ")"}</button>` : ""}`;
   box.innerHTML = `<h2 style="margin-top:26px">Títulos de personalización</h2>
     <p class="muted" style="text-align:center;margin:-4px 8px 12px">Equipa uno para que salga bajo tu nombre.<br>Logros: ${have.size}/${TITULOS.length} · Comprados: ${own.size}</p>
@@ -8646,14 +8646,6 @@ function renderAvisos() {
 
 // ===== Cara a cara (en el perfil de otro jugador) =====
 let h2hOpen = null;   // id del rival con el que se está comparando
-function h2hHtml(a, b) {
-  const t = standings(), jug = S.matches.filter(m => m.result), pc = n => jug.length ? Math.round(n / jug.length * 100) : 0;
-  const g = p => { const i = t.findIndex(q => q.id === p.id), pm = jug.map(m => pts((S.preds[m.id] || {})[p.id], m.result));
-    return { pos: i + 1, pt: i >= 0 ? t[i].pt : 0, pl: pc(pm.filter(x => x === 3).length), rk: rachaRec(p), ef: jug.length ? Math.round(pm.reduce((x, y) => x + y, 0) / (3 * jug.length) * 100) : 0, pa: pc(jug.filter(m => (S.preds[m.id] || {})[p.id]).length) }; };
-  const x = g(a), y = g(b), rows = [["Posición actual", "pos", "º", -1], ["Puntos totales", "pt", "", 1], ["Plenos", "pl", "%", 1], ["Mayor racha", "rk", "🔥", 1], ["Efectividad", "ef", "%", 1], ["Participación", "pa", "%", 1]];
-  const v = (k, u, n) => k === "pos" && !n ? "—" : n + u, w = (d, p, q) => (p - q) * d > 0 ? " class=\"w\"" : "";
-  return `<div class="card"><div class="h2h"><div class="hd">Tú</div><div></div><div class="hd">${esc(b.name)}</div>${rows.map(([l, k, u, d]) => `<b${w(d, x[k], y[k])}>${v(k, u, x[k])}</b><span>${l}</span><b${w(d, y[k], x[k])}>${v(k, u, y[k])}</b>`).join("")}</div></div>`;
-}
 function h2hBtnHtml(a, b) { return `<button type="button" class="btn ghost" id="h2hBtn" style="width:100%;margin:14px 0">${h2hOpen === b.id ? "Ocultar cara a cara" : "Cara a cara"}</button>`; }
 
 // ===== Resumen de temporada (wrapped): sale al cerrarse la jornada final de la liga =====
