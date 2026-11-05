@@ -140,6 +140,9 @@ export class Store extends DurableObject {
     const st = this._state(); let jobs = [];
     if (Array.isArray(ops) && ops.length) {
       const antes = { ids: new Set(st.matches.map((m) => m.id)), res: Object.fromEntries(st.matches.map((m) => [m.id, !!m.result])), mods: modsActuales(st), info: Object.fromEntries(st.matches.map((m) => [m.id, { round: m.round, home: m.home, away: m.away }])) };
+      antes.pl = Object.fromEntries(st.matches.filter((m) => m.comp).map((m) => [m.id, Array.isArray(m.pl) ? m.pl.join(",") : ""]));   // trofeos y Balón de Oro: lo que había antes del cambio, para avisar solo de lo nuevo
+      antes.prem = Object.fromEntries(st.players.map((q) => [q.id, (Array.isArray(q.premios) ? q.premios : []).filter((x) => /^s/.test(x))]));
+      antes.bdo = Object.fromEntries(st.players.map((q) => [q.id, q.bdo && q.bdo.t ? q.bdo.s + "|" + q.bdo.t : ""]));
       applyOps(st, ops); this._set("state", st);
       try {   // si borras un partido (o le quitas el resultado), sus avisos "ya enviados" se olvidan: al volver a crearlo / ponerle resultado se mandan otra vez
         const quitar = [];
@@ -158,7 +161,7 @@ export class Store extends DurableObject {
       if (arch.length) { const d = this._subs(); let ch = false; for (const id of arch) if (d.subs[id]) { delete d.subs[id]; ch = true; } if (ch) this._set("push", d); }
       try {   // un fallo en los avisos nunca debe impedir que se guarde
         const now = Date.now(), L = this._logOnce();
-        const msgs = [...avisosNuevaJornada(st, antes, now, L.once), ...avisosResultado(st, antes, L.once), ...avisosPocion(st, antes, L.once), ...avisosPenaltis(st, now, L.once)];
+        const msgs = [...avisosNuevaJornada(st, antes, now, L.once), ...avisosResultado(st, antes, L.once), ...avisosPocion(st, antes, L.once), ...avisosPenaltis(st, now, L.once), ...avisosTrofeo(st, antes, L.once), ...avisosClasificado(st, antes, L.once), ...avisosBalon(st, antes, L.once)];
         L.save(); jobs = this._jobs(msgs, st, false, typeof autor === "string" ? autor : "");
       } catch (e) { console.error("avisos:", e && e.message); }
     }
@@ -193,9 +196,13 @@ export class Store extends DurableObject {
       votacion: ["🗳️ ¡Votación abierta!", `Elige el partido de la próxima jornada.\nCierra el ${votCierreTxt(f)}.`],
       votacion_re: ["🗳️ Votación reabierta", `Se han borrado los votos: vuelve a votar.\nCierra el ${votCierreTxt(f)}.`],
       votorec: ["🗳️ Quedan 6 horas para votar", `Aún no has votado el partido de la próxima jornada.\nCierra a las ${horaEs(f.close)}.`],
-      reto: ["🤝 Te han retado a penaltis", `${rival} te reta a una tanda de penaltis. Acepta el reto desde la pestaña de inicio.`],
-      turno: ["⚽ ¡Te toca tirar!", `${rival} ya ha jugado la ronda 2 de vuestra tanda. Es tu turno.`],
-      duelo: ["⚽ Duelo de penaltis", `Tienes una tanda contra ${rival}. ¡Entra a jugarla!`],
+      reto: ["🤝🏼Reto Amistoso", `${rival} te reta a una tanda de penaltis. Acepta el reto desde la pestaña de inicio.`],
+      turno: ["⚽️¡Es tu turno!", `${rival} ya ha jugado la ronda 2 de vuestra tanda. ¡Te toca!`],
+      duelo: ["⚽Duelo de penaltis", `Tienes una tanda contra ${rival}. ¡Entra a jugarla!`],
+      trofeo: ["🏆 ¡Trofeo ganado!", "¡Has ganado la liga! Ya está en tu vitrina."],
+      clasif: ["🌍 ¡Te has clasificado!", `Te has clasificado a la Champions League. Juegas contra ${rival}. ¡Haz tu pronóstico!`],
+      nominado: ["⭐️ ¡Estás nominado!", "Estás nominado al Balón de Oro. Los demás ya pueden votar."],
+      votobdo: ["🗳️ ¡Vota al Balón de Oro!", `Elige al mejor jugador de la temporada. Cierra el ${fechaEs(now + 48 * HORA)}.`],
     }[kind];
     if (!D) return { jobs: [], desconocido: true };
     const tag = kind.split("_")[0] + "-prueba-" + now, tab = TAB_AVISO[kind.split("_")[0]], n = pendientes(st, pid, now);
@@ -529,7 +536,7 @@ async function pushEnviar(env, sub, payload, ttl, signal) {
 // Cada aviso se apunta en un registro ("pushlog") para no enviarse dos veces.
 const HORA = 36e5, CIERRE = 36e5;   // las apuestas cierran 1 h antes del partido, igual que en la app
 // Pestaña que se abre al tocar cada aviso (por el principio de la etiqueta del aviso): jugar = Inicio, tabla = Clasificación
-const TAB_AVISO = { jornada: "jugar", cierre: "jugar", votacion: "jugar", votorec: "jugar", pocion: "jugar", reto: "jugar", turno: "jugar", duelo: "jugar", resultado: "tabla" };
+const TAB_AVISO = { jornada: "jugar", cierre: "jugar", votacion: "jugar", votorec: "jugar", pocion: "jugar", reto: "jugar", turno: "jugar", duelo: "jugar", resultado: "tabla", trofeo: "historial", clasif: "jugar", nominado: "jugar", votobdo: "jugar" };
 // Partidos de liga abiertos que el jugador aún no ha pronosticado: es el número rojo del icono de la app
 const pendientes = (st, pid, now) => {
   let n = 0;
@@ -802,6 +809,49 @@ function avisosCierre(st, now, once) {
   return out;
 }
 
+// ---- Trofeo ganado: la app apunta cada copa automática en p.premios («s<temporada>:<copa>»); un apunte nuevo = copa nueva en la vitrina ----
+const TRO_TXT = { spl: "la liga", ucl: "la Champions League", uel: "la Europa League", uecl: "la Conference League", bdo: "el Balón de Oro" };
+function avisosTrofeo(st, antes, once) {
+  const out = [];
+  for (const p of reales(st)) {
+    const ya = new Set((antes.prem || {})[p.id] || []);
+    for (const k of Array.isArray(p.premios) ? p.premios : []) {
+      if (!/^s/.test(k) || ya.has(k)) continue;
+      const id = k.split(":")[1], t = TRO_TXT[id]; if (!t || !once(`tr:${p.id}:${k}`)) continue;
+      out.push({ pid: p.id, tag: "trofeo-" + k, title: "🏆 ¡Trofeo ganado!", body: `¡Has ganado ${t}! Ya está en tu vitrina.` });
+    }
+  }
+  return out;
+}
+// ---- Clasificado a una competición europea: cuando un cruce europeo recibe a sus jugadores (semifinales, final) ----
+const COMP_TXT = { champions: "Champions League", europa: "Europa League", conference: "Conference League" };
+function avisosClasificado(st, antes, once) {
+  const out = [], by = new Map(st.players.map((p) => [p.id, p]));
+  for (const m of st.matches) {
+    if (!m.comp || !Array.isArray(m.pl) || m.pl.length < 2 || (antes.pl || {})[m.id] === m.pl.join(",")) continue;
+    const c = COMP_TXT[m.comp]; if (!c) continue;
+    for (const pid of m.pl) {
+      const q = by.get(pid), riv = by.get(m.pl.find((x) => x !== pid)); if (!q || q.sim || !q.regAt || !riv || !once(`q:${m.id}:${pid}`)) continue;
+      const final = m.comp === "champions" && m.stage === "final";
+      out.push({ pid, tag: "clasif-" + m.id, title: final ? "🏆 ¡Estás en la final!" : "🌍 ¡Te has clasificado!", body: final ? `Has llegado a la final de la ${c} contra ${riv.name}. ¡Haz tu pronóstico!` : `Te has clasificado a la ${c}. Juegas contra ${riv.name}. ¡Haz tu pronóstico!` });
+    }
+  }
+  return out;
+}
+// ---- Balón de Oro: al abrirse la votación, los nominados reciben «estás nominado» y el resto «a votar» (la app apunta en p.bdo.nm si el jugador es nominado) ----
+function avisosBalon(st, antes, once) {
+  const out = [];
+  for (const p of reales(st)) {
+    if (!p.bdo || !p.bdo.t || typeof p.bdo.nm !== "number") continue;
+    const ant = (antes.bdo || {})[p.id] || "";
+    if (ant && ant.split("|")[0] === String(p.bdo.s)) continue;   // ya estaba abierta esta temporada
+    if (!once(`bd:${p.bdo.s}:${p.id}`)) continue;
+    out.push(p.bdo.nm
+      ? { pid: p.id, tag: "nominado-" + p.bdo.s, title: "⭐️ ¡Estás nominado!", body: "Estás nominado al Balón de Oro. Los demás ya pueden votar." }
+      : { pid: p.id, tag: "votobdo-" + p.bdo.s, title: "🗳️ ¡Vota al Balón de Oro!", body: `Elige al mejor jugador de la temporada. Cierra el ${fechaEs(p.bdo.t + 48 * HORA)}.` });
+  }
+  return out;
+}
 function avisosPenaltis(st, now, once) {
   const out = [], by = new Map(st.players.map((p) => [p.id, p]));
   for (const p of st.players) {
@@ -815,15 +865,15 @@ function avisosPenaltis(st, now, once) {
         if (now - amTs(k) > 7 * 864e5) continue;
         // reto recién enviado: p es el retador y el retado aún no ha respondido
         if (e.f === 1 && !f && !e.x && now - amTs(k) <= 48 * HORA && !o.sim && o.regAt && once(`i:${k}:${o.id}`))
-          out.push({ pid: o.id, tag: "reto-" + k, title: "🤝 Te han retado a penaltis", body: `${p.name} te reta a una tanda de penaltis. Acepta el reto desde la pestaña de inicio.` });
+          out.push({ pid: o.id, tag: "reto-" + k, title: "🤝🏼Reto Amistoso", body: `${p.name} te reta a una tanda de penaltis. Acepta el reto desde la pestaña de inicio.` });
       }
       if (!f || e.x || f.x || p.sim || !p.regAt) continue;
       const nx = penSiguiente(e, f);
       if (nx.over || nx.ownOk) continue;
       if (nx.rivOk) {
-        if (once(`t:${k}:${nx.r}:${p.id}`)) out.push({ pid: p.id, tag: "turno-" + k, title: "⚽ ¡Te toca tirar!", body: `${o.name} ya ha jugado la ronda ${nx.r + 1} de vuestra tanda. Es tu turno.` });
+        if (once(`t:${k}:${nx.r}:${p.id}`)) out.push({ pid: p.id, tag: "turno-" + k, title: "⚽️¡Es tu turno!", body: `${o.name} ya ha jugado la ronda ${nx.r + 1} de vuestra tanda. ¡Te toca!` });
       } else if (nx.r === 0 && once(`n:${k}:${p.id}`)) {
-        out.push({ pid: p.id, tag: "duelo-" + k, title: tipo === "europeo" ? "🏆 Desempate por penaltis" : tipo === "amistoso" ? "🤝 Reto amistoso listo" : "⚽ Duelo de penaltis", body: `Tienes una tanda contra ${o.name}. ¡Entra a jugarla!` });
+        out.push({ pid: p.id, tag: "duelo-" + k, title: tipo === "europeo" ? "🏆 Desempate por penaltis" : tipo === "amistoso" ? "🤝 Reto amistoso listo" : "⚽Duelo de penaltis", body: `Tienes una tanda contra ${o.name}. ¡Entra a jugarla!` });
       }
     }
   }
