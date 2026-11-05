@@ -127,15 +127,32 @@ html,body{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%}   /* sin zoom 
 #cdn .cd-sea{margin:14px 0 0;padding-left:.32em;font:400 clamp(20px,6vw,26px)/1 var(--h);letter-spacing:.32em;text-transform:uppercase;color:#ffd466;text-shadow:0 0 18px rgba(255,196,60,.75)}
 #cdn .cd-lab{margin:26px 0 14px;font:700 13px var(--b);letter-spacing:.24em;text-transform:uppercase;color:#8fd9ea}
 #cdn .cd-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%}
-#cdn .cd-t{position:relative;border-radius:16px;padding:14px 0 10px;background:linear-gradient(180deg,rgba(0,180,216,.2),rgba(0,180,216,.04));border:1px solid rgba(0,200,255,.55);box-shadow:0 0 22px -4px rgba(0,200,255,.6),inset 0 0 18px rgba(0,200,255,.14);overflow:hidden}
-#cdn .cd-t::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.5)}
+#cdn .cd-t{--f1:#10394a;--f2:#0a2c3a;position:relative;border-radius:16px;padding:0 0 10px;background:var(--f2);border:1px solid rgba(0,200,255,.55);box-shadow:0 0 22px -4px rgba(0,200,255,.6),inset 0 0 18px rgba(0,200,255,.14);overflow:hidden}
+#cdn .cd-t::before{display:none}
 #cdn .cd-t b{display:block;font:400 clamp(34px,11vw,48px)/1 var(--h);font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 16px rgba(0,200,255,.95)}
-#cdn .cd-t span{display:block;margin-top:5px;font:700 10px var(--b);letter-spacing:.18em;text-transform:uppercase;color:#7fdcf0}
-#cdn .cd-t.s{border-color:rgba(255,196,60,.75);background:linear-gradient(180deg,rgba(255,196,60,.2),rgba(255,196,60,.04));box-shadow:0 0 24px -4px rgba(255,196,60,.65),inset 0 0 18px rgba(255,196,60,.14)}
+#cdn .cd-t>span{display:block;margin-top:5px;font:700 10px var(--b);letter-spacing:.18em;text-transform:uppercase;color:#7fdcf0}
+#cdn .cd-t.s{--f1:#3d3112;--f2:#2b230c;border-color:rgba(255,196,60,.75);box-shadow:0 0 24px -4px rgba(255,196,60,.65),inset 0 0 18px rgba(255,196,60,.14)}
 #cdn .cd-t.s b{color:#ffe08a;text-shadow:0 0 18px rgba(255,196,60,.95)}
-#cdn .cd-t.s span{color:#ffd466}
+#cdn .cd-t.s>span{color:#ffd466}
 #cdn .pop{animation:cdPop .6s ease-out}
 @keyframes cdPop{0%{opacity:.35;transform:translateY(-6%)}100%{opacity:1;transform:none}}
+/* Números de la cuenta atrás como tarjetas de calendario que se doblan (flip clock) */
+#cdn .fl{position:relative;height:1.3em;perspective:6em}
+#cdn .fl>span{position:absolute;left:0;right:0;height:50%;overflow:hidden;-webkit-backface-visibility:hidden;backface-visibility:hidden}
+#cdn .fl>span>i{position:absolute;left:0;right:0;display:block;height:1.3em;font-style:normal;line-height:1.3em;text-align:center}
+#cdn .fl .u,#cdn .fl .fu{top:0;background:linear-gradient(180deg,var(--f1),var(--f2));box-shadow:inset 0 -1px 0 rgba(0,0,0,.6)}
+#cdn .fl .d,#cdn .fl .fd{top:50%;background:var(--f2);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+#cdn .fl .u>i,#cdn .fl .fu>i{top:0}
+#cdn .fl .d>i,#cdn .fl .fd>i{top:-.65em}
+#cdn .fl .fu{z-index:3;transform-origin:50% 100%;animation:flU .3s ease-in forwards}
+#cdn .fl .fd{z-index:2;transform-origin:50% 0;transform:rotateX(90deg);animation:flD .32s ease-out .3s both}
+#cdn .fl .fu::after,#cdn .fl .fd::after{content:"";position:absolute;inset:0;background:#000;opacity:0}
+#cdn .fl .fu::after{animation:flUs .3s ease-in forwards}
+#cdn .fl .fd::after{animation:flDs .32s ease-out .3s both}
+@keyframes flU{to{transform:rotateX(-90deg)}}
+@keyframes flD{from{transform:rotateX(90deg)}to{transform:rotateX(0)}}
+@keyframes flUs{to{opacity:.55}}
+@keyframes flDs{from{opacity:.55}to{opacity:0}}
 #cdn .cd-bar{width:100%;height:6px;border-radius:9px;background:rgba(255,255,255,.08);margin:24px 0 10px;overflow:hidden}
 #cdn .cd-bar i{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#00b4d8,#9af2ff,#ffd466);box-shadow:0 0 14px rgba(0,200,255,.9);transition:width 1s linear}
 #cdn .cd-date{font:600 14px var(--b);color:#cfeaf2}
@@ -2268,6 +2285,50 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 /* Sin rayas oscuras entre posiciones: el fondo de la celda del número cubre también el borde */
 #tabla tr:is(.z-ucl,.z-uel,.z-uecl) td.pos{background-origin:border-box;border-top-color:transparent!important;border-bottom-color:transparent!important}
 #ligaToggle{margin-bottom:28px}
+
+/* ===== Fondos dinámicos por pestaña ===== */
+@property --a1{syntax:"<color>";inherits:true;initial-value:#00b4d8}
+@property --a2{syntax:"<color>";inherits:true;initial-value:#1d4ed8}
+@property --a3{syntax:"<color>";inherits:true;initial-value:#5ad1f2}
+body{--a1:#00b4d8;--a2:#1d4ed8;--a3:#5ad1f2;transition:--a1 .9s ease,--a2 .9s ease,--a3 .9s ease}
+body[data-tab="jugar"],body[data-tab="inicio"],body[data-tab="cuenta"]{--a1:#00b4d8;--a2:#1d4ed8;--a3:#5ad1f2}
+body[data-tab="tabla"]{--a1:#e0a82e;--a2:#d9480f;--a3:#ffd35c}
+body[data-tab="sobres"]{--a1:#a855f7;--a2:#ec4899;--a3:#6d3fc4}
+body[data-tab="historial"]{--a1:#10b981;--a2:#0891b2;--a3:#5eead4}
+body[data-tab="admin"]{--a1:#ef4444;--a2:#f97316;--a3:#fb7185}
+/* auroras que flotan */
+body::before{content:"";position:fixed;inset:-25%;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(38% 32% at 22% 24%,color-mix(in srgb,var(--a1) 34%,transparent),transparent 70%),
+    radial-gradient(34% 30% at 80% 18%,color-mix(in srgb,var(--a2) 30%,transparent),transparent 70%),
+    radial-gradient(42% 34% at 62% 82%,color-mix(in srgb,var(--a3) 22%,transparent),transparent 72%),
+    radial-gradient(30% 26% at 10% 78%,color-mix(in srgb,var(--a2) 22%,transparent),transparent 70%);
+  will-change:transform}
+/* suelo de rejilla neón en perspectiva */
+body::after{content:"";position:fixed;left:-30%;right:-30%;bottom:0;height:46vh;z-index:-1;pointer-events:none;
+  background:
+    linear-gradient(color-mix(in srgb,var(--a1) 38%,transparent) 1px,transparent 1px) 0 0/100% 46px,
+    linear-gradient(90deg,color-mix(in srgb,var(--a1) 30%,transparent) 1px,transparent 1px) 0 0/54px 100%;
+  transform:perspective(380px) rotateX(62deg);transform-origin:50% 100%;
+  -webkit-mask-image:linear-gradient(to top,#000 0,transparent 92%);mask-image:linear-gradient(to top,#000 0,transparent 92%);opacity:.55}
+/* partículas que suben */
+html::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.7;
+  background-image:
+    radial-gradient(1.6px 1.6px at 12% 88%,var(--a3,#5ad1f2),transparent 60%),
+    radial-gradient(1.2px 1.2px at 34% 72%,#fff,transparent 60%),
+    radial-gradient(2px 2px at 58% 94%,var(--a3,#5ad1f2),transparent 60%),
+    radial-gradient(1.2px 1.2px at 77% 66%,#fff,transparent 60%),
+    radial-gradient(1.8px 1.8px at 90% 84%,var(--a3,#5ad1f2),transparent 60%),
+    radial-gradient(1.2px 1.2px at 46% 40%,#fff,transparent 60%);
+  background-size:100% 100%}
+@media (prefers-reduced-motion:no-preference){
+  body::before{animation:fxAur 22s ease-in-out infinite alternate}
+  body::after{animation:fxGrid 2.4s linear infinite}
+  html::before{animation:fxRise 16s linear infinite}
+}
+@keyframes fxAur{0%{transform:translate3d(-4%,-2%,0) rotate(0deg) scale(1)}50%{transform:translate3d(5%,4%,0) rotate(8deg) scale(1.12)}100%{transform:translate3d(-2%,6%,0) rotate(-6deg) scale(1.05)}}
+@keyframes fxGrid{to{background-position:0 46px,54px 0}}
+@keyframes fxRise{0%{transform:translateY(0);opacity:0}10%{opacity:.8}90%{opacity:.6}100%{transform:translateY(-14vh);opacity:0}}
 </style>
 
 </head>
@@ -3653,7 +3714,26 @@ function cdConfetti() {
   }
 }
 function cdBump(e) { e.classList.remove("pop"); void e.offsetWidth; e.classList.add("pop"); }
-function cdSet(id, v, force) { const e = document.getElementById(id); if (e && (force || e.textContent !== v)) { e.textContent = v; cdBump(e); } }
+function cdFlip(e, v) {   // número de calendario: la hoja de arriba se dobla hacia abajo y deja ver el número nuevo
+  if (!e._fl) {
+    e.className = "fl"; e._v = v;
+    e.innerHTML = `<span class="u"><i>${v}</i></span><span class="d"><i>${v}</i></span>`;
+    e._fl = { u: e.children[0].firstChild, d: e.children[1].firstChild };
+    return;
+  }
+  if (e._v === v) return;
+  clearTimeout(e._t);
+  e.querySelectorAll(".fu,.fd").forEach(x => x.remove());
+  const old = e._v, F = e._fl; e._v = v;
+  F.d.textContent = old; F.u.textContent = v;
+  e.insertAdjacentHTML("beforeend", `<span class="fu"><i>${old}</i></span><span class="fd"><i>${v}</i></span>`);
+  e._t = setTimeout(() => { F.d.textContent = v; e.querySelectorAll(".fu,.fd").forEach(x => x.remove()); }, 640);
+}
+function cdSet(id, v, force) {
+  const e = document.getElementById(id); if (!e) return;
+  if (id !== "cdBig") return cdFlip(e, v);   // días, horas, min y seg
+  if (force || e.textContent !== v) { e.textContent = v; cdBump(e); }
+}
 function cdTick() {
   const o = document.getElementById("cdn"), c = cdCur(); if (!o || o.hidden || !c) return;
   const left = c.at - srvNow();
@@ -3941,6 +4021,7 @@ function go(t) {
   if (t !== "historial") viewId = null;
   if (t !== "tabla") $("#myPos").hidden = true;
   $("#mainNav").style.display = meP() && !needTeam ? "flex" : "none";
+  document.body.dataset.tab = t;   // fondo dinámico según la pestaña
   document.querySelectorAll("nav button").forEach(b => b.setAttribute("aria-selected", b.dataset.t === t));
   $("#ubInfo").classList.toggle("on", t === "inicio");
   document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id === t));
