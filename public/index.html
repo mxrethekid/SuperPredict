@@ -773,7 +773,7 @@ td .crest{width:30px;height:30px}
 #historial .pf-badges .fr{border-color:rgba(255,140,30,.6);color:#ffb347;box-shadow:inset 0 0 14px rgba(255,140,30,.1),0 0 18px -6px rgba(255,140,30,.7)}
 #historial .pf-badges .fr i{font-style:normal;font-size:18px;filter:drop-shadow(0 0 8px rgba(255,140,30,.8))}
 /* Títulos de sección del usuario: mismo estilo que "Sus predicciones" */
-#jugar>h2,#tabla>h2,#euroTop>h2,#euroBox>h2,#historial>h2,#historial #historialBox>h2,#historial #logrosBox>h2,#evolCard h3{
+#jugar>h2,#tabla>h2,#premTop>h2,#euroTop>h2,#euroBox>h2,#historial>h2,#historial #historialBox>h2,#historial #logrosBox>h2,#evolCard h3{
   font:700 17px/1.3 var(--b)!important;letter-spacing:.12em!important;text-transform:uppercase;text-align:center;
   color:var(--mute)!important;-webkit-text-fill-color:currentColor!important;background:none!important;
   -webkit-background-clip:border-box;background-clip:border-box;filter:none!important;text-shadow:none!important;
@@ -795,6 +795,7 @@ td .crest{width:30px;height:30px}
 #votBox .vt-ok .btn{margin:10px auto 0}
 #bdoBox .ja-t{margin:0 0 10px}
 #bdoBox .vt-n{text-align:center;margin:0 0 10px;font-size:13px;line-height:1.4}
+#bdoBox .vt-n.vt-1{font-size:clamp(10.5px,3vw,13px)}
 #bdoBox .vt-l{max-height:min(62vh,540px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:2px}
 #bdoBox .vt-r{width:100%;display:flex;align-items:center;gap:14px;padding:10px 12px;margin:0 0 6px;text-align:left;background:#0e1419;border:1px solid var(--line);border-radius:12px;color:var(--text);font:600 17px var(--b);cursor:pointer;-webkit-tap-highlight-color:transparent}
 #bdoBox .vt-r .crest{width:38px;height:38px;flex:none}
@@ -808,10 +809,10 @@ td .crest{width:30px;height:30px}
 #bdoBox .vt-r b.pc{font:700 17px var(--b);color:var(--cyan);flex:none}
 #bdoBox .vt-r.gan b.pc{color:#e9b93c}
 #bdoBox .vt-r.on .bd-star{display:inline}
-#bdoBox .bd-hd{display:flex;align-items:center;gap:8px;margin:0 0 10px}
-#bdoBox .bd-hd::before{content:"";width:62px;flex:none}
-#bdoBox .bd-hd .ja-t{flex:1;margin:0;text-align:center}
-#bdoBox .bd-cup{position:relative;width:62px;height:82px;flex:none;pointer-events:none}
+#bdoBox .bd-hd{display:flex;align-items:center;gap:4px;margin:0 0 10px}
+#bdoBox .bd-hd::before{content:"";width:44px;flex:none}
+#bdoBox .bd-hd .ja-t{flex:1;margin:0;text-align:center;white-space:nowrap;font-size:clamp(11px,3.6vw,14px)!important;letter-spacing:.08em!important}
+#bdoBox .bd-cup{position:relative;width:44px;height:58px;flex:none;pointer-events:none}
 #bdoBox .bd-cup svg{display:block;height:100%;width:auto;margin:0 auto}
 #bdoBox .bd-cup canvas.cup3d{position:absolute;top:0;left:50%;height:100%;aspect-ratio:.85;transform:translateX(-50%);opacity:0;transition:opacity .4s}
 #bdoBox .bd-cup.on3 canvas.cup3d{opacity:1}
@@ -820,23 +821,47 @@ td .crest{width:30px;height:30px}
 /* Fin de temporada: premios arriba y clasificación de la liga plegada tras un botón */
 #tabla.lgmin>h2,#tabla.lgmin>#wrapTopBtn,#tabla.lgmin>#tablaNav,#tabla.lgmin>.lgt,#tabla.lgmin>.lgleg,#tabla.lgmin>#evolBtn,#tabla.lgmin>#evolCard{display:none!important}
 #premTop:empty{display:none}
-.prm{margin:0 0 14px;padding:12px 14px}
-.prm h3{text-align:center;margin:0 0 6px;font:700 15px/1.3 var(--b);letter-spacing:.12em;text-transform:uppercase;color:var(--cyan)}
-.pm-p{padding:10px 0;border-top:1px solid rgba(255,255,255,.08)}
-.pm-p:first-of-type{border-top:0}
-.pm-h{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.pm-h b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16px}
-.pm-t{flex:none;margin-left:auto;text-align:right;font:700 17px var(--b);color:#ffe066}
-.pm-t small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
-.pm-l{display:flex;align-items:center;gap:8px;padding:2px 0;font-size:13px;color:var(--mute)}
-.pm-l span{flex:1;min-width:0}
-.pm-l em{font-style:normal;font-weight:700;color:#fff}
+#premTop>h2{margin:0 0 14px}
+.prm{margin:0 0 14px;padding:14px 14px 0;overflow:hidden}
+.prm.top{border-color:rgba(255,224,102,.55);box-shadow:0 0 18px -6px rgba(255,224,102,.5)}
+.pp-h{display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.08)}
+.pp-h .crest{width:42px;height:42px;flex:none}
+.pp-h b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:19px}
+.pp-k{flex:none;font-size:22px}
+.pp-ls{display:flex;flex-direction:column;gap:8px;padding:12px 0}
+.pp-l{display:flex;align-items:center;gap:12px;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+.pp-n{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.pp-n small{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.pp-n b{font-size:16px}
+.pp-l em{flex:none;font-style:normal;font-weight:700;font-size:16px;color:#fff}
+.pp-t{display:flex;align-items:center;justify-content:space-between;margin:0 -14px;padding:12px 14px;background:linear-gradient(90deg,rgba(255,224,102,.16),rgba(255,224,102,.05));border-top:1px solid rgba(255,224,102,.35)}
+.pp-t span{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:700}
+.pp-t strong{font:700 24px var(--b);color:#ffe066}
 .pm-c{display:block;width:30px;height:38px;flex:none}
 .pm-c svg{display:block;height:100%;width:auto;margin:0 auto}
 #ligaToggle{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin:0 0 14px;padding:8px 14px;border-radius:99px;border:1px solid rgba(170,140,255,.55);background:linear-gradient(rgba(170,140,255,.24),rgba(170,140,255,.1)),#0c1115;color:#fff;font:700 13px var(--b);letter-spacing:.04em;box-shadow:0 4px 14px -6px rgba(0,0,0,.8)}
 #ligaToggle[hidden]{display:none}
 #ligaToggle.on{outline:2px solid var(--cyan);outline-offset:2px;box-shadow:0 0 14px -2px var(--cyan)}
 #ligaToggle .pm-c{width:22px;height:28px}
+#bdoBox .vt-r.bd-r{flex-direction:column;align-items:stretch;gap:12px;padding:14px;margin:0 0 12px;border-radius:16px;background:linear-gradient(180deg,#141c23,#0e1419)}
+#bdoBox .vt-r.bd-r.on{background:linear-gradient(180deg,#143440,#0f2a33)}
+#bdoBox .vt-r.bd-r.gan{background:linear-gradient(180deg,#3a3012,#231d0a);box-shadow:0 0 18px -6px #e9b93c}
+#bdoBox .bd-top{display:flex;align-items:center;gap:12px}
+#bdoBox .bd-top .crest{width:46px;height:46px}
+#bdoBox .bd-top .vt-t{font:700 21px/1.2 var(--b)}
+#bdoBox .bd-g{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px}
+#bdoBox .bd-k{display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 2px 8px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-top:2px solid var(--c)}
+#bdoBox .bd-k i{font-style:normal;font-size:16px;line-height:1}
+#bdoBox .bd-k b{font:700 21px/1.1 var(--b);color:var(--c);font-variant-numeric:tabular-nums}
+#bdoBox .bd-k small{font:600 9.5px/1.15 var(--b);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);text-align:center}
+#bdoBox .bd-ft{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+#bdoBox .bd-eu{font:600 12.5px/1.2 var(--b);padding:6px 11px;border-radius:99px;background:rgba(0,180,216,.14);border:1px solid rgba(0,180,216,.4);color:var(--cyan)}
+#bdoBox .bd-ft .bd-trs{margin-top:0}
+#bdoBox .bd-cd{display:flex;flex-direction:column;align-items:center;gap:2px;margin:0 0 14px;padding:10px 12px;border-radius:14px;background:linear-gradient(rgba(233,185,60,.18),rgba(233,185,60,.06));border:1px solid rgba(233,185,60,.5)}
+#bdoBox .bd-cd small{font:600 12px var(--b);letter-spacing:.06em;color:var(--mute)}
+#bdoBox .bd-cdv{font:700 30px/1.1 var(--b);color:#e9b93c;font-variant-numeric:tabular-nums;letter-spacing:.04em}
+#bdoBox .bd-cd.low{border-color:#ff6b5e;background:linear-gradient(rgba(255,107,94,.2),rgba(255,107,94,.06))}
+#bdoBox .bd-cd.low .bd-cdv{color:#ff6b5e}
 #bdoBox .bd-star{display:none;margin-left:6px;font-size:15px}
 #bdoBox .bd-s{display:block;font:500 12.5px/1.35 var(--b);margin-top:3px;color:var(--mute)}
 #bdoBox .bd-trs{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
@@ -2969,8 +2994,8 @@ const EU_PREMIO = { champions: 12.5, europa: 7.5, conference: 5 };
 function premiosTemporada() {
   const L = standings(), res = {}, pos = {};
   const add = (id, o) => { const r = res[id] || (res[id] = { id, it: [], tot: 0 }); r.it.push(o); r.tot += o.v; };
-  L.forEach((q, i) => { pos[q.id] = i; if (i < PREMIOS_LIGA.length) add(q.id, { k: "spl", n: "Liga · " + (i + 1) + "º", v: PREMIOS_LIGA[i] }); });
-  Object.keys(CUP_ID).forEach(c => { const fin = eMatch(c, "final"); if (!fin || !fin.result) return; const w = eWinner(fin); if (w) add(w, { k: CUP_ID[c], n: COMPS[c].nombre + " · Campeón", v: EU_PREMIO[c] }); });
+  L.forEach((q, i) => { pos[q.id] = i; if (i < PREMIOS_LIGA.length) add(q.id, { k: "spl", n: "Posición en Liga", r: (i + 1) + "º", v: PREMIOS_LIGA[i] }); });
+  Object.keys(CUP_ID).forEach(c => { const fin = eMatch(c, "final"); if (!fin || !fin.result) return; const w = eWinner(fin); if (w) add(w, { k: CUP_ID[c], n: COMPS[c].nombre, r: "Ganador", v: EU_PREMIO[c] }); });
   return Object.values(res).sort((a, b) => b.tot - a.tot || (pos[a.id] ?? 99) - (pos[b.id] ?? 99));
 }
 function renderPrem(over) {
@@ -2982,7 +3007,7 @@ function renderPrem(over) {
   if (!bt._h) { bt._h = 1; bt.innerHTML = `<i class="pm-c">${cup("spl")}</i><span>Clasificación de la liga</span>`; }
   bt.onclick = () => { ligaOpen = !ligaOpen; renderPrem(true); };
   const D = premiosTemporada();
-  const h = D.length ? `<div class="card prm"><h3>Premios de la temporada</h3>${D.map(d => { const q = pById(d.id) || {}; return `<div class="pm-p"><div class="pm-h">${crest(q.team)}<b>${esc(q.name || "")}</b><span class="pm-t"><small>Total</small>${eur(d.tot)}</span></div>${d.it.map(o => `<div class="pm-l"><span>${esc(o.n)}</span><em>${eur(o.v)}</em><i class="pm-c">${cup(o.k)}</i></div>`).join("")}</div>`; }).join("")}</div>` : "";
+  const h = D.length ? `<h2>Premios de la temporada</h2>${D.map((d, n) => { const q = pById(d.id) || {}; return `<div class="card prm${n === 0 ? " top" : ""}"><div class="pp-h">${crest(q.team)}<b>${esc(q.name || "")}</b>${n === 0 ? '<span class="pp-k">🏆</span>' : ""}</div><div class="pp-ls">${d.it.map(o => `<div class="pp-l"><i class="pm-c">${cup(o.k)}</i><span class="pp-n"><small>${esc(o.n)}</small><b>${esc(o.r)}</b></span><em>${eur(o.v)}</em></div>`).join("")}</div><div class="pp-t"><span>Total</span><strong>${eur(d.tot)}</strong></div></div>`; }).join("")}` : "";
   if (pt._h !== h) { pt._h = h; pt.innerHTML = h; }
 }
 function renderEuro() {
@@ -4801,7 +4826,7 @@ function bdoSeason() { const lg = leagueMs().map(m => Date.parse(m.kickoff)).fil
 const bdoListo = () => calcRounds().includes(CONFIG.jornadas) && Object.keys(CUP_ID).every(c => { const f = eMatch(c, "final"); return !!f && !!f.result && !!eWinner(f); });
 function bdoMeritos() {
   const fin = calcRounds().includes(CONFIG.jornadas), M = {};
-  standings().forEach((p, i) => { M[p.id] = { id: p.id, pos: i, pts: p.pt, plenos: p.ex, part: p.env || 0, tit: 0, cups: [], liga: fin && i === 0 ? BDO_LIGA : 0 }; });
+  standings().forEach((p, i) => { M[p.id] = { id: p.id, pos: i, pts: p.pt, plenos: p.ex, part: p.env || 0, rmax: Math.max(p.rmax || 0, p.rmx || 0), tit: 0, cups: [], liga: fin && i === 0 ? BDO_LIGA : 0 }; });
   Object.keys(CUP_ID).forEach(c => { const f = eMatch(c, "final"), w = f && f.result ? eWinner(f) : null; if (w && M[w]) { M[w].tit += BDO_TIT[c]; M[w].cups.push(c); } });
   return Object.values(M).map(x => ({ ...x, m: x.pts + 2 * x.plenos + x.part + x.tit + x.liga })).sort((a, b) => b.m - a.m || a.pos - b.pos);
 }
@@ -4834,7 +4859,7 @@ function bdoMount() {
   if (!f || f.estado === "no") { if (old) old.remove(); return; }
   const el = old || document.createElement("div"); el.id = "bdoBox";
   if (!old) { const ref = box.querySelector("#votBox") || box.querySelector("h2.ja-t") || box.querySelector("#penBox") || box.querySelector(".pc-sec"); if (ref) ref.before(el); else box.appendChild(el); }
-  bdoPaint(el, f, p); setTimeout(mountCups, 0);
+  bdoPaint(el, f, p); bdoTick(); setTimeout(mountCups, 0);
 }
 function bdoPaint(el, f, p) {
   let cup2d = ""; try { cup2d = trofeoSvg(TROFEOS.find(t => t.id === "bdo"), true); } catch (e) {}
@@ -4849,8 +4874,11 @@ function bdoPaint(el, f, p) {
     let eu = "";
     if (zc && !(n.cups || []).includes(zc)) { const fm = eMatch(zc, "final"); eu = fm && fm.result && fm.pl && fm.pl.includes(n.id) ? `Finalista de la ${CUPN[zc]}` : `Clasificado a la ${CUPN[zc]}`; }
     else if (!zc && !tr) eu = "Sin competición europea";
-    const st = `${n.pts} pts en liga · ${n.plenos} ${n.plenos === 1 ? "pleno" : "plenos"} · ${n.pos + 1}º en la tabla`;
-    return `<${tag}${o.btn ? ` type="button" data-id="${esc(n.id)}"` : ""} class="vt-r${mine === n.id || mia ? " on" : ""}${o.gan ? " gan" : ""}">${crest(q.team)}<span class="vt-t">${esc(q.name || "")}<span class="bd-star">⭐</span><small class="bd-s">${st}${o.v != null ? ` · ${o.v} ${o.v === 1 ? "voto" : "votos"}` : ""}</small>${eu ? `<small class="bd-s">${eu}</small>` : ""}${tr ? `<span class="bd-trs">${tr}</span>` : ""}</span>${o.pct != null ? `<b class="pc">${Math.round(o.pct)}%</b>` : ""}</${tag}>`;
+    const tl = [["⚡", n.pts, "Puntos", "#4fd8f0"], ["🎯", n.plenos, n.plenos === 1 ? "Pleno" : "Plenos", "#2fd37a"], ["🔥", n.rmax || 0, "Mayor racha", "#ffb347"], ["🏅", (n.pos + 1) + "º", "En la tabla", "#ffe066"]];
+    if (o.v != null) tl.push(["🗳️", o.v, o.v === 1 ? "Voto" : "Votos", "#c3a6ff"]);
+    const g = `<span class="bd-g">${tl.map(t => `<span class="bd-k" style="--c:${t[3]}"><i>${t[0]}</i><b>${t[1]}</b><small>${t[2]}</small></span>`).join("")}</span>`;
+    const ft = eu || tr ? `<span class="bd-ft">${eu ? `<span class="bd-eu">${eu}</span>` : ""}${tr ? `<span class="bd-trs">${tr}</span>` : ""}</span>` : "";
+    return `<${tag}${o.btn ? ` type="button" data-id="${esc(n.id)}"` : ""} class="vt-r bd-r${mine === n.id || mia ? " on" : ""}${o.gan ? " gan" : ""}"><span class="bd-top">${crest(q.team)}<span class="vt-t">${esc(q.name || "")}<span class="bd-star">⭐</span></span>${o.pct != null ? `<b class="pc">${Math.round(o.pct)}%</b>` : ""}</span>${g}${ft}</${tag}>`;
   };
   if (f.estado === "cerrada" || (f.test && mine)) {
     const R = bdoGanador(f, f.test ? { [mine]: 1 } : null), g = R[0], gp = pById(g.id) || {};
@@ -4858,9 +4886,10 @@ function bdoPaint(el, f, p) {
     el.onclick = null; return;
   }
   const note = f.test ? `<p class="muted vt-n">Prueba: tu voto no se guarda.</p>` : "";
-  if (esNom) { el.innerHTML = hd + note + `<p class="muted vt-n"><b>Estás nominado ⭐️</b></p>` + f.nom.map(n => row(n)).join(""); el.onclick = null; return; }
-  if (mine) { const q = pById(mine) || {}; el.innerHTML = hd + `<div class="card vt-ok"><b>Voto hecho ✅</b><div class="muted" style="margin-top:4px">Tu voto: ${esc(q.name || "")}</div></div>` + f.nom.map(n => row(n)).join(""); el.onclick = null; return; }
-  el.innerHTML = hd + note + `<p class="muted vt-n">Vota objetivamente a quien hizo mejor temporada en tu opinión 🗳️</p>` + f.nom.map(n => row(n, { btn: true })).join("");
+  const cd = `<div class="bd-cd" role="timer"><small>⏳ La votación cierra en</small><b class="bd-cdv" data-close="${f.close}">--:--:--</b><small class="bd-cs">Cierra el ${votCierreTxt(f)}</small></div>`;
+  if (esNom) { el.innerHTML = hd + note + cd + `<p class="muted vt-n"><b>Estás nominado ⭐️</b></p>` + f.nom.map(n => row(n)).join(""); el.onclick = null; return; }
+  if (mine) { const q = pById(mine) || {}; el.innerHTML = hd + cd + `<div class="card vt-ok"><b>Voto hecho ✅</b><div class="muted" style="margin-top:4px">Tu voto: ${esc(q.name || "")}</div></div>` + f.nom.map(n => row(n)).join(""); el.onclick = null; return; }
+  el.innerHTML = hd + note + cd + `<p class="muted vt-n vt-1">Vota objetivamente a quien hizo mejor temporada en tu opinión&nbsp;🗳️</p>` + f.nom.map(n => row(n, { btn: true })).join("");
   el.onclick = e => {
     const b = e.target.closest("button[data-id]"); if (!b) return;
     if (f.test) { BDO_TEST.v = b.dataset.id; toast("Voto hecho ✅"); bdoMount(); return; }
@@ -4868,6 +4897,16 @@ function bdoPaint(el, f, p) {
     p.bdo = { s: f.T, t: f.t, v: b.dataset.id }; save(); toast("Voto hecho ✅"); bdoMount();
   };
 }
+function bdoTick() {
+  document.querySelectorAll("#bdoBox .bd-cdv").forEach(e => {
+    const ms = +e.dataset.close - Date.now();
+    if (ms <= 0) { e.textContent = "00:00:00"; if (!e._f) { e._f = 1; try { bdoMount(); } catch (x) {} } return; }
+    const t = Math.floor(ms / 1e3), z = v => String(v).padStart(2, "0");
+    e.textContent = z(Math.floor(t / 3600)) + ":" + z(Math.floor(t % 3600 / 60)) + ":" + z(t % 60);
+    e.parentNode.classList.toggle("low", ms < 36e5);
+  });
+}
+setInterval(bdoTick, 1000);
 let bdoSigV = "";
 setInterval(() => { try { const f = bdoFase(), s = f ? f.estado : ""; if (s !== bdoSigV) { bdoSigV = s; if (meP()) bdoMount(); } } catch (e) {} }, 15000);
 function bdoAdminHtml() {
