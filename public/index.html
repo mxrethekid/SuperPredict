@@ -1863,9 +1863,9 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 #pshBox #pshMsg{margin:10px 2px 0;font-size:14px}
 @media (prefers-reduced-motion:reduce){#pshBox .psh-sw,#pshBox .psh-sw i{transition:none}}
 /* ===== Marco Balón de Oro: dorado con barrido de brillo y destellos aleatorios (solo quien gana un Balón de Oro) ===== */
-@keyframes bdoGlow{0%,100%{box-shadow:inset 0 9px 9px -9px rgba(245,185,46,.4),inset 0 -9px 9px -9px rgba(245,185,46,.4),0 -8px 10px -8px rgba(245,185,46,.45),0 8px 10px -8px rgba(245,185,46,.45)}50%{box-shadow:inset 0 9px 9px -9px rgba(255,214,102,.8),inset 0 -9px 9px -9px rgba(255,214,102,.8),0 -8px 10px -8px rgba(255,214,102,.85),0 8px 10px -8px rgba(255,214,102,.85)}}
-@keyframes bdoGlowMy{0%,100%{box-shadow:0 0 12px rgba(245,185,46,.5),0 0 26px rgba(245,185,46,.22),inset 0 0 12px rgba(245,185,46,.3)}50%{box-shadow:0 0 18px rgba(255,214,102,.85),0 0 36px rgba(245,185,46,.4),inset 0 0 18px rgba(245,185,46,.5)}}
-@keyframes bdoGlowHero{0%,100%{box-shadow:0 0 14px rgba(245,185,46,.55),0 0 34px rgba(245,185,46,.28),inset 0 0 22px rgba(245,185,46,.32)}50%{box-shadow:0 0 22px rgba(255,214,102,.9),0 0 50px rgba(245,185,46,.45),inset 0 0 32px rgba(245,185,46,.5)}}
+@keyframes bdoGlow{0%,100%{box-shadow:inset 0 9px 9px -9px rgba(255,196,30,.4),inset 0 -9px 9px -9px rgba(255,196,30,.4),0 -8px 10px -8px rgba(255,196,30,.45),0 8px 10px -8px rgba(255,196,30,.45)}50%{box-shadow:inset 0 9px 9px -9px rgba(255,212,64,.8),inset 0 -9px 9px -9px rgba(255,212,64,.8),0 -8px 10px -8px rgba(255,212,64,.85),0 8px 10px -8px rgba(255,212,64,.85)}}
+@keyframes bdoGlowMy{0%,100%{box-shadow:0 0 12px rgba(255,196,30,.5),0 0 26px rgba(255,196,30,.22),inset 0 0 12px rgba(255,196,30,.3)}50%{box-shadow:0 0 18px rgba(255,212,64,.85),0 0 36px rgba(255,196,30,.4),inset 0 0 18px rgba(255,196,30,.5)}}
+@keyframes bdoGlowHero{0%,100%{box-shadow:0 0 14px rgba(255,196,30,.55),0 0 34px rgba(255,196,30,.28),inset 0 0 22px rgba(255,196,30,.32)}50%{box-shadow:0 0 22px rgba(255,212,64,.9),0 0 50px rgba(255,196,30,.45),inset 0 0 32px rgba(255,196,30,.5)}}
 @keyframes bdoSweep{0%{background-position:170% 0}55%,100%{background-position:-70% 0}}
 @keyframes bdoTw{0%{opacity:0;transform:scale(.2) rotate(0)}30%{opacity:1;transform:scale(1) rotate(30deg)}55%,100%{opacity:0;transform:scale(.2) rotate(90deg)}}
 .bsw{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:2}
@@ -1874,23 +1874,23 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 #tablaBox table{border-collapse:separate;border-spacing:0}
 #tabla tr.rbdo,#tabla tr.rbdo.mine{background:none}
 #tabla tr.rbdo+tr td{border-top-color:transparent}
-#tabla tr.rbdo td{position:relative;isolation:isolate;text-shadow:0 1px 3px rgba(0,0,0,.75);border-top:1px solid #e9b949;border-bottom:1px solid #e9b949;box-shadow:inset 0 9px 9px -9px rgba(245,185,46,.4),inset 0 -9px 9px -9px rgba(245,185,46,.4),0 -8px 10px -8px rgba(245,185,46,.45),0 8px 10px -8px rgba(245,185,46,.45)}
-#tabla tr.rbdo td:not(.pos),#tabla tr.rbdo:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos{background:linear-gradient(180deg,rgba(255,214,102,.26),rgba(184,134,11,.14)),rgba(24,19,8,.96)}
-#tabla tr.rbdo td:last-child{border-right:1px solid #e9b949}
-#tabla tr.rbdo:is(.z-ucl,.z-uel,.z-uecl) td:nth-child(2){border-left:1px solid #e9b949}
-#tabla tr.rbdo:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos{border-left:1px solid #e9b949}
+#tabla tr.rbdo td{position:relative;isolation:isolate;text-shadow:0 1px 3px rgba(0,0,0,.75);border-top:1px solid #ffc933;border-bottom:1px solid #ffc933;box-shadow:inset 0 9px 9px -9px rgba(255,196,30,.4),inset 0 -9px 9px -9px rgba(255,196,30,.4),0 -8px 10px -8px rgba(255,196,30,.45),0 8px 10px -8px rgba(255,196,30,.45)}
+#tabla tr.rbdo td:not(.pos),#tabla tr.rbdo:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos{background:linear-gradient(180deg,rgba(255,212,64,.26),rgba(214,148,6,.14)),rgba(24,19,8,.96)}
+#tabla tr.rbdo td:last-child{border-right:1px solid #ffc933}
+#tabla tr.rbdo:is(.z-ucl,.z-uel,.z-uecl) td:nth-child(2){border-left:1px solid #ffc933}
+#tabla tr.rbdo:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos{border-left:1px solid #ffc933}
 #tabla tr.rbdo:is(.z-ucl,.z-uel,.z-uecl) td.pos{border-top-color:rgba(255,255,255,.07);border-bottom-color:transparent;box-shadow:none}
 #tabla tr.rbdo td::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,244,190,.5) 50%,transparent 65%);background-size:220% 100%;background-repeat:no-repeat;background-position:170% 0}
 #tabla tr.rbdo:is(.z-ucl,.z-uel,.z-uecl) td.pos::after{display:none}
 #tabla tr.rbdo .pl .me,#tabla tr.rbdo .pl span{text-shadow:0 0 8px rgba(255,200,60,.55),0 1px 3px rgba(0,0,0,.75)}
-#myPos.bdof{overflow:hidden;border-color:#e9b949;background:linear-gradient(180deg,rgba(255,214,102,.26),rgba(184,134,11,.14)),rgba(24,19,8,.96);box-shadow:0 0 12px rgba(245,185,46,.5),0 0 26px rgba(245,185,46,.22),inset 0 0 12px rgba(245,185,46,.3)}
+#myPos.bdof{overflow:hidden;border-color:#ffc933;background:linear-gradient(180deg,rgba(255,212,64,.26),rgba(214,148,6,.14)),rgba(24,19,8,.96);box-shadow:0 0 12px rgba(255,196,30,.5),0 0 26px rgba(255,196,30,.22),inset 0 0 12px rgba(255,196,30,.3)}
 #myPos.bdof::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,244,190,.4) 50%,transparent 65%);background-size:220% 100%;background-repeat:no-repeat;background-position:170% 0}
-#historial .pf-hero.bdof{overflow:hidden;border-color:#e9b949;background:radial-gradient(120% 80% at 50% 0%,rgba(255,226,122,.34),transparent 62%),radial-gradient(120% 90% at 50% 100%,rgba(184,134,11,.42),transparent 65%),linear-gradient(180deg,rgba(255,214,102,.26),rgba(184,134,11,.14)),rgb(24,19,8);box-shadow:0 0 14px rgba(245,185,46,.55),0 0 34px rgba(245,185,46,.28),inset 0 0 22px rgba(245,185,46,.32)}
+#historial .pf-hero.bdof{overflow:hidden;border-color:#ffc933;background:radial-gradient(120% 80% at 50% 0%,rgba(255,224,100,.34),transparent 62%),radial-gradient(120% 90% at 50% 100%,rgba(214,148,6,.42),transparent 65%),linear-gradient(180deg,rgba(255,212,64,.26),rgba(214,148,6,.14)),rgb(24,19,8);box-shadow:0 0 14px rgba(255,196,30,.55),0 0 34px rgba(255,196,30,.28),inset 0 0 22px rgba(255,196,30,.32)}
 #historial .pf-hero.bdof.z-ucl::before,#historial .pf-hero.bdof.z-uel::before,#historial .pf-hero.bdof.z-uecl::before{opacity:.42}
 #historial .pf-hero.bdof .pf-name{text-shadow:0 0 18px rgba(255,200,60,.7),0 2px 0 #3a2a05}
-#historial .pf-hero.bdof .pf-crest{background:radial-gradient(circle,rgba(184,134,11,.55),rgba(20,15,6,.94) 62%,rgba(20,15,6,.94))}
-#historial .pf-hero.bdof .pf-crest::before{border-color:rgba(255,214,102,.6);box-shadow:0 0 22px -4px rgba(245,185,46,.8),inset 0 0 22px -8px rgba(245,185,46,.6)}
-#historial .pf-hero.bdof .pf-badges span:not(.fr):not(.gd){border-color:rgba(233,185,73,.6);background:#120e06;box-shadow:inset 0 0 14px rgba(245,185,46,.14),0 0 18px -6px rgba(245,185,46,.7)}
+#historial .pf-hero.bdof .pf-crest{background:radial-gradient(circle,rgba(214,148,6,.55),rgba(20,15,6,.94) 62%,rgba(20,15,6,.94))}
+#historial .pf-hero.bdof .pf-crest::before{border-color:rgba(255,212,64,.6);box-shadow:0 0 22px -4px rgba(255,196,30,.8),inset 0 0 22px -8px rgba(255,196,30,.6)}
+#historial .pf-hero.bdof .pf-badges span:not(.fr):not(.gd){border-color:rgba(255,201,51,.6);background:#120e06;box-shadow:inset 0 0 14px rgba(255,196,30,.14),0 0 18px -6px rgba(255,196,30,.7)}
 .pf-bdo .bs{zoom:1.4}
 #historial .pf-hero.bdof::after{display:none}
 #historial .pf-hero>.pf-bdo{position:absolute;inset:0;overflow:hidden;border-radius:inherit;z-index:0;pointer-events:none}
@@ -1898,7 +1898,7 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 .pf-bdo .sw{position:absolute;inset:0;background:linear-gradient(110deg,transparent 38%,rgba(255,244,190,.5) 50%,transparent 62%);background-size:240% 100%;background-repeat:no-repeat;background-position:170% 0}
 .ti-r.mkb.ok{border-color:#ffd24a88}
 .ti-r.mkb.on{border-color:#ffd24a;box-shadow:0 0 14px -4px rgba(255,210,74,.8)}
-.mk-pv.bdo{border-color:#e9b949;background:linear-gradient(180deg,rgba(255,214,102,.26),rgba(184,134,11,.14)),rgba(24,19,8,.96);box-shadow:0 0 12px rgba(245,185,46,.5),0 0 26px rgba(245,185,46,.22),inset 0 0 12px rgba(245,185,46,.3);animation:none}
+.mk-pv.bdo{border-color:#ffc933;background:linear-gradient(180deg,rgba(255,212,64,.26),rgba(214,148,6,.14)),rgba(24,19,8,.96);box-shadow:0 0 12px rgba(255,196,30,.5),0 0 26px rgba(255,196,30,.22),inset 0 0 12px rgba(255,196,30,.3);animation:none}
 .mk-pv.bdo::before{opacity:1;filter:none;animation:none;background:linear-gradient(105deg,transparent 35%,rgba(255,244,190,.5) 50%,transparent 65%);background-size:220% 100%;background-repeat:no-repeat;background-position:170% 0}
 .mk-pv.bdo::after{background:none;animation:none}
 .mk-pv.bdo .mk-t{color:#ffe9a6}
@@ -1934,7 +1934,7 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 /* ===== Marcos animados de la fila: una sola capa grande (.rfx) para fuego, Coleccionista y Balón de Oro; combinables ===== */
 #tabla tr.rx{--xc:rgba(255,150,40,.9);--xg:rgba(255,110,30,.5);--star-u:url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2060%209%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20gradientUnits=%27userSpaceOnUse%27%20x1=%272%27%20y1=%271%27%20x2=%2752%27%20y2=%277%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27%20stop-opacity=%270%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%23fff%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath%20d=%27M2%201L52%207%27%20stroke=%27url%28%23g%29%27%20stroke-width=%271.4%27%20stroke-linecap=%27round%27/%3E%3Ccircle%20cx=%2752%27%20cy=%277%27%20r=%273.4%27%20fill=%27%23fff%27%20fill-opacity=%27.3%27/%3E%3Ccircle%20cx=%2752%27%20cy=%277%27%20r=%271.8%27%20fill=%27%23fff%27/%3E%3C/svg%3E")}
 #tabla tr.xc{--xc:#ff4d8d;--xg:rgba(255,77,141,.5)}
-#tabla tr.xb{--xc:#e9b949;--xg:rgba(245,185,46,.45)}
+#tabla tr.xb{--xc:#ffc933;--xg:rgba(255,196,30,.45)}
 #tabla tr.xb,#tabla tr.xc,#tabla tr.xb.mine,#tabla tr.xc.mine{background:none}
 #tabla tr.rx+tr td{border-top-color:transparent}
 #tabla tr.rx td{position:relative;isolation:isolate;text-shadow:0 1px 3px rgba(0,0,0,.75);border-top:1px solid var(--xc);border-bottom:1px solid var(--xc);box-shadow:inset 0 9px 9px -9px var(--xg),inset 0 -9px 9px -9px var(--xg),0 -8px 10px -8px var(--xg),0 8px 10px -8px var(--xg)}
@@ -1943,12 +1943,12 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 #tabla tr.rx:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos{border-left:1px solid var(--xc)}
 #tabla tr.rx:is(.z-ucl,.z-uel,.z-uecl) td.pos{border-top-color:rgba(255,255,255,.07);border-bottom-color:transparent;box-shadow:none;animation:none}
 #tabla tr.rx .pl .me,#tabla tr.rx .pl span{text-shadow:0 0 8px var(--xg),0 1px 3px rgba(0,0,0,.75)}
-.rfx,.rfs{position:absolute;top:0;bottom:0;left:0;width:calc(var(--rw,100%) - var(--pw,0px) - 2px);overflow:hidden;pointer-events:none}
-.rfx{z-index:-1}.rfs{z-index:2}
-#tabla tr.rx:not(.z-ucl):not(.z-uel):not(.z-uecl) :is(.rfx,.rfs){left:calc(1px - var(--pw,0px));width:calc(var(--rw,100%) - 2px)}
+.rfx,.rfs,.rfb{position:absolute;top:0;bottom:0;left:0;width:calc(var(--rw,100%) - var(--pw,0px) - 2px);overflow:hidden;pointer-events:none}
+.rfx,.rfb{z-index:-1}.rfs{z-index:2}
+#tabla tr.rx:not(.z-ucl):not(.z-uel):not(.z-uecl) :is(.rfx,.rfs,.rfb){left:calc(1px - var(--pw,0px));width:calc(var(--rw,100%) - 2px)}
 .rfx.f{background:linear-gradient(0deg,rgba(255,80,15,.42),rgba(255,140,30,.14) 65%,rgba(255,170,60,.06))}
 .rfx.c{background:linear-gradient(0deg,rgba(255,77,141,.34),rgba(255,177,61,.1)),rgba(24,18,26,.96)}
-.rfx.b{background:linear-gradient(180deg,rgba(255,214,102,.26),rgba(184,134,11,.14)),rgba(24,19,8,.96)}
+.rfx.b{background:linear-gradient(180deg,rgba(255,212,64,.26),rgba(214,148,6,.14)),rgba(24,19,8,.96)}
 .rfx i{position:absolute;display:block;pointer-events:none}
 .rc1,.rc2,.rb1{inset:0}
 .rc1{background:linear-gradient(0deg,rgba(255,77,141,.95),rgba(255,177,61,.3) 60%,transparent);opacity:var(--fo)}
@@ -1980,7 +1980,7 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 
 /* ===== Marcos de campeón europeo: Champions (violeta), Europa League (naranja) y Conference League (verde), con los colores de cada competición ===== */
 .e-ucl{--ec:#8f63e6;--ecl:#d9c8ff;--ecr:150,110,240;--ec2:88,120,255;--ecs:226,210,255;--ecd:rgba(18,12,32,.96);--ecg:rgba(150,110,240,.5);--ecT:6s}
-.e-uel{--ec:#f0a03c;--ecl:#ffd9a0;--ecr:240,150,40;--ec2:255,200,60;--ecs:255,226,170;--ecd:rgba(30,19,6,.96);--ecg:rgba(240,150,40,.5);--ecT:3.6s}
+.e-uel{--ec:#ff7a1c;--ecl:#ffc190;--ecr:255,115,26;--ec2:255,146,46;--ecs:255,204,160;--ecd:rgba(36,14,4,.96);--ecg:rgba(255,115,26,.55);--ecT:3.6s}
 .e-uecl{--ec:#3fc46a;--ecl:#b6f6cb;--ecr:60,200,100;--ec2:40,200,190;--ecs:190,250,210;--ecd:rgba(7,26,14,.96);--ecg:rgba(60,200,100,.5);--ecT:4.8s}
 :is(.e-ucl,.e-uel,.e-uecl) .bs{background:radial-gradient(circle,#fff 0 18%,var(--ecl) 19% 42%,rgba(var(--ecr),0) 72%)}
 @keyframes euGlow{0%,100%{box-shadow:inset 0 9px 9px -9px rgba(var(--ecr),.4),inset 0 -9px 9px -9px rgba(var(--ecr),.4),0 -8px 10px -8px rgba(var(--ecr),.45),0 8px 10px -8px rgba(var(--ecr),.45)}50%{box-shadow:inset 0 9px 9px -9px rgba(var(--ecs),.8),inset 0 -9px 9px -9px rgba(var(--ecs),.8),0 -8px 10px -8px rgba(var(--ecs),.85),0 8px 10px -8px rgba(var(--ecs),.85)}}
@@ -2026,8 +2026,76 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 #myPos.euf,.mk-pv.eu{animation:euGlowMy var(--ecT) ease-in-out infinite}
 #historial .pf-hero.euf{animation:euGlowHero var(--ecT) ease-in-out infinite}
 }
+/* ===== Marcos animados SIN COSTURAS: el brillo lo dibuja una sola capa por fila (.rfb), no cada celda ===== */
+#tabla tr.rx td,#tabla tr.rx td:first-child,#tabla tr.rx td:last-child{box-shadow:none}
+#tabla tr.rx:is(.xb,.xe,.xs) td{animation:none}
+.rfb{overflow:visible;clip-path:inset(-14px 0 -14px 0);opacity:.75;background:linear-gradient(180deg,var(--xg),transparent 12px,transparent calc(100% - 12px),var(--xg));box-shadow:0 0 10px -2px var(--xg)}
+@keyframes rfbPulse{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* ===== Balón de Oro: extras exclusivos (destello que recorre el borde + balón dorado girando) ===== */
+.rb2{inset:0;background:linear-gradient(90deg,transparent,#fff8d2 50%,transparent) -70% 0/40% 2px no-repeat,linear-gradient(90deg,transparent,#fff8d2 50%,transparent) 170% 100%/40% 2px no-repeat}
+.rb3{right:9%;top:50%;width:44px;height:44px;margin-top:-22px;opacity:.2;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='38%25' cy='32%25' r='80%25'%3E%3Cstop offset='0' stop-color='%23fff3b0'/%3E%3Cstop offset='.55' stop-color='%23ffc933'/%3E%3Cstop offset='1' stop-color='%23b07800'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='47' fill='url(%23g)' stroke='%23ffe58a' stroke-width='2'/%3E%3Cpath d='M50 30l17 12-6.5 20h-21L33 42z' fill='%237a5200' fill-opacity='.75'/%3E%3Cpath d='M50 30V12M67 42l18-6M60.5 62l11 15M39.5 62l-11 15M33 42l-18-6' stroke='%237a5200' stroke-opacity='.75' stroke-width='3' fill='none'/%3E%3C/svg%3E") center/contain no-repeat}
+@keyframes bdoRun{0%{background-position:-70% 0,170% 100%}100%{background-position:170% 0,-70% 100%}}
+@keyframes bdoSpin{to{transform:rotate(360deg)}}
+#myPos.bdof::before,.pf-bdo::before,.mk-pv.bdo::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(90deg,transparent,#fff8d2 50%,transparent) -70% 0/40% 2px no-repeat,linear-gradient(90deg,transparent,#fff8d2 50%,transparent) 170% 100%/40% 2px no-repeat}
+.pf-bdo::before{z-index:1;border-radius:inherit}
+.pf-bdo::after{content:"";position:absolute;right:7%;top:14%;width:64px;height:64px;opacity:.17;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='38%25' cy='32%25' r='80%25'%3E%3Cstop offset='0' stop-color='%23fff3b0'/%3E%3Cstop offset='.55' stop-color='%23ffc933'/%3E%3Cstop offset='1' stop-color='%23b07800'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='47' fill='url(%23g)' stroke='%23ffe58a' stroke-width='2'/%3E%3Cpath d='M50 30l17 12-6.5 20h-21L33 42z' fill='%237a5200' fill-opacity='.75'/%3E%3Cpath d='M50 30V12M67 42l18-6M60.5 62l11 15M39.5 62l-11 15M33 42l-18-6' stroke='%237a5200' stroke-opacity='.75' stroke-width='3' fill='none'/%3E%3C/svg%3E") center/contain no-repeat}
+.mk-pv.bdo::after{background:linear-gradient(90deg,transparent,#fff8d2 50%,transparent) -70% 0/40% 2px no-repeat,linear-gradient(90deg,transparent,#fff8d2 50%,transparent) 170% 100%/40% 2px no-repeat;animation:none}
+
+/* ===== Marco Campeón de Liga (azul eléctrico + confeti): solo con la Super Predict League en la vitrina ===== */
+#tabla tr.xs{--xc:#5fe4ff;--xg:rgba(0,214,255,.55)}
+#tabla tr.xs,#tabla tr.xs.mine{background:none}
+.rfx.s{background:linear-gradient(180deg,rgba(0,200,240,.30),rgba(20,70,160,.14)),rgba(5,17,28,.96)}
+.rs1{inset:0;background:linear-gradient(105deg,transparent 35%,rgba(190,250,255,.5) 50%,transparent 65%);background-size:220% 100%;background-repeat:no-repeat;background-position:170% 0}
+.rs2{inset:0;background:radial-gradient(90% 140% at 50% 140%,rgba(0,220,255,.38),transparent 62%),radial-gradient(60% 110% at 0% -20%,rgba(255,255,255,.22),transparent 60%)}
+:is(.rfx,.mpfx).s .rf1,:is(.rfx,.mpfx).s .rf2{background:linear-gradient(0deg,#00d6ff,#e8fdff)}
+:is(.rfx,.mpfx).s:is(.f) .rf1{opacity:.55;-webkit-mask:var(--fR-u) repeat-x 0 100%/52px 100%;mask:var(--fR-u) repeat-x 0 100%/52px 100%}
+:is(.rfx,.mpfx).s:is(.f) .rf2{opacity:.55;-webkit-mask-image:var(--fY-u),var(--fO-u);mask-image:var(--fY-u),var(--fO-u);-webkit-mask-size:14px 62%,27px 100%;mask-size:14px 62%,27px 100%;-webkit-mask-position:3px 100%,6px 100%;mask-position:3px 100%,6px 100%;-webkit-mask-repeat:repeat-x;mask-repeat:repeat-x}
+.cfx{position:absolute;top:-9px;display:block;width:4px;height:8px;border-radius:1px;opacity:0;pointer-events:none}
+.pf-spl .cfx{--fy:200px;width:5px;height:10px}
+@keyframes cfxFall{0%{opacity:0;transform:translate3d(0,0,0) rotate(0)}12%{opacity:.95}80%{opacity:.85}100%{opacity:0;transform:translate3d(var(--dx,10px),var(--fy,62px),0) rotate(600deg)}}
+@keyframes splBr{0%,100%{border-color:#35d4ff}50%{border-color:#ffffff}}
+#myPos.splf{overflow:hidden;border-color:#5fe4ff;background:linear-gradient(180deg,rgba(0,200,240,.30),rgba(20,70,160,.14)),rgba(5,17,28,.96);box-shadow:0 0 12px rgba(0,214,255,.5),0 0 26px rgba(0,214,255,.22),inset 0 0 12px rgba(0,214,255,.3)}
+#myPos.splf::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(190,250,255,.4) 50%,transparent 65%);background-size:220% 100%;background-repeat:no-repeat;background-position:170% 0}
+@keyframes splGlowMy{0%,100%{box-shadow:0 0 12px rgba(0,214,255,.5),0 0 26px rgba(0,214,255,.22),inset 0 0 12px rgba(0,214,255,.3)}50%{box-shadow:0 0 18px rgba(190,250,255,.85),0 0 36px rgba(0,214,255,.4),inset 0 0 18px rgba(0,214,255,.5)}}
+@keyframes splGlowHero{0%,100%{box-shadow:0 0 14px rgba(0,214,255,.55),0 0 34px rgba(0,214,255,.28),inset 0 0 22px rgba(0,214,255,.32)}50%{box-shadow:0 0 22px rgba(190,250,255,.9),0 0 50px rgba(0,214,255,.45),inset 0 0 32px rgba(0,214,255,.5)}}
+#historial .pf-hero.splf{overflow:hidden;border-color:#5fe4ff;background:radial-gradient(120% 80% at 50% 0%,rgba(190,250,255,.30),transparent 62%),radial-gradient(120% 90% at 50% 100%,rgba(0,150,230,.42),transparent 65%),linear-gradient(180deg,rgba(0,200,240,.26),rgba(20,70,160,.14)),rgb(5,17,28);box-shadow:0 0 14px rgba(0,214,255,.55),0 0 34px rgba(0,214,255,.28),inset 0 0 22px rgba(0,214,255,.32)}
+#historial .pf-hero.splf.z-ucl::before,#historial .pf-hero.splf.z-uel::before,#historial .pf-hero.splf.z-uecl::before{opacity:.42}
+#historial .pf-hero.splf .pf-name{text-shadow:0 0 18px rgba(0,214,255,.8),0 2px 0 #021a26}
+#historial .pf-hero.splf .pf-crest{background:radial-gradient(circle,rgba(0,170,230,.5),rgba(5,14,22,.94) 62%,rgba(5,14,22,.94))}
+#historial .pf-hero.splf .pf-crest::before{border-color:rgba(190,250,255,.6);box-shadow:0 0 22px -4px rgba(0,214,255,.8),inset 0 0 22px -8px rgba(0,214,255,.6)}
+#historial .pf-hero.splf .pf-badges span:not(.fr):not(.gd){border-color:rgba(95,228,255,.6);background:#06121a;box-shadow:inset 0 0 14px rgba(0,214,255,.16),0 0 18px -6px rgba(0,214,255,.7)}
+#historial .pf-hero.splf::after{display:none}
+#historial .pf-hero>.pf-spl{position:absolute;inset:0;overflow:hidden;border-radius:inherit;z-index:0;pointer-events:none}
+.pf-spl .sw{position:absolute;inset:0;background:linear-gradient(110deg,transparent 38%,rgba(190,250,255,.5) 50%,transparent 62%);background-size:240% 100%;background-repeat:no-repeat;background-position:170% 0}
+.ti-r.mks.ok{border-color:rgba(95,228,255,.55)}
+.ti-r.mks.on{border-color:#5fe4ff;box-shadow:0 0 14px -4px rgba(0,214,255,.8)}
+.mk-pv.spl{border-color:#5fe4ff;background:linear-gradient(180deg,rgba(0,200,240,.30),rgba(20,70,160,.14)),rgba(5,17,28,.96);box-shadow:0 0 12px rgba(0,214,255,.5),0 0 26px rgba(0,214,255,.22),inset 0 0 12px rgba(0,214,255,.3);animation:none}
+.mk-pv.spl::before{opacity:1;filter:none;animation:none;background:linear-gradient(105deg,transparent 35%,rgba(190,250,255,.5) 50%,transparent 65%);background-size:220% 100%;background-repeat:no-repeat;background-position:170% 0}
+.mk-pv.spl::after{background:none;animation:none}
+.mk-pv.spl .mk-t{color:#bff6ff}
+.mk-pv.spl .mk-u{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.75)}
+@media(prefers-reduced-motion:no-preference){
+#tabla tr.xb .rfb{animation:rfbPulse 4s ease-in-out infinite}
+#tabla tr.xe .rfb{animation:rfbPulse var(--ecT) ease-in-out infinite}
+#tabla tr.xs .rfb{animation:rfbPulse 3s ease-in-out infinite}
+#tabla tr.xc .rfb{animation:colHue 7s linear infinite}
+.rb2,#myPos.bdof::before,.pf-bdo::before,.mk-pv.bdo::after{animation:bdoRun 3.2s linear infinite}
+.rb3,.pf-bdo::after{animation:bdoSpin 18s linear infinite}
+#tabla tr.rx.xs td{animation:splBr 3s ease-in-out infinite}
+#tabla tr.rx.xs:is(.z-ucl,.z-uel,.z-uecl) td.pos{animation:none}
+.rs1,#myPos.splf::after,.pf-spl .sw,.mk-pv.spl::before{animation:bdoSweep 4.2s ease-in-out infinite}
+.rs2{animation:euBreathe 3s ease-in-out infinite}
+#myPos.splf,.mk-pv.spl{animation:splGlowMy 3s ease-in-out infinite}
+#historial .pf-hero.splf{animation:splGlowHero 3s ease-in-out infinite}
+.cfx{animation:cfxFall 3.6s linear infinite}
+:is(.rfx,.mpfx).s .rf1{animation:flU 1.25s ease-in-out infinite alternate}
+:is(.rfx,.mpfx).s .rf2{animation:flU2 .85s ease-in-out infinite alternate}
+}
+@media(prefers-reduced-motion:reduce){.rfb{opacity:.8}.cfx{opacity:.8;top:30%}}
 #ligaToggle{margin-bottom:28px}
 </style>
+
 </head>
 <body>
 <div id="userBar" style="display:none">
@@ -4830,10 +4898,10 @@ function setupMyPos(t) {
   if (myOff) { myOff(); myOff = null; }
   const i = t.findIndex(x => x.id === me), row = $("#tablaBox").querySelector("tr.mine");
   const over = calcRounds().includes(CONFIG.jornadas);   // liga terminada: la barra fija "mi posición" se desactiva
-  if (over || i < 0 || !row) { box.hidden = true; box.classList.remove("fire", "colf", "bdof", "euf", ...EU_MARCOS.map(k => "e-" + k)); sec.classList.remove("hasMy"); return; }
+  if (over || i < 0 || !row) { box.hidden = true; box.classList.remove("fire", "colf", "bdof", "splf", "euf", ...EU_MARCOS.map(k => "e-" + k)); sec.classList.remove("hasMy"); return; }
   const p = t[i];
-  const mb = marcoBdo(p), eu = marcoEu(p); box.classList.toggle("colf", marcoOn(p)); box.classList.toggle("bdof", mb); box.classList.toggle("euf", !!eu); EU_MARCOS.forEach(k => box.classList.toggle("e-" + k, eu === k)); box.classList.toggle("fire", p.rc >= 3 && !marcoOn(p) && !mb && !eu);   // racha: la barra se llena de llamas
-  box.innerHTML = mpFx(p) + `<span class="mp-pos mp-c">${i + 1}º</span><div class="mp-pl">${p.team ? crest(p.team, false) : ""}<span class="mp-name">${esc(p.name)}</span></div><span class="mp-pg mp-c ${p.pg > 0 ? "pg-up" : p.pg < 0 ? "pg-dn" : "pg-0"}">${p.pg > 0 ? "+" + p.pg : p.pg < 0 ? p.pg : "0"}</span><span class="mp-pt mp-c">${p.pt}</span><span class="mp-mv mp-c">${mvIcon(p.mv)}</span>${mb || eu ? bdoSp(4) : ""}`;
+  const mb = marcoBdo(p), eu = marcoEu(p), sp = marcoSpl(p); box.classList.toggle("colf", marcoOn(p)); box.classList.toggle("bdof", mb); box.classList.toggle("splf", sp); box.classList.toggle("euf", !!eu); EU_MARCOS.forEach(k => box.classList.toggle("e-" + k, eu === k)); box.classList.toggle("fire", p.rc >= 3 && !marcoOn(p) && !mb && !eu && !sp);   // racha: la barra se llena de llamas
+  box.innerHTML = mpFx(p) + `<span class="mp-pos mp-c">${i + 1}º</span><div class="mp-pl">${p.team ? crest(p.team, false) : ""}<span class="mp-name">${esc(p.name)}</span></div><span class="mp-pg mp-c ${p.pg > 0 ? "pg-up" : p.pg < 0 ? "pg-dn" : "pg-0"}">${p.pg > 0 ? "+" + p.pg : p.pg < 0 ? p.pg : "0"}</span><span class="mp-pt mp-c">${p.pt}</span><span class="mp-mv mp-c">${mvIcon(p.mv)}</span>${mb || eu ? bdoSp(4) : sp ? `<span class="bsw" aria-hidden="true">${splCf(8)}</span>` : ""}`;
   sec.classList.add("hasMy");
   box.onclick = () => row.scrollIntoView({ behavior: "smooth", block: "center" });
   const nav = $("#mainNav"), ub = $("#userBar");
@@ -5643,10 +5711,10 @@ function renderHistorial() {
   const vis = m => !other || m.result || isClosed(m);
   const rounds = [...new Set(leagueMs().filter(vis).map(m => m.round))].sort((a, b) => a - b);
   const tt = standings(), ix = tt.findIndex(p => p.id === pid);
-  const colOn = marcoOn(who), bdoOn = marcoBdo(who), euK = marcoEu(who), fireOn = ix >= 0 && tt[ix].rc >= 3;   // en racha: el recuadro del perfil lleva llamas
+  const colOn = marcoOn(who), bdoOn = marcoBdo(who), splOn = marcoSpl(who), euK = marcoEu(who), fireOn = ix >= 0 && tt[ix].rc >= 3;   // en racha: el recuadro del perfil lleva llamas
   const rk = rachaRec(who);   // mayor racha conseguida (no baja nunca; para la cabecera)
   const head = (other ? `<div class="pf-top"><button class="pf-back" id="pfBack" aria-label="Volver">‹ Volver</button>${penRetoBtn(other)}</div>` : "") + `
-    <div class="pf-hero${ix < 0 ? "" : ix < 4 ? " z-ucl" : ix < 6 ? " z-uel" : ix < 8 ? " z-uecl" : ""}${fireOn ? " fire" : ""}${colOn ? " colf" : ""}${bdoOn ? " bdof" : ""}${euK ? " euf e-" + euK : ""}">${fireOn ? '<span class="pf-fire" aria-hidden="true"><i class="u"></i></span>' : ""}${colOn ? '<span class="pf-col" aria-hidden="true"><i class="w"></i><i class="s s1"></i><i class="s s2"></i><i class="s s3"></i><i class="s s4"></i><i class="s s5"></i></span>' : ""}${bdoOn ? `<span class="pf-bdo" aria-hidden="true"><i class="hx"></i><i class="sw"></i>${bdoSi(14)}</span>` : ""}${euK ? `<span class="pf-eu" aria-hidden="true"><i class="hx"></i><i class="sw"></i>${bdoSi(14)}</span>` : ""}<div class="pf-crest">${crest(who.team)}</div><div class="pf-name" role="heading" aria-level="2">${esc(who.name)}</div>${ttlHtml(who, "ptl")}
+    <div class="pf-hero${ix < 0 ? "" : ix < 4 ? " z-ucl" : ix < 6 ? " z-uel" : ix < 8 ? " z-uecl" : ""}${fireOn ? " fire" : ""}${colOn ? " colf" : ""}${bdoOn ? " bdof" : ""}${splOn ? " splf" : ""}${euK ? " euf e-" + euK : ""}">${fireOn ? '<span class="pf-fire" aria-hidden="true"><i class="u"></i></span>' : ""}${colOn ? '<span class="pf-col" aria-hidden="true"><i class="w"></i><i class="s s1"></i><i class="s s2"></i><i class="s s3"></i><i class="s s4"></i><i class="s s5"></i></span>' : ""}${bdoOn ? `<span class="pf-bdo" aria-hidden="true"><i class="hx"></i><i class="sw"></i>${bdoSi(14)}</span>` : ""}${splOn ? `<span class="pf-spl" aria-hidden="true"><i class="sw"></i>${splCf(18)}</span>` : ""}${euK ? `<span class="pf-eu" aria-hidden="true"><i class="hx"></i><i class="sw"></i>${bdoSi(14)}</span>` : ""}<div class="pf-crest">${crest(who.team)}</div><div class="pf-name" role="heading" aria-level="2">${esc(who.name)}</div>${ttlHtml(who, "ptl")}
     <div class="pf-badges"><span class="gd">${ix >= 0 ? ix + 1 + "º" : "—"}</span><span>${ix >= 0 ? tt[ix].pt : 0}<small>PT</small></span><span class="fr" title="Mayor racha" aria-label="Mayor racha: ${rk}">${rk}<i aria-hidden="true">🔥</i></span></div></div>` + (other ? `
     <p class="pf-sec">Sus predicciones</p>` : `
     <h2>Historial</h2>`);
@@ -7720,17 +7788,21 @@ const albDueno = () => S.players.reduce((w, p) => (p.albAt > 0 && (!w || p.albAt
 const marcoOn = p => !!p && p.marco === "col" && (p.logros || []).includes("l22") && (albDueno() || {}).id === p.id;   // equipado y además ser el primero en completar el álbum
 const EU_MARCOS = ["ucl", "uel", "uecl"];
 const marcoEu = p => { const k = p && p.marco; return EU_MARCOS.includes(k) && trofeosDe(p).includes(k) ? k : ""; };   // Marco Champions / Europa League / Conference equipado (solo con esa copa en la vitrina)
-const marcoBdo = p => !!p && p.marco === "bdo" && trofeosDe(p).includes("bdo");   // Marco Balón de Oro equipado (solo si tiene un Balón de Oro en la vitrina)
+const marcoBdo = p => !!p && p.marco === "bdo" && trofeosDe(p).includes("bdo");
+const marcoSpl = p => !!p && p.marco === "spl" && trofeosDe(p).includes("spl");   // Marco Campeón de Liga equipado (solo si ganó la Super Predict League)
+const SPL_COLS = ["#ff5c8a", "#ffd24a", "#4dffa0", "#5fe4ff", "#ffffff", "#b79bff"];
+const splCf = n => { let h = ""; for (let i = 0; i < n; i++) h += `<i class="cfx" style="left:${(2 + Math.random() * 94).toFixed(1)}%;background:${SPL_COLS[i % SPL_COLS.length]};--dx:${(-14 + Math.random() * 28).toFixed(0)}px;animation-duration:${(2.6 + Math.random() * 2.2).toFixed(2)}s;animation-delay:${(-Math.random() * 4).toFixed(2)}s"></i>`; return h; };   // Marco Balón de Oro equipado (solo si tiene un Balón de Oro en la vitrina)
 // Destellos dorados del Marco Balón de Oro: posición, tamaño y ritmo al azar; al terminar cada destello (ya invisible) salta a otro sitio
 const bdoSi = n => { let h = ""; for (let i = 0; i < n; i++) { const sz = 6 + Math.random() * 7; h += `<i class="bs" style="left:${(4 + Math.random() * 90).toFixed(1)}%;top:${(8 + Math.random() * 78).toFixed(1)}%;width:${sz.toFixed(1)}px;height:${sz.toFixed(1)}px;animation-duration:${(1.8 + Math.random() * 2.6).toFixed(2)}s;animation-delay:${(-Math.random() * 5).toFixed(2)}s"></i>`; } return h; };
 // Marcos animados de la fila (racha, Coleccionista, Balón de Oro): UNA sola capa grande que cubre toda la fila (sin la celda de la posición si lleva competición europea)
-const rowFxCls = p => { const c = marcoOn(p), e = !c && marcoEu(p), b = !c && !e && marcoBdo(p), f = p.rc >= 3; return (c || e || b || f) ? " rx" + (c ? " xc" : e ? " xe e-" + e : b ? " xb" : "") + (f ? " xf" : "") : ""; };
-const rowFx = p => { const c = marcoOn(p), e = !c && marcoEu(p), b = !c && !e && marcoBdo(p), f = p.rc >= 3; if (!c && !b && !e && !f) return ""; const k = (c ? " c" : "") + (b ? " b" : "") + (e ? " e e-" + e : "") + (f ? " f" : "");
-  return `<span class="rfx${k}" aria-hidden="true">${f ? '<i class="rf1"></i><i class="rf2"></i>' : ""}${c ? '<i class="rc1"></i><i class="rc2"></i>' : ""}${b ? '<i class="rb1"></i>' : ""}${e ? '<i class="re2"></i><i class="re1"></i>' : ""}</span>${b || e ? `<span class="rfs" aria-hidden="true">${bdoSi(8)}</span>` : ""}`; };
+const rowFxCls = p => { const c = marcoOn(p), e = !c && marcoEu(p), b = !c && !e && marcoBdo(p), sp = !c && !e && !b && marcoSpl(p), f = p.rc >= 3; return (c || e || b || sp || f) ? " rx" + (c ? " xc" : e ? " xe e-" + e : b ? " xb" : sp ? " xs" : "") + (f ? " xf" : "") : ""; };
+const rowFx = p => { const c = marcoOn(p), e = !c && marcoEu(p), b = !c && !e && marcoBdo(p), sp = !c && !e && !b && marcoSpl(p), f = p.rc >= 3; if (!c && !b && !e && !sp && !f) return ""; const k = (c ? " c" : "") + (b ? " b" : "") + (sp ? " s" : "") + (e ? " e e-" + e : "") + (f ? " f" : "");
+  return `<span class="rfx${k}" aria-hidden="true">${f ? '<i class="rf1"></i><i class="rf2"></i>' : ""}${c ? '<i class="rc1"></i><i class="rc2"></i>' : ""}${b ? '<i class="rb1"></i><i class="rb2"></i><i class="rb3"></i>' : ""}${sp ? '<i class="rs2"></i><i class="rs1"></i>' : ""}${e ? '<i class="re2"></i><i class="re1"></i>' : ""}</span><span class="rfb" aria-hidden="true"></span>${b || e ? `<span class="rfs" aria-hidden="true">${bdoSi(8)}</span>` : sp ? `<span class="rfs" aria-hidden="true">${splCf(12)}</span>` : ""}`; };
 const rowFxMeasure = () => { const tb = document.querySelector("#tablaBox table"); if (!tb) return; const tr = tb.querySelector("tbody tr"), pc = tr && tr.querySelector("td.pos"); if (!tr || !pc) return; tb.style.setProperty("--rw", tr.offsetWidth + "px"); tb.style.setProperty("--pw", pc.offsetWidth + "px"); };
 window.addEventListener("resize", rowFxMeasure);
-const mpFx = p => (p.rc >= 3 && (marcoOn(p) || marcoEu(p) || marcoBdo(p))) ? `<span class="mpfx ${marcoOn(p) ? "c" : marcoEu(p) ? "e e-" + marcoEu(p) : "b"} f" aria-hidden="true"><i class="rf1"></i><i class="rf2"></i></span>` : "";
+const mpFx = p => (p.rc >= 3 && (marcoOn(p) || marcoEu(p) || marcoBdo(p) || marcoSpl(p))) ? `<span class="mpfx ${marcoOn(p) ? "c" : marcoEu(p) ? "e e-" + marcoEu(p) : marcoSpl(p) ? "s" : "b"} f" aria-hidden="true"><i class="rf1"></i><i class="rf2"></i></span>` : "";
 const bdoSp = n => `<span class="bsw" aria-hidden="true">${bdoSi(n)}</span>`;
+document.addEventListener("animationiteration", e => { const cf = e.target; if (cf && cf.classList && cf.classList.contains("cfx")) cf.style.left = (2 + Math.random() * 94).toFixed(1) + "%"; });
 document.addEventListener("animationiteration", e => { const el = e.target; if (el && el.classList && el.classList.contains("bs")) { el.style.left = (4 + Math.random() * 90).toFixed(1) + "%"; el.style.top = (8 + Math.random() * 78).toFixed(1) + "%"; } }, true);
 const ttlFind = id => TITULOS.find(x => x.id === id) || TIENDA.find(x => x.id === id) || ((m) => m ? ttlCopa(m[1], +m[2] || 1) : null)(/^tr-([a-z]+)(?:-(\d+))?$/.exec(id || ""));
 const ttlName = p => { let id = p && p.titulo; if (!id) return ""; if (/^tr-[a-z]+$/.test(id)) id += "-1"; if (/^tr-/.test(id)) { const t = copaTitulos(p).find(x => x.id === id); return t ? t.n : ""; } const t = ttlFind(id); return t ? t.n : ""; };
@@ -7842,11 +7914,13 @@ function renderLogros() {
     .sort((a, b) => ((b.id === p.titulo) * 2 + nuevos.has(b.id)) - ((a.id === p.titulo) * 2 + nuevos.has(a.id)));   // el equipado, arriba del todo
   const dueno = albDueno(), hasM = have.has("l22") && !!dueno && dueno.id === p.id, onM = hasM && p.marco === "col";
   const hasB = trofeosDe(p).includes("bdo"), onB = hasB && p.marco === "bdo";
-  const bdoRow = `<div class="ti-r mk mkb${hasB ? " ok" : ""}${onB ? " on" : ""}"><div class="ti-i"><em class="ti-k">Marco animado</em><b>Marco Balón de Oro</b><span>${hasB ? "Dorado con destellos aleatorios en tu fila de la clasificación y en tu perfil" : "Solo lo consiguen quienes ganan un Balón de Oro"}</span></div>${hasB ? `<button type="button" class="ti-b" data-mk="bdo">${onB ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}<div class="mk-pv bdo" role="img" aria-label="Vista previa de la animación del Marco Balón de Oro"><span class="mk-n">1º</span>${p.team ? crest(p.team, false) : ""}<span class="mk-u">${esc(p.name)}</span><span class="mk-t">Vista previa</span>${bdoSp(4)}</div></div>`;
+  const bdoRow = `<div class="ti-r mk mkb${hasB ? " ok" : ""}${onB ? " on" : ""}"><div class="ti-i"><em class="ti-k">Marco animado</em><b>Marco Balón de Oro</b><span>${hasB ? "Dorado con destellos aleatorios, un reflejo que recorre el borde y un balón dorado girando, en tu fila de la clasificación y en tu perfil" : "Solo lo consiguen quienes ganan un Balón de Oro"}</span></div>${hasB ? `<button type="button" class="ti-b" data-mk="bdo">${onB ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}<div class="mk-pv bdo" role="img" aria-label="Vista previa de la animación del Marco Balón de Oro"><span class="mk-n">1º</span>${p.team ? crest(p.team, false) : ""}<span class="mk-u">${esc(p.name)}</span><span class="mk-t">Vista previa</span>${bdoSp(4)}</div></div>`;
+  const hasS = trofeosDe(p).includes("spl"), onS = hasS && p.marco === "spl";
+  const splRow = `<div class="ti-r mk mks${hasS ? " ok" : ""}${onS ? " on" : ""}"><div class="ti-i"><em class="ti-k">Marco animado</em><b>Marco Campeón de Liga</b><span>${hasS ? "Azul eléctrico con confeti cayendo en tu fila de la clasificación y en tu perfil" : "Solo lo consigue quien gana la Super Predict League"}</span></div>${hasS ? `<button type="button" class="ti-b" data-mk="spl">${onS ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}<div class="mk-pv spl" role="img" aria-label="Vista previa de la animación del Marco Campeón de Liga"><span class="mk-n">1º</span>${p.team ? crest(p.team, false) : ""}<span class="mk-u">${esc(p.name)}</span><span class="mk-t">Vista previa</span><span class="bsw" aria-hidden="true">${splCf(8)}</span></div></div>`;
   const EUM = [["ucl", "Champions League", "Violeta con barrido de luz y destellos plateados"], ["uel", "Europa League", "Naranja y ámbar con barrido de luz y destellos cálidos"], ["uecl", "Conference League", "Verde y turquesa con barrido de luz y destellos"]];
   const euRow = ([k, nom, d]) => { const has = trofeosDe(p).includes(k), on = has && p.marco === k;
     return `<div class="ti-r mk mke e-${k}${has ? " ok" : ""}${on ? " on" : ""}"><div class="ti-i"><em class="ti-k">Marco animado</em><b>Marco ${nom}</b><span>${has ? d + " en tu fila de la clasificación y en tu perfil" : "Solo lo consiguen quienes ganan la " + nom}</span></div>${has ? `<button type="button" class="ti-b" data-mk="${k}">${on ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}<div class="mk-pv eu" role="img" aria-label="Vista previa de la animación del Marco ${nom}"><span class="mk-n">1º</span>${p.team ? crest(p.team, false) : ""}<span class="mk-u">${esc(p.name)}</span><span class="mk-t">Vista previa</span>${bdoSp(4)}</div></div>`; };
-  const marcoHtml = `<div class="ti-g"><div class="ti-r mk${hasM ? " ok" : ""}${onM ? " on" : ""}"><div class="ti-i"><em class="ti-k">Marco animado</em><b>Marco Coleccionista</b><span>${hasM ? "Estrellas fugaces y brillo cromático en tu fila de la clasificación y en tu perfil · Eres el primero en completar el álbum" : dueno ? "Exclusivo del primero en completar el álbum: ya es de " + esc(dueno.name) : "Exclusivo del primero en completar el álbum de cromos. Aún nadie lo ha conseguido"}</span></div>${hasM ? `<button type="button" class="ti-b" data-mk="col">${onM ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}<div class="mk-pv" role="img" aria-label="Vista previa de la animación del Marco Coleccionista"><span class="mk-n">1º</span>${p.team ? crest(p.team, false) : ""}<span class="mk-u">${esc(p.name)}</span><span class="mk-t">Vista previa</span></div></div>${bdoRow}${EUM.map(euRow).join("")}</div>`;
+  const marcoHtml = `<div class="ti-g"><div class="ti-r mk${hasM ? " ok" : ""}${onM ? " on" : ""}"><div class="ti-i"><em class="ti-k">Marco animado</em><b>Marco Coleccionista</b><span>${hasM ? "Estrellas fugaces y brillo cromático en tu fila de la clasificación y en tu perfil · Eres el primero en completar el álbum" : dueno ? "Exclusivo del primero en completar el álbum: ya es de " + esc(dueno.name) : "Exclusivo del primero en completar el álbum de cromos. Aún nadie lo ha conseguido"}</span></div>${hasM ? `<button type="button" class="ti-b" data-mk="col">${onM ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}<div class="mk-pv" role="img" aria-label="Vista previa de la animación del Marco Coleccionista"><span class="mk-n">1º</span>${p.team ? crest(p.team, false) : ""}<span class="mk-u">${esc(p.name)}</span><span class="mk-t">Vista previa</span></div></div>${bdoRow}${splRow}${EUM.map(euRow).join("")}</div>`;
   box.innerHTML = `<h2 style="margin-top:26px">Títulos de personalización</h2>
     <p class="muted" style="text-align:center;margin:-4px 8px 12px">Equipa uno para que salga bajo tu nombre.<br>Logros: ${have.size}/${TITULOS.length} · Comprados: ${own.size}</p>
     <div class="ti-g">${(titulosAbiertos ? lst : lst.slice(0, 5)).map(t => {
@@ -7871,7 +7945,7 @@ function renderLogros() {
   box.querySelectorAll("[data-mk]").forEach(b => b.onclick = () => {
     const k = b.dataset.mk, q0 = meP();
     if (!real || !synced || !q0) return;
-    if (k === "col" ? !(have.has("l22") && (albDueno() || {}).id === q0.id) : !(["bdo", ...EU_MARCOS].includes(k) && trofeosDe(q0).includes(k))) return;   // Coleccionista: solo el primero en completar el álbum; los demás: hay que tener esa copa en la vitrina
+    if (k === "col" ? !(have.has("l22") && (albDueno() || {}).id === q0.id) : !(["bdo", "spl", ...EU_MARCOS].includes(k) && trofeosDe(q0).includes(k))) return;   // Coleccionista: solo el primero en completar el álbum; los demás: hay que tener esa copa en la vitrina
     const q = meP(); if (!q || !S.players.includes(q)) return;
     q.marco = q.marco === k ? "" : k; save(); render();
   });
