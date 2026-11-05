@@ -477,7 +477,7 @@ td.pt{font:400 20px var(--h);color:var(--cyan)}
 #infoPanel{background:#0c1115;border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:10px;max-height:75vh;overflow:auto}
 #infoPanel[hidden]{display:none}
 #infoPanel section{display:block;padding-top:0}
-#userBar{position:sticky;top:0;z-index:15;margin:0 0 6px;padding:14px 16px 14px;
+#userBar{position:fixed;top:0;left:0;right:0;z-index:15;margin:0 0 6px;padding:14px 16px 14px;
   background:linear-gradient(180deg,#19212a,#111820);border-bottom:1px solid #00b4d840;border-radius:0 0 20px 20px;
   box-shadow:0 10px 26px #000a,0 1px 0 #00b4d822}
 #userBar .ub-row{max-width:720px;margin:0 auto}
@@ -2329,6 +2329,9 @@ html::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;op
 @keyframes fxAur{0%{transform:translate3d(-4%,-2%,0) rotate(0deg) scale(1)}50%{transform:translate3d(5%,4%,0) rotate(8deg) scale(1.12)}100%{transform:translate3d(-2%,6%,0) rotate(-6deg) scale(1.05)}}
 @keyframes fxGrid{to{background-position:0 46px,54px 0}}
 @keyframes fxRise{0%{transform:translateY(0);opacity:0}10%{opacity:.8}90%{opacity:.6}100%{transform:translateY(-14vh);opacity:0}}
+
+/* cabecera fija: no se mueve ni con el rebote al tirar de la página */
+html,body{overscroll-behavior-y:none}
 </style>
 
 </head>
@@ -8996,6 +8999,15 @@ boot();
   window.addEventListener("appinstalled", () => { guardar({ nunca: 1 }); cerrar(); });
   if (ios) { listo = true; window.addEventListener("load", intentar); if (document.readyState === "complete") intentar(); }
   else window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); evt = e; listo = true; intentar(); });   // Android: solo si el navegador permite instalar
+})();
+</script>
+<script>
+/* la cabecera es fija: deja hueco arriba igual a su altura */
+(function(){
+  const ub=document.getElementById("userBar"); if(!ub) return;
+  const set=()=>{const h=ub.offsetHeight; document.documentElement.style.setProperty("--ubh",h?h+"px":"76px"); document.body.style.paddingTop=h?(h+6)+"px":"0";};
+  if(window.ResizeObserver) new ResizeObserver(set).observe(ub);
+  addEventListener("resize",set); set();
 })();
 </script>
 </body>
