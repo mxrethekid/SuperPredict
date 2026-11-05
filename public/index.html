@@ -811,7 +811,7 @@ td .crest{width:30px;height:30px}
 #bdoBox .vt-r.on .bd-star{display:inline}
 #bdoBox .bd-hd{display:flex;align-items:center;gap:4px;margin:0 0 10px}
 #bdoBox .bd-hd::before{content:"";width:44px;flex:none}
-#bdoBox .bd-hd .ja-t{flex:1;margin:0;text-align:center;white-space:nowrap;font-size:clamp(11px,3.6vw,14px)!important;letter-spacing:.08em!important}
+#bdoBox .bd-hd .ja-t{flex:1;margin:0;text-align:center;white-space:nowrap;font-size:clamp(12px,4.3vw,17px)!important;letter-spacing:.08em!important}
 #bdoBox .bd-cup{position:relative;width:44px;height:58px;flex:none;pointer-events:none}
 #bdoBox .bd-cup svg{display:block;height:100%;width:auto;margin:0 auto}
 #bdoBox .bd-cup canvas.cup3d{position:absolute;top:0;left:50%;height:100%;aspect-ratio:.85;transform:translateX(-50%);opacity:0;transition:opacity .4s}
@@ -1931,6 +1931,102 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 #tabla tr.rcol:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos::before{animation:colHue 7s linear infinite}
 #tabla tr.rcol:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos::after{animation:colStar 3.6s linear infinite}
 }
+/* ===== Marcos animados de la fila: una sola capa grande (.rfx) para fuego, Coleccionista y Balón de Oro; combinables ===== */
+#tabla tr.rx{--xc:rgba(255,150,40,.9);--xg:rgba(255,110,30,.5);--star-u:url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2060%209%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20gradientUnits=%27userSpaceOnUse%27%20x1=%272%27%20y1=%271%27%20x2=%2752%27%20y2=%277%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27%20stop-opacity=%270%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%23fff%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath%20d=%27M2%201L52%207%27%20stroke=%27url%28%23g%29%27%20stroke-width=%271.4%27%20stroke-linecap=%27round%27/%3E%3Ccircle%20cx=%2752%27%20cy=%277%27%20r=%273.4%27%20fill=%27%23fff%27%20fill-opacity=%27.3%27/%3E%3Ccircle%20cx=%2752%27%20cy=%277%27%20r=%271.8%27%20fill=%27%23fff%27/%3E%3C/svg%3E")}
+#tabla tr.xc{--xc:#ff4d8d;--xg:rgba(255,77,141,.5)}
+#tabla tr.xb{--xc:#e9b949;--xg:rgba(245,185,46,.45)}
+#tabla tr.xb,#tabla tr.xc,#tabla tr.xb.mine,#tabla tr.xc.mine{background:none}
+#tabla tr.rx+tr td{border-top-color:transparent}
+#tabla tr.rx td{position:relative;isolation:isolate;text-shadow:0 1px 3px rgba(0,0,0,.75);border-top:1px solid var(--xc);border-bottom:1px solid var(--xc);box-shadow:inset 0 9px 9px -9px var(--xg),inset 0 -9px 9px -9px var(--xg),0 -8px 10px -8px var(--xg),0 8px 10px -8px var(--xg)}
+#tabla tr.rx td:last-child{border-right:1px solid var(--xc)}
+#tabla tr.rx:is(.z-ucl,.z-uel,.z-uecl) td:nth-child(2){border-left:1px solid var(--xc)}
+#tabla tr.rx:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos{border-left:1px solid var(--xc)}
+#tabla tr.rx:is(.z-ucl,.z-uel,.z-uecl) td.pos{border-top-color:rgba(255,255,255,.07);border-bottom-color:transparent;box-shadow:none;animation:none}
+#tabla tr.rx .pl .me,#tabla tr.rx .pl span{text-shadow:0 0 8px var(--xg),0 1px 3px rgba(0,0,0,.75)}
+.rfx,.rfs{position:absolute;top:0;bottom:0;left:0;width:calc(var(--rw,100%) - var(--pw,0px) - 2px);overflow:hidden;pointer-events:none}
+.rfx{z-index:-1}.rfs{z-index:2}
+#tabla tr.rx:not(.z-ucl):not(.z-uel):not(.z-uecl) :is(.rfx,.rfs){left:calc(1px - var(--pw,0px));width:calc(var(--rw,100%) - 2px)}
+.rfx.f{background:linear-gradient(0deg,rgba(255,80,15,.42),rgba(255,140,30,.14) 65%,rgba(255,170,60,.06))}
+.rfx.c{background:linear-gradient(0deg,rgba(255,77,141,.34),rgba(255,177,61,.1)),rgba(24,18,26,.96)}
+.rfx.b{background:linear-gradient(180deg,rgba(255,214,102,.26),rgba(184,134,11,.14)),rgba(24,19,8,.96)}
+.rfx i{position:absolute;display:block;pointer-events:none}
+.rc1,.rc2,.rb1{inset:0}
+.rc1{background:linear-gradient(0deg,rgba(255,77,141,.95),rgba(255,177,61,.3) 60%,transparent);opacity:var(--fo)}
+.rc2{background-image:var(--star-u),var(--star-u),var(--star-u);background-repeat:no-repeat;background-size:60px 9px,44px 7px,52px 8px;background-position:-70px -4px,-200px 6px,-330px 0;opacity:.8}
+.rb1{background:linear-gradient(105deg,transparent 35%,rgba(255,244,190,.5) 50%,transparent 65%);background-size:220% 100%;background-repeat:no-repeat;background-position:170% 0}
+/* llamas (fuego): rojas si solo hay racha; con marco equipado conservan la silueta pero toman el color del marco */
+:is(.rfx,.mpfx) .rf1,:is(.rfx,.mpfx) .rf2{position:absolute;display:block;left:0;right:0;bottom:0;transform-origin:50% 100%;pointer-events:none;background-repeat:repeat-x;opacity:var(--fo)}
+:is(.rfx,.mpfx) .rf1{height:54%;background-image:var(--fR-u);background-size:52px 100%;background-position:0 100%}
+:is(.rfx,.mpfx) .rf2{height:38%;background-image:var(--fY-u),var(--fO-u);background-size:14px 62%,27px 100%;background-position:3px 100%,6px 100%}
+:is(.rfx,.mpfx):is(.b,.c,.e) .rf1,:is(.rfx,.mpfx):is(.b,.c,.e) .rf2{opacity:.55}
+:is(.rfx,.mpfx).b .rf1,:is(.rfx,.mpfx).b .rf2{background:linear-gradient(0deg,#ffb52e,#fff3b0)}
+:is(.rfx,.mpfx).c .rf1,:is(.rfx,.mpfx).c .rf2{background:linear-gradient(0deg,#ff4d8d,#ffb13d)}
+:is(.rfx,.mpfx):is(.b,.c,.e) .rf1{-webkit-mask:var(--fR-u) repeat-x 0 100%/52px 100%;mask:var(--fR-u) repeat-x 0 100%/52px 100%}
+:is(.rfx,.mpfx):is(.b,.c,.e) .rf2{-webkit-mask-image:var(--fY-u),var(--fO-u);mask-image:var(--fY-u),var(--fO-u);-webkit-mask-size:14px 62%,27px 100%;mask-size:14px 62%,27px 100%;-webkit-mask-position:3px 100%,6px 100%;mask-position:3px 100%,6px 100%;-webkit-mask-repeat:repeat-x;mask-repeat:repeat-x}
+.mpfx{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+@keyframes colBr{0%,100%{border-color:#ff4d8d}16.67%{border-color:#ffb13d}33.33%{border-color:#e6ff4d}50%{border-color:#4dff9a}66.67%{border-color:#4dc8ff}83.33%{border-color:#b04dff}}
+@media(prefers-reduced-motion:no-preference){
+#tabla tr.xb td{animation:bdoGlow 4s ease-in-out infinite}
+#tabla tr.xc td{animation:colBr 7s linear infinite}
+#tabla tr.xc:is(.z-ucl,.z-uel,.z-uecl) td.pos,#tabla tr.xb:is(.z-ucl,.z-uel,.z-uecl) td.pos{animation:none}
+.rb1{animation:bdoSweep 5s ease-in-out infinite}
+.rc1{animation:colHue 7s linear infinite}
+.rc2{animation:colStar 3.6s linear infinite}
+:is(.rfx,.mpfx) .rf1{animation:flU 1.25s ease-in-out infinite alternate}
+:is(.rfx,.mpfx) .rf2{animation:flU2 .85s ease-in-out infinite alternate}
+:is(.rfx,.mpfx).c .rf1{animation:flU 1.25s ease-in-out infinite alternate,colHue 7s linear infinite}
+:is(.rfx,.mpfx).c .rf2{animation:flU2 .85s ease-in-out infinite alternate,colHue 7s linear infinite}
+}
+
+/* ===== Marcos de campeón europeo: Champions (violeta), Europa League (naranja) y Conference League (verde), con los colores de cada competición ===== */
+.e-ucl{--ec:#8f63e6;--ecl:#d9c8ff;--ecr:150,110,240;--ec2:88,120,255;--ecs:226,210,255;--ecd:rgba(18,12,32,.96);--ecg:rgba(150,110,240,.5);--ecT:6s}
+.e-uel{--ec:#f0a03c;--ecl:#ffd9a0;--ecr:240,150,40;--ec2:255,200,60;--ecs:255,226,170;--ecd:rgba(30,19,6,.96);--ecg:rgba(240,150,40,.5);--ecT:3.6s}
+.e-uecl{--ec:#3fc46a;--ecl:#b6f6cb;--ecr:60,200,100;--ec2:40,200,190;--ecs:190,250,210;--ecd:rgba(7,26,14,.96);--ecg:rgba(60,200,100,.5);--ecT:4.8s}
+:is(.e-ucl,.e-uel,.e-uecl) .bs{background:radial-gradient(circle,#fff 0 18%,var(--ecl) 19% 42%,rgba(var(--ecr),0) 72%)}
+@keyframes euGlow{0%,100%{box-shadow:inset 0 9px 9px -9px rgba(var(--ecr),.4),inset 0 -9px 9px -9px rgba(var(--ecr),.4),0 -8px 10px -8px rgba(var(--ecr),.45),0 8px 10px -8px rgba(var(--ecr),.45)}50%{box-shadow:inset 0 9px 9px -9px rgba(var(--ecs),.8),inset 0 -9px 9px -9px rgba(var(--ecs),.8),0 -8px 10px -8px rgba(var(--ecs),.85),0 8px 10px -8px rgba(var(--ecs),.85)}}
+@keyframes euGlowMy{0%,100%{box-shadow:0 0 12px rgba(var(--ecr),.5),0 0 26px rgba(var(--ecr),.22),inset 0 0 12px rgba(var(--ecr),.3)}50%{box-shadow:0 0 18px rgba(var(--ecs),.85),0 0 36px rgba(var(--ecr),.4),inset 0 0 18px rgba(var(--ecr),.5)}}
+@keyframes euGlowHero{0%,100%{box-shadow:0 0 14px rgba(var(--ecr),.55),0 0 34px rgba(var(--ecr),.28),inset 0 0 22px rgba(var(--ecr),.32)}50%{box-shadow:0 0 22px rgba(var(--ecs),.9),0 0 50px rgba(var(--ecr),.45),inset 0 0 32px rgba(var(--ecr),.5)}}
+@keyframes euBreathe{0%,100%{opacity:.5}50%{opacity:1}}
+/* fila de la clasificación */
+#tabla tr.xe{--xc:var(--ec);--xg:var(--ecg)}
+#tabla tr.xe,#tabla tr.xe.mine{background:none}
+.rfx.e{background:linear-gradient(180deg,rgba(var(--ecr),.28),rgba(var(--ecr),.1)),var(--ecd)}
+.re1,.re2{inset:0}
+.re1{background:linear-gradient(105deg,transparent 35%,rgba(var(--ecs),.5) 50%,transparent 65%);background-size:220% 100%;background-repeat:no-repeat;background-position:170% 0}
+.re2{background:radial-gradient(120% 140% at 50% 130%,rgba(var(--ecr),.4),transparent 60%),radial-gradient(90% 120% at 100% -20%,rgba(var(--ec2),.3),transparent 60%)}
+:is(.rfx,.mpfx).e .rf1,:is(.rfx,.mpfx).e .rf2{background:linear-gradient(0deg,var(--ec),var(--ecl))}
+/* barra fija "mi posición" */
+#myPos.euf{overflow:hidden;border-color:var(--ec);background:linear-gradient(180deg,rgba(var(--ecr),.28),rgba(var(--ecr),.1)),var(--ecd);box-shadow:0 0 12px rgba(var(--ecr),.5),0 0 26px rgba(var(--ecr),.22),inset 0 0 12px rgba(var(--ecr),.3)}
+#myPos.euf::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(var(--ecs),.4) 50%,transparent 65%);background-size:220% 100%;background-repeat:no-repeat;background-position:170% 0}
+/* recuadro del perfil */
+#historial .pf-hero.euf{overflow:hidden;border-color:var(--ec);background:radial-gradient(120% 80% at 50% 0%,rgba(var(--ecs),.3),transparent 62%),radial-gradient(120% 90% at 50% 100%,rgba(var(--ecr),.42),transparent 65%),radial-gradient(90% 70% at 100% 0%,rgba(var(--ec2),.22),transparent 60%),var(--ecd);box-shadow:0 0 14px rgba(var(--ecr),.55),0 0 34px rgba(var(--ecr),.28),inset 0 0 22px rgba(var(--ecr),.32)}
+#historial .pf-hero.euf.z-ucl::before,#historial .pf-hero.euf.z-uel::before,#historial .pf-hero.euf.z-uecl::before{opacity:.42}
+#historial .pf-hero.euf .pf-name{text-shadow:0 0 18px rgba(var(--ecr),.8),0 2px 0 rgba(0,0,0,.6)}
+#historial .pf-hero.euf .pf-crest{background:radial-gradient(circle,rgba(var(--ecr),.5),rgba(10,10,14,.94) 62%,rgba(10,10,14,.94))}
+#historial .pf-hero.euf .pf-crest::before{border-color:rgba(var(--ecs),.6);box-shadow:0 0 22px -4px rgba(var(--ecr),.8),inset 0 0 22px -8px rgba(var(--ecr),.6)}
+#historial .pf-hero.euf .pf-badges span:not(.fr):not(.gd){border-color:rgba(var(--ecr),.6);background:rgba(10,10,14,.92);box-shadow:inset 0 0 14px rgba(var(--ecr),.16),0 0 18px -6px rgba(var(--ecr),.7)}
+#historial .pf-hero.euf::after{display:none}
+#historial .pf-hero>.pf-eu{position:absolute;inset:0;overflow:hidden;border-radius:inherit;z-index:0;pointer-events:none}
+.pf-eu .bs{zoom:1.4}
+.pf-eu .hx{position:absolute;inset:0;opacity:.16;background-image:radial-gradient(rgba(var(--ecs),.95) 1px,transparent 1.5px);background-size:18px 18px}
+.pf-eu .sw{position:absolute;inset:0;background:linear-gradient(110deg,transparent 38%,rgba(var(--ecs),.5) 50%,transparent 62%);background-size:240% 100%;background-repeat:no-repeat;background-position:170% 0}
+/* pestaña de títulos: tarjeta y vista previa */
+.ti-r.mke.ok{border-color:rgba(var(--ecr),.55)}
+.ti-r.mke.on{border-color:var(--ec);box-shadow:0 0 14px -4px rgba(var(--ecr),.8)}
+.mk-pv.eu{border-color:var(--ec);background:linear-gradient(180deg,rgba(var(--ecr),.28),rgba(var(--ecr),.1)),var(--ecd);box-shadow:0 0 12px rgba(var(--ecr),.5),0 0 26px rgba(var(--ecr),.22),inset 0 0 12px rgba(var(--ecr),.3);animation:none}
+.mk-pv.eu::before{opacity:1;filter:none;animation:none;background:linear-gradient(105deg,transparent 35%,rgba(var(--ecs),.5) 50%,transparent 65%);background-size:220% 100%;background-repeat:no-repeat;background-position:170% 0}
+.mk-pv.eu::after{background:none;animation:none}
+.mk-pv.eu .mk-t{color:var(--ecl)}
+.mk-pv.eu .mk-u{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.75)}
+@media(prefers-reduced-motion:no-preference){
+#tabla tr.xe td{animation:euGlow var(--ecT) ease-in-out infinite}
+#tabla tr.xe:is(.z-ucl,.z-uel,.z-uecl) td.pos{animation:none}
+.re1,#myPos.euf::after,.pf-eu .sw,.mk-pv.eu::before{animation:bdoSweep var(--ecT) ease-in-out infinite}
+.re2{animation:euBreathe var(--ecT) ease-in-out infinite}
+#myPos.euf,.mk-pv.eu{animation:euGlowMy var(--ecT) ease-in-out infinite}
+#historial .pf-hero.euf{animation:euGlowHero var(--ecT) ease-in-out infinite}
+}
+#ligaToggle{margin-bottom:28px}
 </style>
 </head>
 <body>
@@ -2151,10 +2247,10 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
   <div id="premTop"></div>
   <button type="button" class="btn ghost" id="ligaToggle" aria-expanded="false" hidden></button>
   <h2>Super Predict League</h2>
-  <button type="button" class="btn" id="wrapTopBtn" style="width:100%;margin:0 0 14px" hidden>✨ Ver Wrapped</button>
   <div id="tablaNav"></div>
   <div class="card lgt" style="padding:6px 10px"><div class="lg-cup" aria-hidden="true"><canvas class="cup3d" data-cup="spl" data-z="7"></canvas></div><div id="tablaBox"></div></div>
   <div class="muted lgleg" style="margin:12px 0;line-height:1.6"><div>- <b>PG</b>: Puntos ganados en la jornada</div><div>- <b>PT</b>: Puntos totales</div></div>
+  <button type="button" class="btn" id="wrapTopBtn" style="width:100%;margin:0 0 14px" hidden>✨ Ver Wrapped</button>
   <button type="button" class="btn ghost" id="evolBtn" style="width:100%;margin:0 0 14px" aria-expanded="false" aria-controls="evolCard" hidden>Ver evolución de posiciones</button>
   <div class="card" id="evolCard" style="margin-bottom:18px" hidden><h3 style="text-align:center;color:var(--cyan)">Evolución de posiciones</h3><div id="evolBox"></div></div>
   <div id="euroTop"></div>
@@ -2490,7 +2586,7 @@ function recentAdd(ops) {
     else if (o.c === "players") {   // título equipado, compras, logros, escudo y lo que cambia el admin (pagado, trofeos)
       const k = "u|" + o.id;
       if (o.rm) { RECENT.delete(k); return; }
-      const st = {}; ["titulo", "marco", "comprados", "logros", "team", "paid", "trofeos", "premios", "bdo", "vis", "pen", "fav", "vot", "vctl"].forEach(f => { if (o.set && f in o.set) st[f] = o.set[f]; });
+      const st = {}; ["titulo", "marco", "comprados", "logros", "team", "paid", "trofeos", "premios", "bdo", "vis", "pen", "fav", "vot", "vctl", "albAt"].forEach(f => { if (o.set && f in o.set) st[f] = o.set[f]; });
       if (!Object.keys(st).length) return;
       const e = RECENT.get(k); RECENT.set(k, { o: { c: "players", id: o.id, set: { ...(e ? e.o.set : {}), ...st } }, t: now });
     }
@@ -2556,6 +2652,7 @@ function adopt(st, silent) {
       const st = o.set;
       if ("titulo" in st && (p.titulo || "") !== (st.titulo || "")) { p.titulo = st.titulo; healed = true; }
       if ("marco" in st && (p.marco || "") !== (st.marco || "")) { p.marco = st.marco; healed = true; }
+      if (st.albAt > 0 && !(p.albAt > 0)) { p.albAt = st.albAt; healed = true; }   // momento en que completó el álbum: solo se recupera, nunca se pisa
       if (st.team && p.team !== st.team && !S.players.some(x => x.id !== p.id && x.team === st.team)) { p.team = st.team; healed = true; }
       if ("paid" in st && !!p.paid !== !!st.paid) { p.paid = !!st.paid; healed = true; }
       if ("trofeos" in st && JSON.stringify(p.trofeos || []) !== JSON.stringify(st.trofeos || [])) { p.trofeos = clone(st.trofeos || []); healed = true; }
@@ -3041,7 +3138,7 @@ function renderPrem(over) {
   if (!bt._h) { bt._h = 1; bt.innerHTML = `<i class="pm-c">${cup("spl")}</i><span>Clasificación de la liga</span>`; }
   bt.onclick = () => { ligaOpen = !ligaOpen; renderPrem(true); };
   const D = premiosTemporada();
-  const h = D.length ? `<h2>Premios de la temporada</h2>${D.map((d, n) => { const q = pById(d.id) || {}; return `<div class="card prm${n === 0 ? " top" : ""}"><div class="pp-h">${crest(q.team)}<b>${esc(q.name || "")}</b>${n === 0 ? '<span class="pp-k">🏆</span>' : ""}</div><div class="pp-ls">${d.it.map(o => `<div class="pp-l"><i class="pm-c">${cup(o.k)}</i><span class="pp-n"><small>${esc(o.n)}</small><b>${esc(o.r)}</b></span><em>${eur(o.v)}</em></div>`).join("")}</div><div class="pp-t"><span>Total</span><strong>${eur(d.tot)}</strong></div></div>`; }).join("")}` : "";
+  const h = D.length ? `<h2>Premios de la temporada ${temporada()}</h2>${D.map((d, n) => { const q = pById(d.id) || {}; return `<div class="card prm${n === 0 ? " top" : ""}"><div class="pp-h">${crest(q.team)}<b>${esc(q.name || "")}</b></div><div class="pp-ls">${d.it.map(o => `<div class="pp-l"><i class="pm-c">${cup(o.k)}</i><span class="pp-n"><small>${esc(o.n)}</small><b>${esc(o.r)}</b></span><em>${eur(o.v)}</em></div>`).join("")}</div><div class="pp-t"><span>Total</span><strong>${eur(d.tot)}</strong></div></div>`; }).join("")}` : "";
   if (pt._h !== h) { pt._h = h; pt.innerHTML = h; }
 }
 function renderEuro() {
@@ -3074,13 +3171,13 @@ function renderEuroPlay() {
   box.innerHTML = duelCard(du) + mine.map(m => {
     const C = COMPS[m.comp], st = C.st.find(s => s.k === m.stage), open = closeAt(m) > now, cur = (S.preds[m.id] || {})[p.id];
     const rv = pById(m.pl.find(id => id !== p.id)), rp = (S.preds[m.id] || {})[rv.id];
-    const wait = open && !cur && m.pl[0] !== p.id && !rp;   // el 2º espera a que envíe el 1º
+    const wait = false;   // los dos finalistas pueden enviar a la vez, sin orden: ya hay desempates
     return `<div class="ecard ${C.z}">${ecT(C)}<div class="ec-s">${st.nom}</div>
       <div class="ec-vs"><span>${crest(p.team)}<b>${esc(p.name)}</b></span><i>VS</i><span><b>${esc(rv.name)}</b>${crest(rv.team)}</span></div>
       ${open ? `<div class="ec-cd">Se cerrará en: <b data-ecd="${closeAt(m)}">${fmtCd(closeAt(m) - now)}</b></div>` : '<div class="ec-cd off">Apuestas cerradas</div>'}
       <div class="mdate">${fmt(m.kickoff)}</div>
       ${scoreRow(m, cur ? cur.h : "", cur ? cur.a : "", "data-ph", "data-pa", cur || !open || wait ? "disabled" : "")}
-      ${wait ? `<p class="ec-w">⏳ Primero envía su predicción <b>${esc(rv.name)}</b>, el mejor clasificado. Podrás enviar el tuyo cuando lo haga.</p><button class="btn" style="width:100%" disabled>Esperando a tu rival</button>` : !cur && open ? `<button class="btn" data-esend="${m.id}" style="width:100%">Enviar predicción</button><p class="msg" data-emsg="${m.id}"></p><p class="muted" style="text-align:center">Una vez enviado no podrás cambiarlo.${rp ? " Tu rival ya ha enviado: no puedes repetir su marcador." : m.pl[0] === p.id ? " Tu rival no podrá repetir tu marcador." : ""}</p>` : `<button class="btn" style="width:100%" disabled>${cur ? "Predicción enviada ✓" : "Predicción cerrada"}</button>`}
+      ${wait ? `<p class="ec-w">⏳ Primero envía su predicción <b>${esc(rv.name)}</b>, el mejor clasificado. Podrás enviar el tuyo cuando lo haga.</p><button class="btn" style="width:100%" disabled>Esperando a tu rival</button>` : !cur && open ? `<button class="btn" data-esend="${m.id}" style="width:100%">Enviar predicción</button><p class="msg" data-emsg="${m.id}"></p><p class="muted" style="text-align:center">Una vez enviado no podrás cambiarlo.</p>` : `<button class="btn" style="width:100%" disabled>${cur ? "Predicción enviada ✓" : "Predicción cerrada"}</button>`}
       ${cur || !open ? `<div class="ec-r">Predicción de ${esc(rv.name)}: <b>${rp ? rp.h + " - " + rp.a : "–"}</b></div>` : ""}</div>`;
   }).join("");
   box.querySelectorAll("[data-gopen]").forEach(b => b.onclick = () => { const t = document.getElementById("penBox"); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); });
@@ -3097,11 +3194,7 @@ function renderEuroPlay() {
     const h = parseInt(box.querySelector(`[data-ph="${m.id}"]`).value), a = parseInt(box.querySelector(`[data-pa="${m.id}"]`).value);
     if (isNaN(h) || isNaN(a) || h < 0 || a < 0) return fail("Escribe los goles de los dos equipos.");
     if (isClosed(m)) return fail("El cierre de apuestas ya pasó.");
-    const riv = m.pl.find(id => id !== me), rpr = (S.preds[m.id] || {})[riv];
-    if (m.pl[0] !== me && !rpr) return fail("Todavía no puedes: primero envía su predicción tu rival, el mejor clasificado.");
-    if (rpr && rpr.h === h && rpr.a === a) return fail("Ese marcador ya lo ha elegido tu rival. Elige otro.");
-    if (!(await ask("Una vez enviada no podrás cambiar tu predicción. ¿Enviarla?", "Enviar"))) return;
-    const rp2 = (S.preds[m.id] || {})[riv]; if (rp2 && rp2.h === h && rp2.a === a) return fail("Ese marcador ya lo ha elegido tu rival. Elige otro.");   // por si lo envió mientras confirmabas
+        if (!(await ask("Una vez enviada no podrás cambiar tu predicción. ¿Enviarla?", "Enviar"))) return;
     const o = S.preds[m.id] = S.preds[m.id] || {}; if (!o[me]) o[me] = { h, a, t: Date.now() };
     save(); renderEuroPlay(); renderEuro(); renderSobres(); checkCoins(); renderLogros();
   });
@@ -4692,9 +4785,10 @@ function renderTabla() {
   const nav = rs.length ? `<div class="jhead"><div class="jn">${rs.length > 1 ? `<button class="jb" data-jd="-1" ${idx <= 0 ? "disabled" : ""} aria-label="Jornada anterior">‹</button>` : ""}<b>Jornada ${cur}</b>${rs.length > 1 ? `<button class="jb" data-jd="1" ${idx >= rs.length - 1 ? "disabled" : ""} aria-label="Jornada siguiente">›</button>` : ""}</div></div>` : "";
   $("#tablaNav").innerHTML = nav;
   $("#tablaBox").innerHTML = `<table><thead><tr><th class="n">Pos</th><th>Jugador</th><th class="n">PG</th><th class="n">PT</th><th class="arr"><button type="button" class="tdb" id="tdInfo" aria-label="Criterios de desempate" title="Criterios de desempate"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="7.3" r="1.5" fill="currentColor"/></svg></button></th></tr></thead><tbody>` +
-    t.map((p, i) => `<tr data-pid="${p.id}" class="${i < 4 ? "z-ucl" : i < 6 ? "z-uel" : i < 8 ? "z-uecl" : ""}${p.id === me ? " mine" : ""}${marcoOn(p) ? " rcol" : marcoBdo(p) ? " rbdo" : p.rc >= 3 ? " rfire" : ""}"><td class="pos">${i + 1}º</td><td><div class="pl">${p.team ? crest(p.team, false) : ""}<span class="plw"><span class="${p.id === me ? "me" : ""}">${esc(p.name)}</span>${ttlHtml(p, "tb")}</span></div>${marcoBdo(p) ? bdoSp(3) : ""}</td><td class="n ${p.pg > 0 ? "pg-up" : p.pg < 0 ? "pg-dn" : "pg-0"}">${p.pg > 0 ? "+" + p.pg : p.pg < 0 ? p.pg : "0"}</td><td class="n pt">${p.pt}${marcoBdo(p) ? bdoSp(2) : ""}</td><td class="arr">${mvIcon(p.mv)}</td></tr>`).join("") + "</tbody></table>";
+    t.map((p, i) => `<tr data-pid="${p.id}" class="${i < 4 ? "z-ucl" : i < 6 ? "z-uel" : i < 8 ? "z-uecl" : ""}${p.id === me ? " mine" : ""}${rowFxCls(p)}"><td class="pos">${i + 1}º</td><td><div class="pl">${p.team ? crest(p.team, false) : ""}<span class="plw"><span class="${p.id === me ? "me" : ""}">${esc(p.name)}</span>${ttlHtml(p, "tb")}</span></div>${rowFx(p)}</td><td class="n ${p.pg > 0 ? "pg-up" : p.pg < 0 ? "pg-dn" : "pg-0"}">${p.pg > 0 ? "+" + p.pg : p.pg < 0 ? p.pg : "0"}</td><td class="n pt">${p.pt}</td><td class="arr">${mvIcon(p.mv)}</td></tr>`).join("") + "</tbody></table>";
   $("#tablaNav").querySelectorAll("[data-jd]").forEach(b => b.onclick = () => { const n = rs[idx + +b.dataset.jd]; if (n == null) return; tv = n === last ? null : n; renderTabla(); });
   fitTitulos($("#tablaBox"));
+  rowFxMeasure();
   setupMyPos(t);
 }
 
@@ -4736,10 +4830,10 @@ function setupMyPos(t) {
   if (myOff) { myOff(); myOff = null; }
   const i = t.findIndex(x => x.id === me), row = $("#tablaBox").querySelector("tr.mine");
   const over = calcRounds().includes(CONFIG.jornadas);   // liga terminada: la barra fija "mi posición" se desactiva
-  if (over || i < 0 || !row) { box.hidden = true; box.classList.remove("fire", "colf", "bdof"); sec.classList.remove("hasMy"); return; }
+  if (over || i < 0 || !row) { box.hidden = true; box.classList.remove("fire", "colf", "bdof", "euf", ...EU_MARCOS.map(k => "e-" + k)); sec.classList.remove("hasMy"); return; }
   const p = t[i];
-  const mb = marcoBdo(p); box.classList.toggle("colf", marcoOn(p)); box.classList.toggle("bdof", mb); box.classList.toggle("fire", p.rc >= 3 && !marcoOn(p) && !mb);   // racha: la barra se llena de llamas
-  box.innerHTML = `<span class="mp-pos mp-c">${i + 1}º</span><div class="mp-pl">${p.team ? crest(p.team, false) : ""}<span class="mp-name">${esc(p.name)}</span></div><span class="mp-pg mp-c ${p.pg > 0 ? "pg-up" : p.pg < 0 ? "pg-dn" : "pg-0"}">${p.pg > 0 ? "+" + p.pg : p.pg < 0 ? p.pg : "0"}</span><span class="mp-pt mp-c">${p.pt}</span><span class="mp-mv mp-c">${mvIcon(p.mv)}</span>${mb ? bdoSp(4) : ""}`;
+  const mb = marcoBdo(p), eu = marcoEu(p); box.classList.toggle("colf", marcoOn(p)); box.classList.toggle("bdof", mb); box.classList.toggle("euf", !!eu); EU_MARCOS.forEach(k => box.classList.toggle("e-" + k, eu === k)); box.classList.toggle("fire", p.rc >= 3 && !marcoOn(p) && !mb && !eu);   // racha: la barra se llena de llamas
+  box.innerHTML = mpFx(p) + `<span class="mp-pos mp-c">${i + 1}º</span><div class="mp-pl">${p.team ? crest(p.team, false) : ""}<span class="mp-name">${esc(p.name)}</span></div><span class="mp-pg mp-c ${p.pg > 0 ? "pg-up" : p.pg < 0 ? "pg-dn" : "pg-0"}">${p.pg > 0 ? "+" + p.pg : p.pg < 0 ? p.pg : "0"}</span><span class="mp-pt mp-c">${p.pt}</span><span class="mp-mv mp-c">${mvIcon(p.mv)}</span>${mb || eu ? bdoSp(4) : ""}`;
   sec.classList.add("hasMy");
   box.onclick = () => row.scrollIntoView({ behavior: "smooth", block: "center" });
   const nav = $("#mainNav"), ub = $("#userBar");
@@ -5549,10 +5643,10 @@ function renderHistorial() {
   const vis = m => !other || m.result || isClosed(m);
   const rounds = [...new Set(leagueMs().filter(vis).map(m => m.round))].sort((a, b) => a - b);
   const tt = standings(), ix = tt.findIndex(p => p.id === pid);
-  const colOn = marcoOn(who), bdoOn = marcoBdo(who), fireOn = ix >= 0 && tt[ix].rc >= 3 && !colOn && !bdoOn;   // en racha: el recuadro del perfil lleva llamas
+  const colOn = marcoOn(who), bdoOn = marcoBdo(who), euK = marcoEu(who), fireOn = ix >= 0 && tt[ix].rc >= 3;   // en racha: el recuadro del perfil lleva llamas
   const rk = rachaRec(who);   // mayor racha conseguida (no baja nunca; para la cabecera)
   const head = (other ? `<div class="pf-top"><button class="pf-back" id="pfBack" aria-label="Volver">‹ Volver</button>${penRetoBtn(other)}</div>` : "") + `
-    <div class="pf-hero${ix < 0 ? "" : ix < 4 ? " z-ucl" : ix < 6 ? " z-uel" : ix < 8 ? " z-uecl" : ""}${fireOn ? " fire" : ""}${colOn ? " colf" : ""}${bdoOn ? " bdof" : ""}">${fireOn ? '<span class="pf-fire" aria-hidden="true"><i class="u"></i></span>' : ""}${colOn ? '<span class="pf-col" aria-hidden="true"><i class="w"></i><i class="s s1"></i><i class="s s2"></i><i class="s s3"></i><i class="s s4"></i><i class="s s5"></i></span>' : ""}${bdoOn ? `<span class="pf-bdo" aria-hidden="true"><i class="hx"></i><i class="sw"></i>${bdoSi(14)}</span>` : ""}<div class="pf-crest">${crest(who.team)}</div><div class="pf-name" role="heading" aria-level="2">${esc(who.name)}</div>${ttlHtml(who, "ptl")}
+    <div class="pf-hero${ix < 0 ? "" : ix < 4 ? " z-ucl" : ix < 6 ? " z-uel" : ix < 8 ? " z-uecl" : ""}${fireOn ? " fire" : ""}${colOn ? " colf" : ""}${bdoOn ? " bdof" : ""}${euK ? " euf e-" + euK : ""}">${fireOn ? '<span class="pf-fire" aria-hidden="true"><i class="u"></i></span>' : ""}${colOn ? '<span class="pf-col" aria-hidden="true"><i class="w"></i><i class="s s1"></i><i class="s s2"></i><i class="s s3"></i><i class="s s4"></i><i class="s s5"></i></span>' : ""}${bdoOn ? `<span class="pf-bdo" aria-hidden="true"><i class="hx"></i><i class="sw"></i>${bdoSi(14)}</span>` : ""}${euK ? `<span class="pf-eu" aria-hidden="true"><i class="hx"></i><i class="sw"></i>${bdoSi(14)}</span>` : ""}<div class="pf-crest">${crest(who.team)}</div><div class="pf-name" role="heading" aria-level="2">${esc(who.name)}</div>${ttlHtml(who, "ptl")}
     <div class="pf-badges"><span class="gd">${ix >= 0 ? ix + 1 + "º" : "—"}</span><span>${ix >= 0 ? tt[ix].pt : 0}<small>PT</small></span><span class="fr" title="Mayor racha" aria-label="Mayor racha: ${rk}">${rk}<i aria-hidden="true">🔥</i></span></div></div>` + (other ? `
     <p class="pf-sec">Sus predicciones</p>` : `
     <h2>Historial</h2>`);
@@ -6663,7 +6757,7 @@ async function abrirSobre() {
   if (!libre && coinsDe(me0) < PACK_PRECIO) return;
   const c = sortearCromo(me0); if (!c) return;   // colección completa
   abriendo = true;
-  me0.cromos = [...(me0.cromos || []), c.n]; me0.sobres = (me0.sobres || 0) + 1; if (libre) me0.sg = (me0.sg || 0) + 1; ledgerAdd(me0, c.n); mergeGastos(); save();   // se guarda ya: cerrar la pestaña no pierde el cromo
+  me0.cromos = [...(me0.cromos || []), c.n]; me0.sobres = (me0.sobres || 0) + 1; if (libre) me0.sg = (me0.sg || 0) + 1; ledgerAdd(me0, c.n); mergeGastos(); if (!faltan(me0).length && !(me0.albAt > 0)) me0.albAt = srvNow(); save();   // albAt: instante (reloj del servidor) en que completa el álbum; decide quién es el primero   // se guarda ya: cerrar la pestaña no pierde el cromo
   const R = RAREZA[c.k];
   const reduce = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
   const o = document.createElement("div");
@@ -7621,10 +7715,21 @@ function copaTitulos(p) {   // títulos de trofeo de un jugador, de la temporada
   });
   return out;
 }
-const marcoOn = p => !!p && p.marco === "col" && (p.logros || []).includes("l22");   // Marco Coleccionista equipado (solo si tiene el logro)
+// Marco Coleccionista EXCLUSIVO: solo lo lleva el primero en completar el álbum (p.albAt = instante en que lo completó; gana el más antiguo)
+const albDueno = () => S.players.reduce((w, p) => (p.albAt > 0 && (!w || p.albAt < w.albAt || (p.albAt === w.albAt && String(p.id) < String(w.id)))) ? p : w, null);
+const marcoOn = p => !!p && p.marco === "col" && (p.logros || []).includes("l22") && (albDueno() || {}).id === p.id;   // equipado y además ser el primero en completar el álbum
+const EU_MARCOS = ["ucl", "uel", "uecl"];
+const marcoEu = p => { const k = p && p.marco; return EU_MARCOS.includes(k) && trofeosDe(p).includes(k) ? k : ""; };   // Marco Champions / Europa League / Conference equipado (solo con esa copa en la vitrina)
 const marcoBdo = p => !!p && p.marco === "bdo" && trofeosDe(p).includes("bdo");   // Marco Balón de Oro equipado (solo si tiene un Balón de Oro en la vitrina)
 // Destellos dorados del Marco Balón de Oro: posición, tamaño y ritmo al azar; al terminar cada destello (ya invisible) salta a otro sitio
 const bdoSi = n => { let h = ""; for (let i = 0; i < n; i++) { const sz = 6 + Math.random() * 7; h += `<i class="bs" style="left:${(4 + Math.random() * 90).toFixed(1)}%;top:${(8 + Math.random() * 78).toFixed(1)}%;width:${sz.toFixed(1)}px;height:${sz.toFixed(1)}px;animation-duration:${(1.8 + Math.random() * 2.6).toFixed(2)}s;animation-delay:${(-Math.random() * 5).toFixed(2)}s"></i>`; } return h; };
+// Marcos animados de la fila (racha, Coleccionista, Balón de Oro): UNA sola capa grande que cubre toda la fila (sin la celda de la posición si lleva competición europea)
+const rowFxCls = p => { const c = marcoOn(p), e = !c && marcoEu(p), b = !c && !e && marcoBdo(p), f = p.rc >= 3; return (c || e || b || f) ? " rx" + (c ? " xc" : e ? " xe e-" + e : b ? " xb" : "") + (f ? " xf" : "") : ""; };
+const rowFx = p => { const c = marcoOn(p), e = !c && marcoEu(p), b = !c && !e && marcoBdo(p), f = p.rc >= 3; if (!c && !b && !e && !f) return ""; const k = (c ? " c" : "") + (b ? " b" : "") + (e ? " e e-" + e : "") + (f ? " f" : "");
+  return `<span class="rfx${k}" aria-hidden="true">${f ? '<i class="rf1"></i><i class="rf2"></i>' : ""}${c ? '<i class="rc1"></i><i class="rc2"></i>' : ""}${b ? '<i class="rb1"></i>' : ""}${e ? '<i class="re2"></i><i class="re1"></i>' : ""}</span>${b || e ? `<span class="rfs" aria-hidden="true">${bdoSi(8)}</span>` : ""}`; };
+const rowFxMeasure = () => { const tb = document.querySelector("#tablaBox table"); if (!tb) return; const tr = tb.querySelector("tbody tr"), pc = tr && tr.querySelector("td.pos"); if (!tr || !pc) return; tb.style.setProperty("--rw", tr.offsetWidth + "px"); tb.style.setProperty("--pw", pc.offsetWidth + "px"); };
+window.addEventListener("resize", rowFxMeasure);
+const mpFx = p => (p.rc >= 3 && (marcoOn(p) || marcoEu(p) || marcoBdo(p))) ? `<span class="mpfx ${marcoOn(p) ? "c" : marcoEu(p) ? "e e-" + marcoEu(p) : "b"} f" aria-hidden="true"><i class="rf1"></i><i class="rf2"></i></span>` : "";
 const bdoSp = n => `<span class="bsw" aria-hidden="true">${bdoSi(n)}</span>`;
 document.addEventListener("animationiteration", e => { const el = e.target; if (el && el.classList && el.classList.contains("bs")) { el.style.left = (4 + Math.random() * 90).toFixed(1) + "%"; el.style.top = (8 + Math.random() * 78).toFixed(1) + "%"; } }, true);
 const ttlFind = id => TITULOS.find(x => x.id === id) || TIENDA.find(x => x.id === id) || ((m) => m ? ttlCopa(m[1], +m[2] || 1) : null)(/^tr-([a-z]+)(?:-(\d+))?$/.exec(id || ""));
@@ -7720,8 +7825,9 @@ function renderLogros() {
   const copT = copaTitulos(p), copIds = copT.map(t => t.id);   // títulos de trofeo que tiene
   const had0 = new Set([...have, ...copIds]);
   if (real && synced) {   // los logros desbloqueados se guardan para siempre en el jugador (solo tras leer el servidor, para no recrear fichas borradas)
+    if (s.alb >= CROMOS.length && !(p.albAt > 0)) { p.albAt = srvNow(); save(); }   // por si completó el álbum antes de existir el sello
     const nu = TITULOS.filter(t => !have.has(t.id) && s[t.k] >= t.v);
-    if (nu.length) { nu.forEach(t => have.add(t.id)); p.logros = [...have]; save(); toastLater("¡Título desbloqueado: " + nu[0].n + "!" + (nu.length > 1 ? " (+" + (nu.length - 1) + ")" : "")); if (nu.some(t => t.id === "l22")) toastLater("¡Marco Coleccionista desbloqueado! Equípalo en tus títulos"); }
+    if (nu.length) { nu.forEach(t => have.add(t.id)); p.logros = [...have]; save(); toastLater("¡Título desbloqueado: " + nu[0].n + "!" + (nu.length > 1 ? " (+" + (nu.length - 1) + ")" : "")); if (nu.some(t => t.id === "l22")) toastLater((albDueno() || {}).id === p.id ? "¡Marco Coleccionista desbloqueado! Equípalo en tus títulos" : "¡Álbum completo! El Marco Coleccionista es solo para quien lo completó primero"); }
   }
   let nuevos = new Set();   // logros conseguidos que el jugador aún no ha visto (puntito rojo)
   if (real && synced) {
@@ -7734,10 +7840,13 @@ function renderLogros() {
   const own = new Set((p.comprados || []).filter(id => TIENDA.some(t => t.id === id)));
   const lst = [...TITULOS.filter(t => have.has(t.id)), ...TIENDA.filter(t => own.has(t.id)), ...copT, ...TITULOS.filter(t => !have.has(t.id))]
     .sort((a, b) => ((b.id === p.titulo) * 2 + nuevos.has(b.id)) - ((a.id === p.titulo) * 2 + nuevos.has(a.id)));   // el equipado, arriba del todo
-  const hasM = have.has("l22"), onM = hasM && p.marco === "col";
+  const dueno = albDueno(), hasM = have.has("l22") && !!dueno && dueno.id === p.id, onM = hasM && p.marco === "col";
   const hasB = trofeosDe(p).includes("bdo"), onB = hasB && p.marco === "bdo";
   const bdoRow = `<div class="ti-r mk mkb${hasB ? " ok" : ""}${onB ? " on" : ""}"><div class="ti-i"><em class="ti-k">Marco animado</em><b>Marco Balón de Oro</b><span>${hasB ? "Dorado con destellos aleatorios en tu fila de la clasificación y en tu perfil" : "Solo lo consiguen quienes ganan un Balón de Oro"}</span></div>${hasB ? `<button type="button" class="ti-b" data-mk="bdo">${onB ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}<div class="mk-pv bdo" role="img" aria-label="Vista previa de la animación del Marco Balón de Oro"><span class="mk-n">1º</span>${p.team ? crest(p.team, false) : ""}<span class="mk-u">${esc(p.name)}</span><span class="mk-t">Vista previa</span>${bdoSp(4)}</div></div>`;
-  const marcoHtml = `<div class="ti-g"><div class="ti-r mk${hasM ? " ok" : ""}${onM ? " on" : ""}"><div class="ti-i"><em class="ti-k">Marco animado</em><b>Marco Coleccionista</b><span>${hasM ? "Estrellas fugaces y brillo cromático en tu fila de la clasificación y en tu perfil" : "Se desbloquea con el logro «El Coleccionista»"}</span></div>${hasM ? `<button type="button" class="ti-b" data-mk="col">${onM ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}<div class="mk-pv" role="img" aria-label="Vista previa de la animación del Marco Coleccionista"><span class="mk-n">1º</span>${p.team ? crest(p.team, false) : ""}<span class="mk-u">${esc(p.name)}</span><span class="mk-t">Vista previa</span></div></div>${bdoRow}</div>`;
+  const EUM = [["ucl", "Champions League", "Violeta con barrido de luz y destellos plateados"], ["uel", "Europa League", "Naranja y ámbar con barrido de luz y destellos cálidos"], ["uecl", "Conference League", "Verde y turquesa con barrido de luz y destellos"]];
+  const euRow = ([k, nom, d]) => { const has = trofeosDe(p).includes(k), on = has && p.marco === k;
+    return `<div class="ti-r mk mke e-${k}${has ? " ok" : ""}${on ? " on" : ""}"><div class="ti-i"><em class="ti-k">Marco animado</em><b>Marco ${nom}</b><span>${has ? d + " en tu fila de la clasificación y en tu perfil" : "Solo lo consiguen quienes ganan la " + nom}</span></div>${has ? `<button type="button" class="ti-b" data-mk="${k}">${on ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}<div class="mk-pv eu" role="img" aria-label="Vista previa de la animación del Marco ${nom}"><span class="mk-n">1º</span>${p.team ? crest(p.team, false) : ""}<span class="mk-u">${esc(p.name)}</span><span class="mk-t">Vista previa</span>${bdoSp(4)}</div></div>`; };
+  const marcoHtml = `<div class="ti-g"><div class="ti-r mk${hasM ? " ok" : ""}${onM ? " on" : ""}"><div class="ti-i"><em class="ti-k">Marco animado</em><b>Marco Coleccionista</b><span>${hasM ? "Estrellas fugaces y brillo cromático en tu fila de la clasificación y en tu perfil · Eres el primero en completar el álbum" : dueno ? "Exclusivo del primero en completar el álbum: ya es de " + esc(dueno.name) : "Exclusivo del primero en completar el álbum de cromos. Aún nadie lo ha conseguido"}</span></div>${hasM ? `<button type="button" class="ti-b" data-mk="col">${onM ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}<div class="mk-pv" role="img" aria-label="Vista previa de la animación del Marco Coleccionista"><span class="mk-n">1º</span>${p.team ? crest(p.team, false) : ""}<span class="mk-u">${esc(p.name)}</span><span class="mk-t">Vista previa</span></div></div>${bdoRow}${EUM.map(euRow).join("")}</div>`;
   box.innerHTML = `<h2 style="margin-top:26px">Títulos de personalización</h2>
     <p class="muted" style="text-align:center;margin:-4px 8px 12px">Equipa uno para que salga bajo tu nombre.<br>Logros: ${have.size}/${TITULOS.length} · Comprados: ${own.size}</p>
     <div class="ti-g">${(titulosAbiertos ? lst : lst.slice(0, 5)).map(t => {
@@ -7760,8 +7869,9 @@ function renderLogros() {
     }
   }
   box.querySelectorAll("[data-mk]").forEach(b => b.onclick = () => {
-    const k = b.dataset.mk;
-    if (!real || !synced || !(k === "bdo" ? trofeosDe(meP()).includes("bdo") : have.has("l22"))) return;
+    const k = b.dataset.mk, q0 = meP();
+    if (!real || !synced || !q0) return;
+    if (k === "col" ? !(have.has("l22") && (albDueno() || {}).id === q0.id) : !(["bdo", ...EU_MARCOS].includes(k) && trofeosDe(q0).includes(k))) return;   // Coleccionista: solo el primero en completar el álbum; los demás: hay que tener esa copa en la vitrina
     const q = meP(); if (!q || !S.players.includes(q)) return;
     q.marco = q.marco === k ? "" : k; save(); render();
   });
