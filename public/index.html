@@ -334,7 +334,7 @@ html,body{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%}   /* sin zoom 
 .en.ad{cursor:pointer}.en.ad.sel{box-shadow:0 0 0 2px var(--cyan)}
 .en-add{margin-top:8px;text-align:center;font:700 12px var(--b);color:var(--cyan)}
 .badge.ecp{border:0;cursor:pointer;opacity:.6;font:inherit}.badge.ecp.on{opacity:1;outline:2px solid var(--cyan);outline-offset:1px}
-#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translate3d(-50%,16px,0) scale(.94);opacity:0;visibility:hidden;will-change:opacity,transform;transition:opacity .28s ease,transform .32s cubic-bezier(.2,.9,.3,1.15),visibility 0s linear .32s;z-index:99;max-width:min(90%,420px);padding:12px 20px;border-radius:16px;text-align:center;font-size:14px;font-weight:600;letter-spacing:.01em;line-height:1.35;color:#eafcff;text-shadow:0 0 8px rgba(0,200,240,.6);pointer-events:none;background:linear-gradient(180deg,rgba(14,34,46,.97),rgba(7,17,25,.98));border:1px solid rgba(90,209,242,.8);box-shadow:0 0 0 1px rgba(0,180,216,.14),0 0 14px rgba(0,180,216,.55),0 0 34px rgba(0,180,216,.25),0 10px 26px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08)}
+#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px) - var(--pin,0px));transform:translate3d(-50%,16px,0) scale(.94);opacity:0;visibility:hidden;will-change:opacity,transform;transition:opacity .28s ease,transform .32s cubic-bezier(.2,.9,.3,1.15),visibility 0s linear .32s;z-index:99;max-width:min(90%,420px);padding:12px 20px;border-radius:16px;text-align:center;font-size:14px;font-weight:600;letter-spacing:.01em;line-height:1.35;color:#eafcff;text-shadow:0 0 8px rgba(0,200,240,.6);pointer-events:none;background:linear-gradient(180deg,rgba(14,34,46,.97),rgba(7,17,25,.98));border:1px solid rgba(90,209,242,.8);box-shadow:0 0 0 1px rgba(0,180,216,.14),0 0 14px rgba(0,180,216,.55),0 0 34px rgba(0,180,216,.25),0 10px 26px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08)}
 #toast.on{opacity:1;visibility:visible;transform:translate3d(-50%,0,0) scale(1);transition:opacity .28s ease,transform .32s cubic-bezier(.2,.9,.3,1.15),visibility 0s}
 @media(prefers-reduced-motion:reduce){#toast,#toast.on{transition:none}}
 .note{margin:0 0 14px;padding:10px 12px;border-radius:10px;border-left:4px solid var(--cyan);background:rgba(0,180,216,.09);font-size:13px;color:var(--text)}
@@ -968,6 +968,7 @@ td .crest{width:30px;height:30px}
 #historial .pf-badges .fr{border-color:rgba(255,140,30,.6);color:#ffb347;box-shadow:inset 0 0 14px rgba(255,140,30,.1),0 0 18px -6px rgba(255,140,30,.7)}
 #historial .pf-badges .fr i{font-style:normal;font-size:18px;filter:drop-shadow(0 0 8px rgba(255,140,30,.8))}
 /* Títulos de sección del usuario: mismo estilo que "Sus predicciones" */
+#euroPlay:not(:empty)+h2{margin-top:44px}   /* con tarjeta europea arriba, el título de Inicio ("Partido de la semana" / "Jornadas anteriores") queda separado de ella */
 #jugar>h2,#tabla>h2,#premTop>h2,#euroTop>h2,#euroBox>h2,#historial>h2,#historial #historialBox>h2,#historial #logrosBox>h2,#evolCard h3{
   font:700 17px/1.3 var(--b)!important;letter-spacing:.12em!important;text-transform:uppercase;text-align:center;
   color:var(--mute)!important;-webkit-text-fill-color:currentColor!important;background:none!important;
@@ -1050,7 +1051,11 @@ td .crest{width:30px;height:30px}
 #bdoBox .bd-k i{font-style:normal;font-size:16px;line-height:1}
 #bdoBox .bd-k b{font:700 21px/1.1 var(--b);color:var(--c);font-variant-numeric:tabular-nums}
 #bdoBox .bd-k small{font:600 9.5px/1.15 var(--b);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);text-align:center}
-#bdoBox .bd-ft{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+#bdoBox .bd-ft{display:flex;align-items:center;justify-content:flex-start;gap:8px;flex-wrap:wrap}
+#bdoBox .bd-eu.ch{background:rgba(255,196,60,.14);border-color:rgba(255,206,90,.6);color:#ffd866}
+#bdoBox .bd-top .vt-t{min-width:0;flex:0 1 auto}
+#bdoBox .bd-top .bd-trs{margin:-4px -2px 0 auto;gap:6px;flex-wrap:nowrap;align-self:flex-start;flex:none}
+#bdoBox .bd-top .bd-t{width:50px}
 #bdoBox .bd-eu{font:600 12.5px/1.2 var(--b);padding:6px 11px;border-radius:99px;background:rgba(0,180,216,.14);border:1px solid rgba(0,180,216,.4);color:var(--cyan)}
 #bdoBox .bd-ft .bd-trs{margin-top:0}
 #bdoBox .bd-cd{display:flex;flex-direction:column;align-items:center;gap:2px;margin:0 0 14px;padding:10px 12px;border-radius:14px;background:linear-gradient(rgba(233,185,60,.18),rgba(233,185,60,.06));border:1px solid rgba(233,185,60,.5)}
@@ -2028,6 +2033,7 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 @keyframes ecr{50%{opacity:.35}}
 .eu-sep{height:3px;margin:24px 8px;border-radius:3px;background:linear-gradient(90deg,transparent,var(--cyan),#9af2ff,var(--cyan),transparent) 0 0/200% 100%;box-shadow:0 0 12px #00b4d8aa;animation:ecsep 5s linear infinite}
 @keyframes ecsep{to{background-position:-200% 0}}
+#euroPlay .ecard .tdb.tdi{right:60px}   /* a su derecha va el chat y a su izquierda la forma: el botón de info se hace sitio */
 .ecard .tdb.tdi{position:absolute;top:12px;right:12px;margin:0;z-index:3;color:#fff;filter:drop-shadow(0 1px 4px #000)}
 @media (prefers-reduced-motion:reduce){.ecard,.ecard::after,.en::after,.en-p.win,.ecr,.eu-sep{animation:none}}
 /* Marco Coleccionista sin bordes: solo brillo interior */
@@ -3494,7 +3500,7 @@ function renderEuroPlay() {
     const C = COMPS[m.comp], st = C.st.find(s => s.k === m.stage), open = closeAt(m) > now, cur = (S.preds[m.id] || {})[p.id];
     const rv = pById(m.pl.find(id => id !== p.id)), rp = (S.preds[m.id] || {})[rv.id];
     const wait = false;   // los dos finalistas pueden enviar a la vez, sin orden: ya hay desempates
-    return `<div class="ecard ${C.z}">${ecT(C)}<div class="ec-s">${st.nom}</div>
+    return `<div class="ecard ${C.z}">${chatBtn(m)}${formaBtn(m)}${ecT(C)}<div class="ec-s">${st.nom}</div>
       <div class="ec-vs"><span>${crest(p.team)}<b>${esc(p.name)}</b></span><i>VS</i><span><b>${esc(rv.name)}</b>${crest(rv.team)}</span></div>
       ${open ? `<div class="ec-cd">Se cerrará en: <b data-ecd="${closeAt(m)}">${fmtCd(closeAt(m) - now)}</b></div>` : '<div class="ec-cd off">Apuestas cerradas</div>'}
       <div class="mdate">${fmt(m.kickoff)}</div>
@@ -4949,6 +4955,7 @@ function openForma(mid) {
   cargar();
 }
 
+const chLabel = m => m.comp && COMPS[m.comp] ? COMPS[m.comp].nombre + ((COMPS[m.comp].st.find(x => x.k === m.stage) || {}).nom ? " · " + COMPS[m.comp].st.find(x => x.k === m.stage).nom : "") : "Jornada " + m.round;   // los partidos europeos no tienen jornada: se muestra la competición y la fase
 function chatBtn(m) {
   const n = chUnread(m);
   return `<button type="button" class="chb" data-chat="${m.id}" aria-label="Chat del partido${n ? " (" + n + " sin leer)" : ""}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.5-4.6A8 8 0 1 1 21 12Z"/></svg>${n ? `<i>${n > 99 ? "99+" : n}</i>` : ""}</button>`;
@@ -4956,7 +4963,7 @@ function chatBtn(m) {
 document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("[data-chat]"); if (b) { e.preventDefault(); openChat(b.dataset.chat); } });
 function chatClose() {
   if (!chEl) return; clearInterval(chTimer); chTimer = 0; document.body.style.overflow = ""; document.removeEventListener("keydown", chKey); chEl.remove(); chEl = null;
-  try { renderJugar(); } catch (e) {}   // actualiza el globo de mensajes sin leer
+  try { renderJugar(); renderEuroPlay(); } catch (e) {}   // actualiza el globo de mensajes sin leer
 }
 function chKey(ev) { if (ev.key === "Escape") chatClose(); }
 function chatUpdate() {
@@ -4978,8 +4985,8 @@ function openChat(mid) {
   if (chEl || !meP()) return;
   const m = S.matches.find(x => x.id === mid); if (!m || m.result) return;
   const ov = document.createElement("div"); ov.className = "ch-ov"; ov.dataset.mid = mid; chEl = ov;
-  ov.innerHTML = `<div class="ch-md" role="dialog" aria-modal="true" aria-label="Chat del partido, jornada ${m.round}"><button class="pm-x" type="button" aria-label="Cerrar">✕</button>
-    <div class="ch-top"><h3>Chat del partido</h3><small>${esc(m.home)} vs ${esc(m.away)} · Jornada ${m.round}</small></div>
+  ov.innerHTML = `<div class="ch-md" role="dialog" aria-modal="true" aria-label="Chat del partido, ${esc(chLabel(m))}"><button class="pm-x" type="button" aria-label="Cerrar">✕</button>
+    <div class="ch-top"><h3>Chat del partido</h3><small>${esc(m.home)} vs ${esc(m.away)} · ${esc(chLabel(m))}</small></div>
     <div class="ch-l" aria-live="polite"></div>
     <div class="ch-f"><input type="text" maxlength="${CH_LEN}" placeholder="Escribe un mensaje…" autocomplete="off" enterkeyhint="send" aria-label="Mensaje"><button type="button" aria-label="Enviar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/></svg></button></div></div>`;
   document.body.appendChild(ov); document.body.style.overflow = "hidden"; document.addEventListener("keydown", chKey);
@@ -5464,7 +5471,8 @@ function setupMyPos(t) {
     const vh = window.innerHeight || document.documentElement.clientHeight;
     const nb = nav.getBoundingClientRect(), navTop = nb.height ? nb.top : vh;
     const ubb = ub.getBoundingClientRect(), topLim = ubb.height ? Math.max(ubb.bottom, 0) : 0;
-    box.style.bottom = Math.max(0, vh - navTop) + 10 + "px";
+    if (nb.height && navTop > vh + 2) { box.style.bottom = "auto"; box.style.top = (navTop - 64 - 10) + "px"; }   // viewport encogido: la barra va pegada encima de la pestañas
+    else { box.style.top = ""; box.style.bottom = Math.max(0, vh - navTop) + 10 + "px"; }
     if (!sec.classList.contains("on")) { box.hidden = true; return; }
     // alinea las columnas de la barra con las de la tabla (Pos, Jugador, PG, PT, flecha)
     const vw = document.documentElement.clientWidth || window.innerWidth, bw = Math.min(vw - 24, 696) - 4, bl = (vw - bw) / 2;   // -4: borde de 2px de la barra
@@ -5494,13 +5502,19 @@ function setupMyPos(t) {
 (function pinNav() {
   const nav = document.getElementById("mainNav"); if (!nav) return;
   let raf = 0;
-  const reset = () => { nav.style.top = ""; nav.style.bottom = ""; };
+  const root = document.documentElement;
+  const reset = () => { nav.style.top = ""; nav.style.bottom = ""; root.style.removeProperty("--pin"); };
+  const isField = el => !!el && (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) || el.isContentEditable);
   const fix = () => {
     raf = 0;
     const vv = window.visualViewport, ae = document.activeElement;
-    if (!vv || vv.scale > 1.01 || !nav.offsetHeight || (ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName))) { reset(); return; }
-    const gap = Math.round(document.documentElement.clientHeight - (vv.offsetTop + vv.height));
-    if (Math.abs(gap) > 2) { nav.style.bottom = "auto"; nav.style.top = (vv.offsetTop + vv.height - nav.offsetHeight) + "px"; }
+    if (!vv || vv.scale > 1.01 || !nav.offsetHeight || isField(ae)) { reset(); return; }
+    let bottom = vv.offsetTop + vv.height;
+    // Al volver de otra app, iOS a veces deja el viewport "encogido" (la app se ve a pantalla completa pero la maquetación cree que la pantalla mide menos): en la app instalada se usa la altura real de la pantalla
+    const stand = navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+    if (stand && screen.width < screen.height && window.innerWidth < window.innerHeight + 1 && screen.height - bottom > 150) bottom = screen.height;
+    const gap = Math.round(document.documentElement.clientHeight - bottom);
+    if (Math.abs(gap) > 2) { nav.style.bottom = "auto"; nav.style.top = (bottom - nav.offsetHeight) + "px"; root.style.setProperty("--pin", Math.max(0, -gap) + "px"); }
     else reset();
   };
   const go = () => { if (!raf) raf = requestAnimationFrame(fix); };
@@ -5508,6 +5522,18 @@ function setupMyPos(t) {
   window.addEventListener("scroll", go, { passive: true });
   window.addEventListener("resize", go); window.addEventListener("orientationchange", go);
   document.addEventListener("focusout", () => setTimeout(go, 300));
+  // al volver a la app desde otra: se recoloca varias veces (iOS tarda un momento en dar el tamaño correcto)
+  // Al volver, iOS puede dejar el campo enfocado y el viewport "encogido" como si el teclado siguiera abierto: se quita el foco y se fuerza a recalcular el viewport
+  const kick = () => {
+    const ae = document.activeElement; if (isField(ae)) { try { ae.blur(); } catch (e) {} }
+    const m = document.querySelector('meta[name="viewport"]');
+    if (m) { const c = m.getAttribute("content"); m.setAttribute("content", c.replace("maximum-scale=1", "maximum-scale=1.0001")); requestAnimationFrame(() => m.setAttribute("content", c)); }
+    const x = window.scrollX, y = window.scrollY; window.scrollTo(x, y + 1); window.scrollTo(x, y);
+    go();
+  };
+  const back = () => { kick(); go(); [60, 200, 500, 1000, 2000].forEach(t => setTimeout(go, t)); setTimeout(kick, 350); };
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) back(); });
+  window.addEventListener("pageshow", back); window.addEventListener("focus", back);
   setInterval(go, 500); go();
 })();
 
@@ -5566,7 +5592,7 @@ const MAX_COPAS = 9;
 function autoTrofeos() {
   try {
     if (!synced) return;
-    if (S.players.some(p => p.sim)) return;   // temporada simulada: no se reparten copas
+    const sim = S.players.some(p => p.sim);   // temporada simulada: sí se reparten copas (para probar), y al quitar la simulación se retiran de los jugadores reales
     const lg = leagueMs().map(m => Date.parse(m.kickoff)).filter(Boolean); if (!lg.length) return;
     const T = "s" + new Date(Math.min(...lg)).toISOString().slice(0, 10), ganados = [];
     if (calcRounds().includes(CONFIG.jornadas)) { const L = standings(); if (L[0]) ganados.push([L[0].id, "spl"]); }
@@ -5581,7 +5607,7 @@ function autoTrofeos() {
       if (pr.includes(k)) return;
       const got = trofeosDe(p);
       if (got.filter(x => x === id).length < MAX_COPAS) p.trofeos = got.concat(id);
-      p.premios = pr.concat(k, "t" + temporada() + ":" + id); ch = true;
+      p.premios = pr.concat(k, "t" + temporada() + ":" + id, ...(sim && !p.sim ? ["sim" + T + ":" + id] : [])); ch = true;
       if (p.id === me) { const t = TROFEOS.find(x => x.id === id); { const tc = ttlCopa(id, temporada()); toast("🏆 ¡Nuevo trofeo en tu vitrina: " + (t ? t.nombre : "") + "!" + (tc ? " Título desbloqueado: «" + tc.n + "»" : "") + (id === "bdo" ? " y Marco Balón de Oro" : "")); } }
     });
     if (ch) save();
@@ -5650,8 +5676,9 @@ function bdoPaint(el, f, p) {
     const tl = [["⚡", n.pts, "Puntos", "#4fd8f0"], ["🎯", n.plenos, n.plenos === 1 ? "Pleno" : "Plenos", "#2fd37a"], ["🔥", n.rmax || 0, "Mayor racha", "#ffb347"], ["🏅", (n.pos + 1) + "º", "En la tabla", "#ffe066"]];
     if (o.v != null) tl.push(["🗳️", o.v, o.v === 1 ? "Voto" : "Votos", "#c3a6ff"]);
     const g = `<span class="bd-g">${tl.map(t => `<span class="bd-k" style="--c:${t[3]}"><i>${t[0]}</i><b>${t[1]}</b><small>${t[2]}</small></span>`).join("")}</span>`;
-    const ft = eu || tr ? `<span class="bd-ft">${eu ? `<span class="bd-eu">${eu}</span>` : ""}${tr ? `<span class="bd-trs">${tr}</span>` : ""}</span>` : "";
-    return `<${tag}${o.btn ? ` type="button" data-id="${esc(n.id)}"` : ""} class="vt-r bd-r${mine === n.id || mia ? " on" : ""}${o.gan ? " gan" : ""}"><span class="bd-top">${crest(q.team)}<span class="vt-t">${esc(q.name || "")}<span class="bd-star">⭐</span></span>${o.pct != null ? `<b class="pc">${Math.round(o.pct)}%</b>` : ""}</span>${g}${ft}</${tag}>`;
+    const camp = (n.liga ? ["Campeón de la liga"] : []).concat((n.cups || []).map(c => `Campeón de la ${CUPN[c]}`));   // insignias de campeón + finalista/clasificado; los trofeos van arriba a la derecha
+    const ft = camp.length || eu ? `<span class="bd-ft">${camp.map(b => `<span class="bd-eu ch">${b}</span>`).join("")}${eu ? `<span class="bd-eu">${eu}</span>` : ""}</span>` : "";
+    return `<${tag}${o.btn ? ` type="button" data-id="${esc(n.id)}"` : ""} class="vt-r bd-r${mine === n.id || mia ? " on" : ""}${o.gan ? " gan" : ""}"><span class="bd-top">${crest(q.team)}<span class="vt-t">${esc(q.name || "")}<span class="bd-star">⭐</span></span>${tr ? `<span class="bd-trs">${tr}</span>` : ""}${o.pct != null ? `<b class="pc">${Math.round(o.pct)}%</b>` : ""}</span>${g}${ft}</${tag}>`;
   };
   if (f.estado === "cerrada" || (f.test && mine)) {
     const R = bdoGanador(f, f.test ? { [mine]: 1 } : null), g = R[0], gp = pById(g.id) || {};
@@ -6607,9 +6634,15 @@ async function simular() {
   render();
 }
 function simQuitar() {   // deja la liga como estaba antes de simular
-  const ids = new Set(S.players.filter(q => q.sim).map(q => q.id));
+  const sT = bdoSeason(), ids = new Set(S.players.filter(q => q.sim).map(q => q.id));
   ids.forEach(id => goneAdd(id));
   S.players = S.players.filter(q => !ids.has(q.id));
+  if (sT) S.players.forEach(q => {   // copas que un jugador real ganó durante la simulación: se retiran de su vitrina
+    const pre = "sim" + sT + ":", pr = Array.isArray(q.premios) ? q.premios : [], mine = pr.filter(x => x.startsWith(pre)); if (!mine.length) return;
+    const tr = trofeosDe(q).slice(), drop = new Set();
+    mine.forEach(x => { const id = x.slice(pre.length), i = tr.lastIndexOf(id); if (i >= 0) tr.splice(i, 1); drop.add(x); drop.add(sT + ":" + id); drop.add("t" + temporada() + ":" + id); });
+    q.trofeos = tr; q.premios = pr.filter(x => !drop.has(x));
+  });
   S.players.forEach(q => {   // duelos que se hubieran sorteado contra los inventados
     if (q.pen) { Object.keys(q.pen).forEach(k => { if (q.pen[k] && ids.has(q.pen[k].o)) delete q.pen[k]; }); if (!Object.keys(q.pen).length) delete q.pen; }
     delete q.vis;
@@ -8967,7 +9000,7 @@ document.addEventListener("touchmove", e => { if (e.touches && e.touches.length 
 boot();
 </script>
 <style>
-#spi{position:fixed;left:0;right:0;bottom:0;z-index:200;display:flex;justify-content:center;padding:0 12px calc(12px + env(safe-area-inset-bottom,0px));pointer-events:none;transform:translateY(130%);transition:transform .45s cubic-bezier(.2,.9,.3,1)}
+#spi{position:fixed;left:0;right:0;bottom:calc(0px - var(--pin,0px));z-index:200;display:flex;justify-content:center;padding:0 12px calc(12px + env(safe-area-inset-bottom,0px));pointer-events:none;transform:translateY(130%);transition:transform .45s cubic-bezier(.2,.9,.3,1)}
 #spi.on{transform:none}
 #spi .spi-c{pointer-events:auto;width:100%;max-width:460px;background:var(--panel);border:1px solid var(--cyan);border-radius:18px;padding:16px 16px 12px;box-shadow:0 10px 40px #000c,0 0 0 1px #00b4d822,0 0 28px #00b4d833}
 #spi .spi-h{display:flex;align-items:center;gap:12px}
