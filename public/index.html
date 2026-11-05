@@ -1863,23 +1863,39 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 #pshBox #pshMsg{margin:10px 2px 0;font-size:14px}
 @media (prefers-reduced-motion:reduce){#pshBox .psh-sw,#pshBox .psh-sw i{transition:none}}
 /* ===== Marco Balón de Oro: dorado con barrido de brillo y destellos aleatorios (solo quien gana un Balón de Oro) ===== */
-@keyframes bdoGlow{0%,100%{box-shadow:inset 0 1px 0 rgba(255,226,122,.55),inset 0 -1px 0 rgba(255,226,122,.55),inset 0 0 14px rgba(245,185,46,.28)}50%{box-shadow:inset 0 1px 0 rgba(255,240,170,.9),inset 0 -1px 0 rgba(255,240,170,.9),inset 0 0 22px rgba(245,185,46,.5)}}
+@keyframes bdoGlow{0%,100%{box-shadow:inset 0 9px 9px -9px rgba(245,185,46,.4),inset 0 -9px 9px -9px rgba(245,185,46,.4),0 -8px 10px -8px rgba(245,185,46,.45),0 8px 10px -8px rgba(245,185,46,.45)}50%{box-shadow:inset 0 9px 9px -9px rgba(255,214,102,.8),inset 0 -9px 9px -9px rgba(255,214,102,.8),0 -8px 10px -8px rgba(255,214,102,.85),0 8px 10px -8px rgba(255,214,102,.85)}}
 @keyframes bdoGlowMy{0%,100%{box-shadow:0 0 12px rgba(245,185,46,.5),0 0 26px rgba(245,185,46,.22),inset 0 0 12px rgba(245,185,46,.3)}50%{box-shadow:0 0 18px rgba(255,214,102,.85),0 0 36px rgba(245,185,46,.4),inset 0 0 18px rgba(245,185,46,.5)}}
-@keyframes bdoGlowHero{0%,100%{box-shadow:0 0 26px -6px rgba(245,185,46,.7),0 0 56px -14px rgba(245,185,46,.45),inset 0 0 0 1px rgba(255,226,122,.9),inset 0 0 0 4px #120e06,inset 0 0 0 5px rgba(233,185,73,.6),inset 0 0 26px 4px rgba(245,185,46,.22)}50%{box-shadow:0 0 38px -4px rgba(255,214,102,.95),0 0 70px -12px rgba(245,185,46,.65),inset 0 0 0 1px rgba(255,240,170,1),inset 0 0 0 4px #120e06,inset 0 0 0 5px rgba(255,214,102,.85),inset 0 0 30px 6px rgba(245,185,46,.36)}}
+@keyframes bdoGlowHero{0%,100%{box-shadow:0 0 14px rgba(245,185,46,.55),0 0 34px rgba(245,185,46,.28),inset 0 0 22px rgba(245,185,46,.32)}50%{box-shadow:0 0 22px rgba(255,214,102,.9),0 0 50px rgba(245,185,46,.45),inset 0 0 32px rgba(245,185,46,.5)}}
 @keyframes bdoSweep{0%{background-position:170% 0}55%,100%{background-position:-70% 0}}
 @keyframes bdoTw{0%{opacity:0;transform:scale(.2) rotate(0)}30%{opacity:1;transform:scale(1) rotate(30deg)}55%,100%{opacity:0;transform:scale(.2) rotate(90deg)}}
 .bsw{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:2}
 .bs{position:absolute;display:block;pointer-events:none;opacity:0;margin:-5px 0 0 -5px;background:radial-gradient(circle,#fff 0 18%,#ffeaa0 19% 42%,rgba(255,200,60,0) 72%);-webkit-clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%)}
-#tabla tr.rbdo td{position:relative;isolation:isolate;text-shadow:0 1px 3px rgba(0,0,0,.75);background:linear-gradient(180deg,rgba(255,214,102,.16),rgba(184,134,11,.10));box-shadow:inset 0 1px 0 rgba(255,226,122,.55),inset 0 -1px 0 rgba(255,226,122,.55),inset 0 0 14px rgba(245,185,46,.28)}
-#tabla tr.rbdo td:not(.pos)::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,244,190,.5) 50%,transparent 65%);background-size:220% 100%;background-repeat:no-repeat;background-position:170% 0}
+/* Fila Balón de Oro: misma caja que la vista previa (borde dorado, fondo dorado oscuro, brillo) partida en celdas sin costuras */
+#tablaBox table{border-collapse:separate;border-spacing:0}
+#tabla tr.rbdo,#tabla tr.rbdo.mine{background:none}
+#tabla tr.rbdo+tr td{border-top-color:transparent}
+#tabla tr.rbdo td{position:relative;isolation:isolate;text-shadow:0 1px 3px rgba(0,0,0,.75);border-top:1px solid #e9b949;border-bottom:1px solid #e9b949;box-shadow:inset 0 9px 9px -9px rgba(245,185,46,.4),inset 0 -9px 9px -9px rgba(245,185,46,.4),0 -8px 10px -8px rgba(245,185,46,.45),0 8px 10px -8px rgba(245,185,46,.45)}
+#tabla tr.rbdo td:not(.pos),#tabla tr.rbdo:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos{background:linear-gradient(180deg,rgba(255,214,102,.26),rgba(184,134,11,.14)),rgba(24,19,8,.96)}
+#tabla tr.rbdo td:last-child{border-right:1px solid #e9b949}
+#tabla tr.rbdo:is(.z-ucl,.z-uel,.z-uecl) td:nth-child(2){border-left:1px solid #e9b949}
+#tabla tr.rbdo:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos{border-left:1px solid #e9b949}
+#tabla tr.rbdo:is(.z-ucl,.z-uel,.z-uecl) td.pos{border-top-color:rgba(255,255,255,.07);border-bottom-color:transparent;box-shadow:none}
+#tabla tr.rbdo td::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,244,190,.5) 50%,transparent 65%);background-size:220% 100%;background-repeat:no-repeat;background-position:170% 0}
+#tabla tr.rbdo:is(.z-ucl,.z-uel,.z-uecl) td.pos::after{display:none}
 #tabla tr.rbdo .pl .me,#tabla tr.rbdo .pl span{text-shadow:0 0 8px rgba(255,200,60,.55),0 1px 3px rgba(0,0,0,.75)}
 #myPos.bdof{overflow:hidden;border-color:#e9b949;background:linear-gradient(180deg,rgba(255,214,102,.26),rgba(184,134,11,.14)),rgba(24,19,8,.96);box-shadow:0 0 12px rgba(245,185,46,.5),0 0 26px rgba(245,185,46,.22),inset 0 0 12px rgba(245,185,46,.3)}
 #myPos.bdof::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,244,190,.4) 50%,transparent 65%);background-size:220% 100%;background-repeat:no-repeat;background-position:170% 0}
-#historial .pf-hero.bdof{overflow:hidden;border-color:rgba(255,214,102,.95);background:radial-gradient(120% 90% at 50% 0%,rgba(255,226,122,.30),transparent 60%),radial-gradient(120% 90% at 50% 100%,rgba(184,134,11,.38),transparent 65%),linear-gradient(180deg,#261d0b,#120e06);box-shadow:0 0 26px -6px rgba(245,185,46,.7),0 0 56px -14px rgba(245,185,46,.45),inset 0 0 0 1px rgba(255,226,122,.9),inset 0 0 0 4px #120e06,inset 0 0 0 5px rgba(233,185,73,.6),inset 0 0 26px 4px rgba(245,185,46,.22)}
+#historial .pf-hero.bdof{overflow:hidden;border-color:#e9b949;background:radial-gradient(120% 80% at 50% 0%,rgba(255,226,122,.34),transparent 62%),radial-gradient(120% 90% at 50% 100%,rgba(184,134,11,.42),transparent 65%),linear-gradient(180deg,rgba(255,214,102,.26),rgba(184,134,11,.14)),rgb(24,19,8);box-shadow:0 0 14px rgba(245,185,46,.55),0 0 34px rgba(245,185,46,.28),inset 0 0 22px rgba(245,185,46,.32)}
+#historial .pf-hero.bdof.z-ucl::before,#historial .pf-hero.bdof.z-uel::before,#historial .pf-hero.bdof.z-uecl::before{opacity:.42}
+#historial .pf-hero.bdof .pf-name{text-shadow:0 0 18px rgba(255,200,60,.7),0 2px 0 #3a2a05}
+#historial .pf-hero.bdof .pf-crest{background:radial-gradient(circle,rgba(184,134,11,.55),rgba(20,15,6,.94) 62%,rgba(20,15,6,.94))}
+#historial .pf-hero.bdof .pf-crest::before{border-color:rgba(255,214,102,.6);box-shadow:0 0 22px -4px rgba(245,185,46,.8),inset 0 0 22px -8px rgba(245,185,46,.6)}
+#historial .pf-hero.bdof .pf-badges span:not(.fr):not(.gd){border-color:rgba(233,185,73,.6);background:#120e06;box-shadow:inset 0 0 14px rgba(245,185,46,.14),0 0 18px -6px rgba(245,185,46,.7)}
+.pf-bdo .bs{zoom:1.4}
 #historial .pf-hero.bdof::after{display:none}
 #historial .pf-hero>.pf-bdo{position:absolute;inset:0;overflow:hidden;border-radius:inherit;z-index:0;pointer-events:none}
-.pf-bdo .hx{position:absolute;inset:0;opacity:.09;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill='%23ffd24a' fill-rule='evenodd'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/svg%3E");background-size:28px 49px}
-.pf-bdo .sw{position:absolute;inset:0;background:linear-gradient(110deg,transparent 38%,rgba(255,244,190,.34) 50%,transparent 62%);background-size:240% 100%;background-repeat:no-repeat;background-position:170% 0}
+.pf-bdo .hx{position:absolute;inset:0;opacity:.13;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill='%23ffd24a' fill-rule='evenodd'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/svg%3E");background-size:28px 49px}
+.pf-bdo .sw{position:absolute;inset:0;background:linear-gradient(110deg,transparent 38%,rgba(255,244,190,.5) 50%,transparent 62%);background-size:240% 100%;background-repeat:no-repeat;background-position:170% 0}
 .ti-r.mkb.ok{border-color:#ffd24a88}
 .ti-r.mkb.on{border-color:#ffd24a;box-shadow:0 0 14px -4px rgba(255,210,74,.8)}
 .mk-pv.bdo{border-color:#e9b949;background:linear-gradient(180deg,rgba(255,214,102,.26),rgba(184,134,11,.14)),rgba(24,19,8,.96);box-shadow:0 0 12px rgba(245,185,46,.5),0 0 26px rgba(245,185,46,.22),inset 0 0 12px rgba(245,185,46,.3);animation:none}
@@ -1888,8 +1904,9 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 .mk-pv.bdo .mk-t{color:#ffe9a6}
 @media(prefers-reduced-motion:no-preference){
 #tabla tr.rbdo td{animation:bdoGlow 4s ease-in-out infinite}
-#tabla tr.rbdo td:not(.pos)::after{animation:bdoSweep 5s ease-in-out infinite}
-#tabla tr.rbdo td:nth-child(3)::after{animation-delay:.25s}#tabla tr.rbdo td:nth-child(4)::after{animation-delay:.5s}#tabla tr.rbdo td:nth-child(5)::after{animation-delay:.75s}
+#tabla tr.rbdo td::after{animation:bdoSweep 5s ease-in-out infinite}
+#tabla tr.rbdo:is(.z-ucl,.z-uel,.z-uecl) td.pos{animation:none}
+#tabla tr.rbdo td:nth-child(2)::after{animation-delay:.2s}#tabla tr.rbdo td:nth-child(3)::after{animation-delay:.4s}#tabla tr.rbdo td:nth-child(4)::after{animation-delay:.6s}#tabla tr.rbdo td:nth-child(5)::after{animation-delay:.8s}
 #myPos.bdof{animation:bdoGlowMy 4s ease-in-out infinite}
 #myPos.bdof::after,.pf-bdo .sw,.mk-pv.bdo::before{animation:bdoSweep 5s ease-in-out infinite}
 #historial .pf-hero.bdof{animation:bdoGlowHero 4s ease-in-out infinite}
@@ -1897,6 +1914,23 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 .bs{animation:bdoTw 3s ease-in-out infinite}
 }
 @media(prefers-reduced-motion:reduce){.bs{opacity:.8}}
+/* Todos los marcos animados (fuego, Coleccionista, Balón de Oro): con competición europea no pisan la celda de la posición; sin ella la ocupan */
+#tabla tr:is(.rfire,.rcol):is(.z-ucl,.z-uel,.z-uecl) td.pos{box-shadow:none}
+#tabla tr.rfire:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos{background-image:linear-gradient(0deg,rgba(255,80,15,.42),rgba(255,140,30,.14) 65%,rgba(255,170,60,.06))}
+#tabla tr.rfire:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos::before,#tabla tr.rfire:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos::after{content:"";position:absolute;left:0;right:0;bottom:0;z-index:-1;pointer-events:none;background-repeat:repeat-x;transform-origin:50% 100%;opacity:var(--fo)}
+#tabla tr.rfire:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos::before{height:54%;background-image:var(--fR-u);background-size:52px 100%;background-position:0 100%}
+#tabla tr.rfire:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos::after{height:38%;background-image:var(--fY-u),var(--fO-u);background-size:14px 62%,27px 100%;background-position:3px 100%,6px 100%}
+#tabla tr.rcol:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos::before,#tabla tr.rcol:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+#tabla tr.rcol:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos::before{background:linear-gradient(0deg,rgba(255,77,141,.95),rgba(255,177,61,.3) 60%,transparent);opacity:var(--fo)}
+#tabla tr.rcol:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos::after{background-image:var(--star-u),var(--star-u),var(--star-u);background-repeat:no-repeat;background-size:60px 9px,44px 7px,52px 8px;background-position:-70px -4px,-200px 6px,-330px 0;opacity:.8}
+#tabla tr:is(.rfire,.rcol):not(.z-ucl):not(.z-uel):not(.z-uecl) td:nth-child(2)::before,#tabla tr:is(.rfire,.rcol):not(.z-ucl):not(.z-uel):not(.z-uecl) td:nth-child(2)::after{-webkit-mask-image:none;mask-image:none}
+@media(prefers-reduced-motion:no-preference){
+#tabla tr:is(.rfire,.rcol):is(.z-ucl,.z-uel,.z-uecl) td.pos{animation:none}
+#tabla tr.rfire:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos::before{animation:flU 1.25s ease-in-out infinite alternate}
+#tabla tr.rfire:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos::after{animation:flU2 .85s ease-in-out infinite alternate}
+#tabla tr.rcol:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos::before{animation:colHue 7s linear infinite}
+#tabla tr.rcol:not(.z-ucl):not(.z-uel):not(.z-uecl) td.pos::after{animation:colStar 3.6s linear infinite}
+}
 </style>
 </head>
 <body>
@@ -5518,7 +5552,7 @@ function renderHistorial() {
   const colOn = marcoOn(who), bdoOn = marcoBdo(who), fireOn = ix >= 0 && tt[ix].rc >= 3 && !colOn && !bdoOn;   // en racha: el recuadro del perfil lleva llamas
   const rk = rachaRec(who);   // mayor racha conseguida (no baja nunca; para la cabecera)
   const head = (other ? `<div class="pf-top"><button class="pf-back" id="pfBack" aria-label="Volver">‹ Volver</button>${penRetoBtn(other)}</div>` : "") + `
-    <div class="pf-hero${ix < 0 ? "" : ix < 4 ? " z-ucl" : ix < 6 ? " z-uel" : ix < 8 ? " z-uecl" : ""}${fireOn ? " fire" : ""}${colOn ? " colf" : ""}${bdoOn ? " bdof" : ""}">${fireOn ? '<span class="pf-fire" aria-hidden="true"><i class="u"></i></span>' : ""}${colOn ? '<span class="pf-col" aria-hidden="true"><i class="w"></i><i class="s s1"></i><i class="s s2"></i><i class="s s3"></i><i class="s s4"></i><i class="s s5"></i></span>' : ""}${bdoOn ? `<span class="pf-bdo" aria-hidden="true"><i class="hx"></i><i class="sw"></i>${bdoSi(9)}</span>` : ""}<div class="pf-crest">${crest(who.team)}</div><div class="pf-name" role="heading" aria-level="2">${esc(who.name)}</div>${ttlHtml(who, "ptl")}
+    <div class="pf-hero${ix < 0 ? "" : ix < 4 ? " z-ucl" : ix < 6 ? " z-uel" : ix < 8 ? " z-uecl" : ""}${fireOn ? " fire" : ""}${colOn ? " colf" : ""}${bdoOn ? " bdof" : ""}">${fireOn ? '<span class="pf-fire" aria-hidden="true"><i class="u"></i></span>' : ""}${colOn ? '<span class="pf-col" aria-hidden="true"><i class="w"></i><i class="s s1"></i><i class="s s2"></i><i class="s s3"></i><i class="s s4"></i><i class="s s5"></i></span>' : ""}${bdoOn ? `<span class="pf-bdo" aria-hidden="true"><i class="hx"></i><i class="sw"></i>${bdoSi(14)}</span>` : ""}<div class="pf-crest">${crest(who.team)}</div><div class="pf-name" role="heading" aria-level="2">${esc(who.name)}</div>${ttlHtml(who, "ptl")}
     <div class="pf-badges"><span class="gd">${ix >= 0 ? ix + 1 + "º" : "—"}</span><span>${ix >= 0 ? tt[ix].pt : 0}<small>PT</small></span><span class="fr" title="Mayor racha" aria-label="Mayor racha: ${rk}">${rk}<i aria-hidden="true">🔥</i></span></div></div>` + (other ? `
     <p class="pf-sec">Sus predicciones</p>` : `
     <h2>Historial</h2>`);
