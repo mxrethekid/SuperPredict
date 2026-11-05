@@ -56,9 +56,9 @@ section.on{display:block}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
 .muted{color:var(--mute);font-size:14px}
 .steps{list-style:none;padding:0;display:grid;gap:12px}
-#inicio h2,#infoPanel h2{font-size:32px;line-height:1.05;letter-spacing:.015em;color:transparent;-webkit-text-fill-color:transparent;background:var(--flow) 0 0/200% 100% repeat-x;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 9px rgba(0,180,216,.5))}
-#inicio h2::after,#infoPanel h2::after{content:"";display:block;width:74px;height:4px;border-radius:4px;margin-top:9px;background:linear-gradient(90deg,var(--cyan),#5fd8f2 55%,transparent);box-shadow:0 0 10px rgba(0,180,216,.7)}
-@media (prefers-reduced-motion:no-preference){#inicio h2,#infoPanel h2{animation:blueflow 14s linear infinite}#inicio h2:nth-of-type(2),#infoPanel h2:nth-of-type(2){animation-duration:16s;animation-delay:-3s}#inicio h2:nth-of-type(3),#infoPanel h2:nth-of-type(3){animation-duration:15s;animation-delay:-6s}#inicio h2:nth-of-type(4),#infoPanel h2:nth-of-type(4){animation-duration:17s;animation-delay:-9s}#inicio h2:nth-of-type(5),#infoPanel h2:nth-of-type(5){animation-duration:16s;animation-delay:-12s}}
+#inicio h2,#infoPanel h2,#cdInfo h2,#fsInfo h2{font-size:32px;line-height:1.05;letter-spacing:.015em;color:transparent;-webkit-text-fill-color:transparent;background:var(--flow) 0 0/200% 100% repeat-x;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 9px rgba(0,180,216,.5))}
+#inicio h2::after,#infoPanel h2,#cdInfo h2,#fsInfo h2::after{content:"";display:block;width:74px;height:4px;border-radius:4px;margin-top:9px;background:linear-gradient(90deg,var(--cyan),#5fd8f2 55%,transparent);box-shadow:0 0 10px rgba(0,180,216,.7)}
+@media (prefers-reduced-motion:no-preference){#inicio h2,#infoPanel h2,#cdInfo h2,#fsInfo h2{animation:blueflow 14s linear infinite}#inicio h2:nth-of-type(2),#infoPanel h2,#cdInfo h2,#fsInfo h2:nth-of-type(2){animation-duration:16s;animation-delay:-3s}#inicio h2:nth-of-type(3),#infoPanel h2,#cdInfo h2,#fsInfo h2:nth-of-type(3){animation-duration:15s;animation-delay:-6s}#inicio h2:nth-of-type(4),#infoPanel h2,#cdInfo h2,#fsInfo h2:nth-of-type(4){animation-duration:17s;animation-delay:-9s}#inicio h2:nth-of-type(5),#infoPanel h2,#cdInfo h2,#fsInfo h2:nth-of-type(5){animation-duration:16s;animation-delay:-12s}}
 .ih{position:relative;overflow:hidden;text-align:center;border-color:rgba(0,180,216,.55);background:radial-gradient(120% 100% at 50% 0%,rgba(0,180,216,.26),var(--panel) 72%);padding:22px 16px 18px}
 .ih .ey{width:62px;height:62px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;font-size:30px;background:rgba(0,180,216,.14);border:1px solid rgba(0,180,216,.6);box-shadow:0 0 24px rgba(0,180,216,.45)}
 .ih p{font-size:16px;line-height:1.5}
@@ -95,6 +95,180 @@ html,body{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%}   /* sin zoom 
 #maint h2{font-size:30px;line-height:1.1;margin:0 0 10px;color:#eafcff;text-shadow:0 0 14px rgba(0,200,240,.6)}
 #maint p{color:var(--mute);font-size:15px;line-height:1.5;margin:0}
 #maint .mt-a{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(22px + env(safe-area-inset-bottom,0px));background:none;border:1px solid var(--line);color:var(--mute);border-radius:99px;padding:8px 18px;font:600 13px var(--b);letter-spacing:.08em;opacity:.7}
+/* ===== Cuenta atrás de inicio de temporada (pantalla completa) ===== */
+#cdn{position:fixed;inset:0;z-index:149;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(24px + env(safe-area-inset-top,0px)) 18px calc(56px + env(safe-area-inset-bottom,0px));text-align:center;overflow:hidden;overscroll-behavior:none;background:#05090d;color:#eafcff}
+#cdn[hidden]{display:none}
+#cdn .cd-bg{position:absolute;inset:0;pointer-events:none;overflow:hidden;background:radial-gradient(120% 70% at 50% -5%,rgba(0,180,216,.38),transparent 60%),radial-gradient(90% 60% at 50% 112%,rgba(201,161,74,.26),transparent 60%)}
+#cdn .cd-aur{position:absolute;left:-30%;width:160%;height:60%;filter:blur(40px);opacity:.55;border-radius:50%}
+#cdn .cd-aur.a1{top:-22%;background:radial-gradient(closest-side,rgba(0,200,255,.6),transparent);animation:cdAur 9s ease-in-out infinite alternate}
+#cdn .cd-aur.a2{bottom:-26%;background:radial-gradient(closest-side,rgba(255,196,60,.45),transparent);animation:cdAur 11s ease-in-out infinite alternate-reverse}
+@keyframes cdAur{from{transform:translateX(-9%) scale(1)}to{transform:translateX(9%) scale(1.18)}}
+#cdn .cd-grid{position:absolute;inset:0;opacity:.2;background-image:linear-gradient(rgba(0,180,216,.55) 1px,transparent 1px),linear-gradient(90deg,rgba(0,180,216,.55) 1px,transparent 1px);background-size:44px 44px;-webkit-mask-image:radial-gradient(70% 60% at 50% 48%,#000,transparent);mask-image:radial-gradient(70% 60% at 50% 48%,#000,transparent);animation:cdGrid 10s linear infinite}
+@keyframes cdGrid{to{background-position:0 44px,44px 0}}
+#cdn .cd-parts{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#cdn .cd-parts i{position:absolute;bottom:-14px;border-radius:50%;background:#9af2ff;box-shadow:0 0 10px 2px rgba(0,200,255,.85);opacity:0;animation:cdUp linear infinite}
+#cdn .cd-parts i.g{background:#ffd466;box-shadow:0 0 10px 2px rgba(255,196,60,.85)}
+@keyframes cdUp{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:.95}100%{transform:translateY(-108vh) scale(1.15);opacity:0}}
+#cdn .cd-main{position:relative;z-index:2;width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center}
+#cdn .cd-eye{width:150px;height:auto;overflow:visible;filter:drop-shadow(0 0 22px rgba(0,200,255,.65))}
+#cdn .cd-eye .au{animation:cdAura 3.2s ease-in-out infinite;transform-origin:60px 40px}
+#cdn .cd-eye .rg{fill:none;stroke:#00b4d8;stroke-width:1.2;transform-origin:60px 40px;animation:cdRing 3.2s ease-out infinite}
+#cdn .cd-eye .rg.r2{stroke:#9af2ff;animation-delay:1.6s}
+#cdn .cd-eye .bl{transform-origin:60px 40px;animation:cdBlink 5.5s infinite}
+#cdn .cd-eye .lk{animation:cdLook 7s ease-in-out infinite}
+#cdn .cd-eye .pu{transform-origin:60px 40px;animation:cdPupil 2.2s ease-in-out infinite}
+@keyframes cdAura{50%{transform:scale(1.08);opacity:.75}}
+@keyframes cdRing{0%{transform:scale(1);opacity:.9}100%{transform:scale(1.55);opacity:0}}
+@keyframes cdBlink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.06)}}
+@keyframes cdLook{0%,100%{transform:translate(0,0)}25%{transform:translate(9px,-2px)}50%{transform:translate(-8px,1px)}75%{transform:translate(4px,3px)}}
+@keyframes cdPupil{50%{transform:scale(1.22)}}
+#cdn .cd-logo{margin-top:4px;font:400 clamp(40px,13vw,58px)/.95 var(--h);text-transform:uppercase;letter-spacing:.02em;background:linear-gradient(90deg,#00b4d8,#9af2ff,#fff,#9af2ff,#00b4d8) 0 0/250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:cdShine 4s linear infinite;filter:drop-shadow(0 0 14px rgba(0,200,255,.45))}
+@keyframes cdShine{to{background-position:250% 0}}
+#cdn .cd-sea{margin:14px 0 0;padding-left:.32em;font:400 clamp(20px,6vw,26px)/1 var(--h);letter-spacing:.32em;text-transform:uppercase;color:#ffd466;text-shadow:0 0 18px rgba(255,196,60,.75)}
+#cdn .cd-lab{margin:26px 0 14px;font:700 13px var(--b);letter-spacing:.24em;text-transform:uppercase;color:#8fd9ea}
+#cdn .cd-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%}
+#cdn .cd-t{position:relative;border-radius:16px;padding:14px 0 10px;background:linear-gradient(180deg,rgba(0,180,216,.2),rgba(0,180,216,.04));border:1px solid rgba(0,200,255,.55);box-shadow:0 0 22px -4px rgba(0,200,255,.6),inset 0 0 18px rgba(0,200,255,.14);overflow:hidden}
+#cdn .cd-t::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.5)}
+#cdn .cd-t b{display:block;font:400 clamp(34px,11vw,48px)/1 var(--h);font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 16px rgba(0,200,255,.95)}
+#cdn .cd-t span{display:block;margin-top:5px;font:700 10px var(--b);letter-spacing:.18em;text-transform:uppercase;color:#7fdcf0}
+#cdn .cd-t.s{border-color:rgba(255,196,60,.75);background:linear-gradient(180deg,rgba(255,196,60,.2),rgba(255,196,60,.04));box-shadow:0 0 24px -4px rgba(255,196,60,.65),inset 0 0 18px rgba(255,196,60,.14)}
+#cdn .cd-t.s b{color:#ffe08a;text-shadow:0 0 18px rgba(255,196,60,.95)}
+#cdn .cd-t.s span{color:#ffd466}
+#cdn .pop{animation:cdPop .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes cdPop{0%{transform:translateY(-35%) scale(1.25);opacity:.2}100%{transform:none;opacity:1}}
+#cdn .cd-bar{width:100%;height:6px;border-radius:9px;background:rgba(255,255,255,.08);margin:24px 0 10px;overflow:hidden}
+#cdn .cd-bar i{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#00b4d8,#9af2ff,#ffd466);box-shadow:0 0 14px rgba(0,200,255,.9);transition:width 1s linear}
+#cdn .cd-date{font:600 14px var(--b);color:#cfeaf2}
+#cdn .cd-hint{margin-top:6px;font-size:12px;color:var(--mute)}
+#cdn .cd-big{display:none;margin:8px 0 0;font:400 clamp(150px,52vw,230px)/1 var(--h);color:#fff;text-shadow:0 0 30px #00d0ff,0 0 80px #00b4d8,0 0 140px rgba(255,196,60,.7)}
+#cdn.f10 .cd-tiles,#cdn.f10 .cd-bar,#cdn.f10 .cd-date,#cdn.f10 .cd-hint{display:none}
+#cdn.f10 .cd-big{display:block}
+#cdn.f10 .cd-big.pop{animation:cdBig 1s ease-out}
+#cdn.f3 .cd-big{color:#fff3c4;text-shadow:0 0 30px #ffb52e,0 0 80px #ff8a1e,0 0 140px rgba(255,90,30,.7)}
+@keyframes cdBig{0%{transform:scale(2.3);opacity:0;filter:blur(8px)}25%{transform:scale(1);opacity:1;filter:none}100%{transform:scale(.88);opacity:.85}}
+#cdn.f10::after{content:"";position:absolute;left:50%;top:50%;width:46vmin;height:46vmin;margin:-23vmin 0 0 -23vmin;border-radius:50%;border:3px solid rgba(0,220,255,.85);box-shadow:0 0 40px rgba(0,200,255,.7);pointer-events:none;animation:cdShock 1s ease-out infinite}
+#cdn.f3::after{border-color:rgba(255,196,60,.9);box-shadow:0 0 40px rgba(255,160,40,.8)}
+@keyframes cdShock{0%{transform:scale(.4);opacity:1}100%{transform:scale(2.6);opacity:0}}
+#cdn .cd-fin{display:none;flex-direction:column;align-items:center}
+#cdn.fin .cd-pre{display:none}
+#cdn.fin .cd-fin{display:flex}
+#cdn .cd-fin h2{margin:18px 0 0;font:400 clamp(40px,12.5vw,62px)/.95 var(--h);text-transform:uppercase;background:linear-gradient(90deg,#fff3b0,#ffd466,#ff9d2e,#ffd466,#fff3b0) 0 0/250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:cdShine 2.5s linear infinite,cdSlam .9s cubic-bezier(.2,1.5,.4,1) both;filter:drop-shadow(0 0 22px rgba(255,180,40,.8))}
+@keyframes cdSlam{0%{transform:scale(2.6);opacity:0}100%{transform:scale(1);opacity:1}}
+#cdn .cd-fin p{margin:14px 0 0;font:500 16px/1.4 var(--b);color:#d6eef5}
+#cdn .cd-go{margin-top:28px;padding:16px 44px;border:0;border-radius:99px;font:400 22px var(--h);letter-spacing:.14em;text-transform:uppercase;color:#06232b;background:linear-gradient(180deg,#b8f6ff,#00b4d8);cursor:pointer;box-shadow:0 0 0 0 rgba(0,200,255,.7),0 10px 30px -6px rgba(0,200,255,.85);animation:cdBtn 1.6s ease-out infinite}
+@keyframes cdBtn{70%{box-shadow:0 0 0 24px rgba(0,200,255,0),0 10px 30px -6px rgba(0,200,255,.85)}100%{box-shadow:0 0 0 0 rgba(0,200,255,0),0 10px 30px -6px rgba(0,200,255,.85)}}
+#cdn.fin .cd-bg::after{content:"";position:absolute;left:50%;top:42%;width:170vmax;height:170vmax;margin:-85vmax 0 0 -85vmax;background:repeating-conic-gradient(from 0deg,rgba(255,200,80,.2) 0 6deg,transparent 6deg 16deg);-webkit-mask-image:radial-gradient(closest-side,#000,transparent 70%);mask-image:radial-gradient(closest-side,#000,transparent 70%);animation:cdSpin 26s linear infinite}
+@keyframes cdSpin{to{transform:rotate(360deg)}}
+#cdn .cd-flash{position:absolute;inset:0;z-index:5;background:#fff;opacity:0;pointer-events:none}
+#cdn.fin .cd-flash{animation:cdFlash 1.1s ease-out}
+@keyframes cdFlash{0%{opacity:1}100%{opacity:0}}
+#cdn .cd-conf{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden}
+#cdn .cd-conf i{position:absolute;top:-18px;left:var(--x);width:var(--s);height:calc(var(--s) * 1.6);background:var(--c);border-radius:2px;animation:cdFall var(--d) cubic-bezier(.3,.6,.6,1) var(--dl) forwards}
+@keyframes cdFall{0%{transform:translate3d(0,0,0) rotate(0)}100%{transform:translate3d(var(--dx),108vh,0) rotate(var(--r))}}
+#cdn .cd-info{position:absolute;z-index:6;top:calc(14px + env(safe-area-inset-top,0px));right:14px;width:46px;height:46px;display:grid;place-items:center;border-radius:14px;border:1px solid rgba(0,200,255,.6);background:rgba(0,180,216,.14);color:#9af2ff;cursor:pointer;box-shadow:0 0 18px -2px rgba(0,200,255,.65)}
+#cdn .cd-info[aria-expanded=true]{background:rgba(0,180,216,.34);color:#fff}
+#cdn .cd-adm{position:absolute;z-index:6;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:none;border:1px solid var(--line);color:var(--mute);border-radius:99px;padding:8px 18px;font:600 13px var(--b);cursor:pointer}
+#cdn .cd-adm[hidden],#cdn.fin .cd-adm{display:none}
+#cdn .cd-sheet{position:absolute;inset:0;z-index:8;display:flex;align-items:flex-end;background:rgba(3,8,11,.8);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+#cdn .cd-sheet[hidden]{display:none}
+#cdn .cd-sh{width:100%;max-height:90%;overflow:auto;text-align:left;background:#0c1115;border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;padding:14px 16px calc(28px + env(safe-area-inset-bottom,0px));animation:cdSheet .35s ease-out}
+@keyframes cdSheet{from{transform:translateY(40px);opacity:0}}
+#cdn .cd-x{position:sticky;top:0;z-index:2;display:block;margin:0 0 6px auto;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:#161c22;color:#fff;font:400 22px/1 var(--b);cursor:pointer}
+#cdInfo h2{margin-top:6px}
+@media (prefers-reduced-motion:reduce){#cdn *,#cdn::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
+/* ===== Fin de temporada: gracias por participar + resumen de la temporada ===== */
+#fsn{position:fixed;inset:0;z-index:148;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:#05090d;color:#eafcff}
+#fsn[hidden]{display:none}
+#fsn .fs-bg{position:fixed;inset:0;pointer-events:none;background:radial-gradient(120% 60% at 50% -8%,rgba(255,196,60,.28),transparent 60%),radial-gradient(100% 60% at 50% 110%,rgba(0,180,216,.3),transparent 60%)}
+#fsn .fs-bg::before{content:"";position:absolute;inset:0;opacity:.16;background-image:linear-gradient(rgba(255,200,80,.6) 1px,transparent 1px),linear-gradient(90deg,rgba(255,200,80,.6) 1px,transparent 1px);background-size:44px 44px;-webkit-mask-image:radial-gradient(70% 55% at 50% 30%,#000,transparent);mask-image:radial-gradient(70% 55% at 50% 30%,#000,transparent);animation:cdGrid 12s linear infinite}
+#fsn .fs-parts{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+#fsn .fs-parts i{position:absolute;bottom:-14px;border-radius:50%;background:#ffd466;box-shadow:0 0 10px 2px rgba(255,196,60,.85);opacity:0;animation:cdUp linear infinite}
+#fsn .fs-parts i.c{background:#9af2ff;box-shadow:0 0 10px 2px rgba(0,200,255,.85)}
+#fsn .fs-in{position:relative;z-index:2;max-width:460px;margin:0 auto;padding:calc(70px + env(safe-area-inset-top,0px)) 16px calc(40px + env(safe-area-inset-bottom,0px));text-align:center}
+#fsn .fs-a{opacity:0;transform:translateY(26px);transition:opacity .7s ease-out,transform .7s cubic-bezier(.2,.9,.3,1)}
+#fsn .fs-a.in{opacity:1;transform:none}
+#fsn .cd-eye{width:120px;height:auto;overflow:visible;filter:drop-shadow(0 0 20px rgba(255,196,60,.55))}
+#fsn .cd-eye .au{animation:cdAura 3.2s ease-in-out infinite;transform-origin:60px 40px}
+#fsn .cd-eye .rg{fill:none;stroke:#ffd466;stroke-width:1.2;transform-origin:60px 40px;animation:cdRing 3.2s ease-out infinite}
+#fsn .cd-eye .rg.r2{stroke:#fff3b0;animation-delay:1.6s}
+#fsn .cd-eye .bl{transform-origin:60px 40px;animation:cdBlink 5.5s infinite}
+#fsn .cd-eye .lk{animation:cdLook 7s ease-in-out infinite}
+#fsn .cd-eye .pu{transform-origin:60px 40px;animation:cdPupil 2.2s ease-in-out infinite}
+#fsn .fs-k{margin-top:10px;font:700 12px var(--b);letter-spacing:.34em;text-transform:uppercase;color:#8fd9ea;padding-left:.34em}
+#fsn .fs-t{text-shadow:none;white-space:normal;margin:8px 0 0;font:400 clamp(34px,10.5vw,52px)/.98 var(--h);text-transform:uppercase;background:linear-gradient(90deg,#fff3b0,#ffd466,#ff9d2e,#ffd466,#fff3b0) 0 0/250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:cdShine 4s linear infinite;filter:drop-shadow(0 0 18px rgba(255,180,40,.55))}
+#fsn .fs-th{margin:18px 0 0;font:400 clamp(22px,7vw,30px)/1.1 var(--h);letter-spacing:.06em;text-transform:uppercase;color:#fff;text-shadow:0 0 18px rgba(0,200,255,.7)}
+#fsn .fs-p{margin:10px auto 0;max-width:340px;font:500 15px/1.5 var(--b);color:#cfe6ee}
+#fsn .fs-soon{margin:26px auto 0;padding:14px 22px;display:inline-block;border-radius:18px;border:1px solid rgba(0,200,255,.6);background:linear-gradient(180deg,rgba(0,180,216,.2),rgba(0,180,216,.05));box-shadow:0 0 26px -4px rgba(0,200,255,.6),inset 0 0 20px rgba(0,200,255,.12)}
+#fsn .fs-soon small{display:block;font:700 11px var(--b);letter-spacing:.3em;text-transform:uppercase;color:#7fdcf0;padding-left:.3em;animation:fsBlink 2.4s ease-in-out infinite}
+#fsn .fs-soon b{display:block;margin-top:4px;font:400 clamp(24px,8vw,32px)/1 var(--h);letter-spacing:.08em;text-transform:uppercase;color:#fff;text-shadow:0 0 16px rgba(0,200,255,.9)}
+#fsn .fs-soon em{display:block;margin-top:6px;font:600 13px var(--b);font-style:normal;color:#ffd466}
+@keyframes fsBlink{50%{opacity:.45}}
+#fsn .fs-h{margin:46px 0 14px;font:400 26px/1 var(--h);letter-spacing:.08em;text-transform:uppercase;color:#fff}
+#fsn .fs-h::after{content:"";display:block;width:60px;height:3px;margin:9px auto 0;border-radius:3px;background:linear-gradient(90deg,transparent,#ffd466,transparent)}
+#fsn .fs-sub{margin:-6px 0 14px;font:600 12px var(--b);letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+#fsn .fs-champ{position:relative;padding:22px 16px 20px;border-radius:22px;border:1px solid rgba(255,214,102,.7);background:radial-gradient(90% 80% at 50% 0%,rgba(255,196,60,.3),rgba(255,196,60,.05)),rgba(12,17,21,.7);box-shadow:0 0 34px -6px rgba(255,196,60,.7),inset 0 0 30px rgba(255,196,60,.1);overflow:hidden}
+#fsn .fs-champ::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.22),transparent);animation:fsSheen 4.5s ease-in-out infinite}
+@keyframes fsSheen{0%,55%{left:-60%}100%{left:130%}}
+#fsn .fs-cup{width:74px;height:96px;margin:0 auto;animation:fsFloat 3.6s ease-in-out infinite;filter:drop-shadow(0 8px 14px rgba(255,180,40,.5))}
+#fsn .fs-cup svg{width:100%;height:100%}
+@keyframes fsFloat{50%{transform:translateY(-6px)}}
+#fsn .fs-champ .crest{width:56px;height:56px;margin:10px auto 0;display:block}
+#fsn .fs-champ b{display:block;margin-top:8px;font:400 34px/1 var(--h);letter-spacing:.04em;text-transform:uppercase;color:#fff3b0;text-shadow:0 0 18px rgba(255,196,60,.8)}
+#fsn .fs-champ span{display:block;margin-top:6px;font:700 12px var(--b);letter-spacing:.22em;text-transform:uppercase;color:#ffd466}
+#fsn .fs-pod{display:grid;grid-template-columns:1fr 1.12fr 1fr;gap:8px;align-items:end;margin-top:16px}
+#fsn .fs-pc{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;padding:10px 4px 12px;border-radius:16px 16px 6px 6px;border:1px solid var(--cc);background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));box-shadow:0 0 20px -6px var(--cc)}
+#fsn .fs-pc.p1{min-height:176px;--cc:#ffd466}#fsn .fs-pc.p2{min-height:146px;--cc:#c9d6df}#fsn .fs-pc.p3{min-height:126px;--cc:#d9915a}
+#fsn .fs-pc .m{font:400 26px/1 var(--h);color:var(--cc)}
+#fsn .fs-pc .crest{width:40px;height:40px}
+#fsn .fs-pc strong{max-width:100%;padding:0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:700 14px var(--b);color:#fff}
+#fsn .fs-pc em{font:700 12px var(--b);font-style:normal;color:var(--cc)}
+#fsn .fs-eu{display:grid;gap:10px}
+#fsn .fs-ec{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:18px;text-align:left;border:1px solid var(--cc);background:linear-gradient(90deg,color-mix(in srgb,var(--cc) 26%,transparent),rgba(12,17,21,.6) 70%);box-shadow:0 0 22px -8px var(--cc)}
+#fsn .fs-ec .ci{width:38px;height:50px;flex:none}#fsn .fs-ec .ci svg{width:100%;height:100%}
+#fsn .fs-ec div{min-width:0;flex:1}
+#fsn .fs-ec small{display:block;font:700 10px var(--b);letter-spacing:.2em;text-transform:uppercase;color:var(--cc)}
+#fsn .fs-ec b{display:flex;align-items:center;gap:8px;margin-top:3px;font:700 17px var(--b);color:#fff}
+#fsn .fs-ec b span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#fsn .fs-ec .crest{width:26px;height:26px;flex:none}
+#fsn .fs-ec.u{--cc:#9a6cff}#fsn .fs-ec.e{--cc:#ff9d2e}#fsn .fs-ec.k{--cc:#34d56b}
+#fsn .fs-pr{display:grid;gap:8px}
+#fsn .fs-pw{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;text-align:left;border:1px solid var(--line);background:rgba(22,28,34,.75)}
+#fsn .fs-pw:first-child{border-color:rgba(255,214,102,.6);box-shadow:0 0 18px -6px rgba(255,214,102,.6)}
+#fsn .fs-pw .crest{width:30px;height:30px;flex:none}
+#fsn .fs-pw div{min-width:0;flex:1}
+#fsn .fs-pw strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:700 15px var(--b);color:#fff}
+#fsn .fs-pw small{display:block;font:500 11px var(--b);color:var(--mute)}
+#fsn .fs-pw em{font:400 20px var(--h);font-style:normal;color:#ffe08a;text-shadow:0 0 12px rgba(255,196,60,.6)}
+#fsn .fs-st{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#fsn .fs-s{padding:14px 8px 12px;border-radius:16px;border:1px solid rgba(0,200,255,.4);background:linear-gradient(180deg,rgba(0,180,216,.14),rgba(0,180,216,.03))}
+#fsn .fs-s b{display:block;font:400 34px/1 var(--h);color:#fff;text-shadow:0 0 14px rgba(0,200,255,.8)}
+#fsn .fs-s span{display:block;margin-top:5px;font:700 10px var(--b);letter-spacing:.14em;text-transform:uppercase;color:#7fdcf0}
+#fsn .fs-s small{display:block;margin-top:4px;font:600 12px var(--b);color:#ffd466;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#fsn .fs-s:last-child:nth-child(odd){grid-column:1/-1}
+#fsn .fs-s.g{border-color:rgba(255,196,60,.5);background:linear-gradient(180deg,rgba(255,196,60,.14),rgba(255,196,60,.03))}
+#fsn .fs-s.g b{text-shadow:0 0 14px rgba(255,196,60,.8)}
+#fsn .fs-tb{border-radius:18px;border:1px solid var(--line);background:rgba(12,17,21,.72);overflow:hidden;text-align:left}
+#fsn .fs-r{display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:1px solid rgba(255,255,255,.06);border-left:3px solid transparent}
+#fsn .fs-r:first-child{border-top:0}
+#fsn .fs-r.z1{border-left-color:#9a6cff}#fsn .fs-r.z2{border-left-color:#ff9d2e}#fsn .fs-r.z3{border-left-color:#34d56b}
+#fsn .fs-r i{width:24px;font:400 17px var(--h);font-style:normal;text-align:center;color:var(--mute)}
+#fsn .fs-r:nth-child(-n+3) i{color:#ffd466}
+#fsn .fs-r .crest{width:26px;height:26px;flex:none}
+#fsn .fs-r span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 15px var(--b);color:#fff}
+#fsn .fs-r b{font:700 15px var(--b);color:#9af2ff}
+#fsn .fs-bye{margin-top:44px;font:400 24px/1.15 var(--h);letter-spacing:.05em;text-transform:uppercase;color:#fff3b0;text-shadow:0 0 16px rgba(255,196,60,.6)}
+#fsn .fs-sumbtn{display:block;width:100%;max-width:340px;margin:24px auto 0;padding:14px 20px;border-radius:99px;border:1px solid rgba(255,214,102,.75);background:linear-gradient(180deg,rgba(255,196,60,.28),rgba(255,196,60,.08));color:#fff3b0;font:700 15px var(--b);letter-spacing:.03em;cursor:pointer;box-shadow:0 0 24px -6px rgba(255,196,60,.7),inset 0 0 18px rgba(255,196,60,.12);-webkit-tap-highlight-color:transparent}
+#fsn .fs-sumbtn:active{transform:scale(.97)}
+#fsn .fs-sum[hidden]{display:none}
+#fsn .fs-btn{display:block;margin:26px auto 0;background:none;border:1px solid var(--line);color:var(--mute);border-radius:99px;padding:9px 20px;font:600 13px var(--b);cursor:pointer}
+#fsn .fs-info{position:fixed;z-index:6;top:calc(14px + env(safe-area-inset-top,0px));right:14px;width:46px;height:46px;display:grid;place-items:center;border-radius:14px;border:1px solid rgba(255,214,102,.65);background:rgba(255,196,60,.14);color:#ffe08a;cursor:pointer;box-shadow:0 0 18px -2px rgba(255,196,60,.6)}
+#fsn .fs-info[aria-expanded=true]{background:rgba(255,196,60,.34);color:#fff}
+#fsn .fs-sheet{position:fixed;inset:0;z-index:8;display:flex;align-items:flex-end;background:rgba(3,8,11,.8);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+#fsn .fs-sheet[hidden]{display:none}
+#fsn .fs-sh{width:100%;max-height:90%;overflow:auto;text-align:left;background:#0c1115;border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;padding:14px 16px calc(28px + env(safe-area-inset-bottom,0px));animation:cdSheet .35s ease-out}
+#fsn .fs-x{position:sticky;top:0;z-index:2;display:block;margin:0 0 6px auto;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:#161c22;color:#fff;font:400 22px/1 var(--b);cursor:pointer}
+#fsInfo h2{margin-top:6px}
+@media (prefers-reduced-motion:reduce){#fsn *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
 /* Competiciones europeas: tarjetas con el fondo de cada competición y cuadros de eliminatorias */
 .ecard{--c:var(--ucl);position:relative;overflow:hidden;isolation:isolate;margin-top:18px;padding:16px 12px 14px;border-radius:18px;border:1px solid var(--c);background:#0c1115;box-shadow:0 0 22px color-mix(in srgb,var(--c) 38%,transparent)}
 .ecard.z-uel{--c:var(--uel)}.ecard.z-uecl{--c:var(--uecl)}
@@ -1644,6 +1818,7 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 .pc-n.used{opacity:.45;text-decoration:line-through}
 .pc-n.armed{color:#ffd24a}
 .pc-h{text-align:center;font-size:12px;margin:8px 0 0}
+.pc-w{text-align:center;font-size:11px;margin:-6px 0 12px;opacity:.85}
 .pf{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:6px}
 .pf-b{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px 8px;border-radius:12px;border:1px solid var(--line);background:rgba(120,75,38,.35);color:var(--text);cursor:pointer}
 .pf-b .pf-i{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--c);background:linear-gradient(90deg,var(--c) 50%,var(--c2,var(--c)) 50%)}
@@ -3410,6 +3585,290 @@ function applyMaint() {
     o.hidden = true;
     if (maintShown && !on) { maintShown = false; if (!adminView && !me) go("cuenta"); }   // fin del mantenimiento: pantalla de inicio de sesión
   }
+  try { applyCountdown(); } catch (e) { console.error(e); }   // cuenta atrás de inicio de temporada
+  try { applyFin(); } catch (e) { console.error(e); }   // pantalla de fin de temporada
+}
+
+// ===== Cuenta atrás de inicio de temporada =====
+// El admin la programa en su panel (Gestión). Se guarda junto al aviso de mantenimiento (S.preds[MKEY].cd = { at, n, t }), así llega a todos los móviles
+// y se conserva al empezar una temporada nueva. Hasta la hora de inicio nadie (salvo el admin) entra: pantalla completa con la cuenta atrás, los últimos
+// 10 segundos en grande y, al llegar a cero, un final con confeti y el botón de entrar. Sirve para cualquier temporada: basta con programar otra.
+const cdCfg = () => { const m = S.preds[MKEY], c = m && m.cd; return c && c.at > 0 ? c : null; };
+let cdPrev = null;      // vista previa del admin (solo en este dispositivo)
+let cdFin = 0, cdLast = 0, cdnTimer = null, cdOn = false;   // cdFin: cuenta atrás cuyo final se está mostrando; cdLast: la que se ha visto correr en esta sesión
+const cdCur = () => cdPrev || cdCfg();
+const cdNum = c => c && c.n > 0 ? c.n : temporada();
+function cdDate(at) { try { const t = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(new Date(at)) + " h"; return t.charAt(0).toUpperCase() + t.slice(1); } catch (e) { return new Date(at).toLocaleString(); } }
+function cdBuild() {
+  let o = document.getElementById("cdn"); if (o) return o;
+  o = document.createElement("div"); o.id = "cdn"; o.hidden = true; o.setAttribute("role", "dialog"); o.setAttribute("aria-modal", "true"); o.setAttribute("aria-label", "Cuenta atrás para el inicio de la temporada");
+  o.innerHTML = `<div class="cd-bg"><i class="cd-aur a1"></i><i class="cd-aur a2"></i><i class="cd-grid"></i></div><div class="cd-parts" id="cdParts"></div><div class="cd-conf" id="cdConf"></div><div class="cd-flash"></div>
+  <button type="button" class="cd-info" id="cdInfoBtn" aria-expanded="false" aria-label="Qué es Súper Predict y cómo funciona"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="7.3" r="1.5" fill="currentColor"/></svg></button>
+  <div class="cd-main">
+    <svg class="cd-eye" viewBox="0 0 120 80" aria-hidden="true"><defs><radialGradient id="cdAu"><stop offset="0" stop-color="#00b4d8" stop-opacity=".55"/><stop offset=".6" stop-color="#00b4d8" stop-opacity=".12"/><stop offset="1" stop-color="#00b4d8" stop-opacity="0"/></radialGradient><radialGradient id="cdSc" cx=".5" cy=".5" r=".6"><stop offset=".55" stop-color="#fff"/><stop offset="1" stop-color="#c3d1da"/></radialGradient><radialGradient id="cdIr" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#e8b158"/><stop offset=".55" stop-color="#a9742a"/><stop offset="1" stop-color="#4a2c0b"/></radialGradient><clipPath id="cdCl"><path d="M6 40Q60 -4 114 40Q60 84 6 40Z"/></clipPath></defs>
+      <ellipse class="au" cx="60" cy="40" rx="88" ry="58" fill="url(#cdAu)"/><ellipse class="rg" cx="60" cy="40" rx="56" ry="32"/><ellipse class="rg r2" cx="60" cy="40" rx="56" ry="32"/>
+      <g class="bl"><ellipse cx="60" cy="40" rx="56" ry="32" fill="#2a2f35"/><path d="M6 40Q60 -4 114 40Q60 84 6 40Z" fill="url(#cdSc)"/><g clip-path="url(#cdCl)"><g class="lk"><circle cx="60" cy="40" r="22" fill="url(#cdIr)"/><circle cx="60" cy="40" r="16" fill="none" stroke="#ffd98a" stroke-opacity=".38" stroke-width="9" stroke-dasharray="1.1 2.6"/><circle cx="60" cy="40" r="21.3" fill="none" stroke="#2a1706" stroke-width="1.8"/><circle class="pu" cx="60" cy="40" r="12" fill="#1b1f24"/><circle cx="52" cy="31" r="5" fill="#fff"/><circle cx="68" cy="47" r="2.2" fill="#fff" opacity=".7"/></g></g><path d="M6 40Q60 -4 114 40Q60 84 6 40Z" fill="none" stroke="#2a2f35" stroke-width="1.6"/></g></svg>
+    <div class="cd-logo">Súper Predict</div>
+    <div class="cd-sea" id="cdSea"></div>
+    <div class="cd-pre">
+      <div class="cd-lab">La temporada empieza en</div>
+      <div class="cd-big" id="cdBig">10</div>
+      <div class="cd-tiles" role="timer" aria-live="off"><div class="cd-t"><b id="cdD">00</b><span>días</span></div><div class="cd-t"><b id="cdH">00</b><span>horas</span></div><div class="cd-t"><b id="cdM">00</b><span>min</span></div><div class="cd-t s"><b id="cdS">00</b><span>seg</span></div></div>
+      <div class="cd-bar" aria-hidden="true"><i id="cdBar"></i></div>
+      <div class="cd-date" id="cdDate"></div>
+      <div class="cd-hint">Prepárate: cuando llegue a cero podrás entrar</div>
+    </div>
+    <div class="cd-fin"><h2 id="cdFinT"></h2><p>Ya puedes entrar y hacer tus pronósticos.<br>¡Mucha suerte!</p><button type="button" class="cd-go" id="cdGo">Entrar</button></div>
+  </div>
+  <button type="button" class="cd-adm" id="cdAdm">Admin</button>
+  <div class="cd-sheet" id="cdSheet" hidden><div class="cd-sh"><button type="button" class="cd-x" id="cdX" aria-label="Cerrar">✕</button><div id="cdInfo"></div></div></div>`;
+  document.body.appendChild(o);
+  const P = o.querySelector("#cdParts");
+  for (let i = 0; i < 30; i++) { const e = document.createElement("i"), z = 2 + Math.random() * 4; if (i % 4 === 0) e.className = "g"; e.style.cssText = `left:${(Math.random() * 100).toFixed(1)}%;width:${z.toFixed(1)}px;height:${z.toFixed(1)}px;animation-duration:${(7 + Math.random() * 9).toFixed(1)}s;animation-delay:${(-Math.random() * 14).toFixed(1)}s`; P.appendChild(e); }
+  const sh = o.querySelector("#cdSheet"), ib = o.querySelector("#cdInfoBtn");
+  const setInfo = on => {
+    if (on && !o.querySelector("#cdInfo").firstChild) { o.querySelector("#cdInfo").innerHTML = $("#inicio").innerHTML; o.querySelectorAll("#cdInfo .fee").forEach(e => e.textContent = CONFIG.cuota); }
+    sh.hidden = !on; ib.setAttribute("aria-expanded", String(on)); if (on) o.querySelector(".cd-sh").scrollTop = 0;
+  };
+  ib.onclick = () => setInfo(sh.hidden);
+  o.querySelector("#cdX").onclick = () => setInfo(false);
+  sh.onclick = ev => { if (ev.target === sh) setInfo(false); };
+  o._closeInfo = () => setInfo(false);
+  o.querySelector("#cdAdm").onclick = () => { go("admin"); };
+  o.querySelector("#cdGo").onclick = () => {
+    const wasPrev = !!cdPrev;
+    if (wasPrev) cdPrev = null; else { cdFin = 0; cdLast = 0; }
+    applyCountdown();
+    if (!wasPrev && !me && !unlocked) go("cuenta");
+  };
+  return o;
+}
+function cdConfetti() {
+  const b = document.getElementById("cdConf"); if (!b) return;
+  const col = ["#00b4d8", "#9af2ff", "#ffd466", "#ff9d2e", "#ff6fb5", "#9b6bff", "#2fd37a", "#ffffff"];
+  for (let i = 0; i < 80; i++) {
+    const e = document.createElement("i"), r = Math.random;
+    e.style.cssText = `--x:${(r() * 100).toFixed(1)}%;--s:${(6 + r() * 7).toFixed(1)}px;--c:${col[i % col.length]};--d:${(2.6 + r() * 2.2).toFixed(2)}s;--dl:${(r() * .9).toFixed(2)}s;--dx:${((r() - .5) * 160).toFixed(0)}px;--r:${((r() - .5) * 1440).toFixed(0)}deg`;
+    b.appendChild(e); setTimeout(() => e.remove(), 6500);
+  }
+}
+function cdBump(e) { e.classList.remove("pop"); void e.offsetWidth; e.classList.add("pop"); }
+function cdSet(id, v, force) { const e = document.getElementById(id); if (e && (force || e.textContent !== v)) { e.textContent = v; cdBump(e); } }
+function cdTick() {
+  const o = document.getElementById("cdn"), c = cdCur(); if (!o || o.hidden || !c) return;
+  const left = c.at - srvNow();
+  if (left > 0) {
+    const s = Math.ceil(left / 1000), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), sc = s % 60;
+    cdSet("cdD", cdPad(d)); cdSet("cdH", cdPad(h)); cdSet("cdM", cdPad(m)); cdSet("cdS", cdPad(sc), true);
+    const bar = document.getElementById("cdBar"), tot = c.at - (c.t || 0);
+    if (bar) bar.style.width = (c.t > 0 && tot > 0 ? Math.max(0, Math.min(100, (1 - left / tot) * 100)) : 0).toFixed(2) + "%";
+    const f = s <= 10; o.classList.toggle("f10", f); o.classList.toggle("f3", s <= 3);
+    if (f) cdSet("cdBig", String(s));
+  } else if (!o.classList.contains("fin")) {
+    o.classList.remove("f10", "f3"); o.classList.add("fin");
+    document.getElementById("cdFinT").textContent = "¡Empieza la temporada " + cdNum(c) + "!";
+    document.getElementById("cdGo").textContent = cdPrev ? "Cerrar vista previa" : "Entrar";
+    cdConfetti(); setTimeout(cdConfetti, 1500); setTimeout(cdConfetti, 3200);
+    try { if (navigator.vibrate) navigator.vibrate([180, 70, 180, 70, 420]); } catch (e) {}
+  }
+}
+const cdPad = n => String(n).padStart(2, "0");
+function applyCountdown() {
+  const c = cdCur(), adminView = $("#admin").classList.contains("on");
+  let show = false;
+  if (c) {
+    const left = c.at - srvNow();
+    if (cdPrev) show = true;
+    else if (!unlocked && !adminView) {
+      if (left > 0) { show = true; cdLast = c.at; }
+      else if (cdFin === c.at) show = true;   // el final se está mostrando
+      else if (cdLast === c.at) { cdFin = c.at; show = true; }   // acaba de terminar mientras estaba abierta la pantalla
+    }
+  }
+  if (!show && !cdOn) return;
+  const o = cdBuild();
+  if (show && !cdOn) {
+    cdOn = true; o.hidden = false; o.classList.remove("f10", "f3", "fin");
+    document.getElementById("cdSea").textContent = "Temporada " + cdNum(c);
+    document.getElementById("cdDate").textContent = cdDate(c.at);
+    document.getElementById("cdAdm").hidden = !!cdPrev;
+    document.getElementById("cdConf").innerHTML = "";
+    if (cdPrev) { o.classList.remove("fin"); }
+    clearInterval(cdnTimer); cdnTimer = setInterval(cdTick, 250); cdTick();
+  } else if (show) {
+    document.getElementById("cdSea").textContent = "Temporada " + cdNum(c);
+    document.getElementById("cdDate").textContent = cdDate(c.at);
+    document.getElementById("cdAdm").hidden = !!cdPrev;
+  } else if (cdOn) {
+    cdOn = false; o.hidden = true; clearInterval(cdnTimer); cdnTimer = null; o.classList.remove("f10", "f3", "fin");
+    if (o._closeInfo) o._closeInfo();
+  }
+}
+// Panel del admin: programar, quitar y probar la cuenta atrás
+const cdLocal = ts => { const d = new Date(ts - new Date(ts).getTimezoneOffset() * 6e4); return d.toISOString().slice(0, 16); };
+function cdAdminHtml() {
+  const c = cdCfg(), left = c ? c.at - srvNow() : 0, played = calcRounds().length > 0, nDef = c ? cdNum(c) : (played ? temporada() + 1 : temporada());
+  const st = !c ? "Sin cuenta atrás programada." : left > 0 ? `<b>Activa:</b> temporada ${cdNum(c)} · empieza el ${esc(cdDate(c.at))} (faltan ${fmtIn(left)}). Hasta entonces nadie, salvo tú, puede entrar.` : `<b>Terminada:</b> la temporada ${cdNum(c)} empezó el ${esc(cdDate(c.at))}. Ya puede entrar todo el mundo.`;
+  const dv = AD.cdD != null ? AD.cdD : (c && left > 0 ? cdLocal(c.at) : ""), nv = AD.cdN != null ? AD.cdN : nDef;
+  return `<div class="card" style="margin-top:22px${c && left > 0 ? ";border-color:#ffd466" : ""}"><h3>⏳ Cuenta atrás de temporada</h3>
+    <p class="muted">Elige cuándo empieza la temporada. Hasta esa hora los jugadores ven una pantalla con la cuenta atrás y, al llegar a cero, pueden entrar. Para la siguiente temporada, programa otra.</p>
+    <p class="muted" style="color:${c && left > 0 ? "#ffd466" : "var(--mute)"}">${st}</p>
+    <label for="cdN">Número de temporada</label><input id="cdN" type="number" inputmode="numeric" min="1" max="99" value="${nv}" aria-label="Número de temporada" style="width:100%">
+    <label for="cdDt">Fecha y hora de inicio</label><input id="cdDt" type="datetime-local" value="${dv}" aria-label="Fecha y hora de inicio" style="width:100%">
+    <button class="btn" id="cdSave" style="width:100%">${c && left > 0 ? "Guardar cambios" : "Programar cuenta atrás"}</button>
+    <button class="btn ghost" id="cdTest" style="width:100%">👁️ Vista previa (25 s)</button>
+    ${c ? `<button class="btn del" id="cdDel" style="width:100%">Quitar cuenta atrás</button>` : ""}</div>`;
+}
+function cdAdminBind() {
+  const fail = t => { AD.msg = t; AD.cls = "err"; renderAdmin(); };
+  const keep = () => { AD.cdD = $("#cdDt").value; AD.cdN = $("#cdN").value; };
+  if ($("#cdSave")) $("#cdSave").onclick = () => {
+    keep(); const at = new Date($("#cdDt").value).getTime(), n = parseInt($("#cdN").value);
+    if (isNaN(at)) return fail("Elige la fecha y la hora de inicio de la cuenta atrás.");
+    if (at <= srvNow()) return fail("La hora de inicio tiene que ser futura.");
+    if (isNaN(n) || n < 1 || n > 99) return fail("Pon un número de temporada entre 1 y 99.");
+    (S.preds[MKEY] = S.preds[MKEY] || {}).cd = { at, n, t: srvNow() };
+    delete S.preds[MKEY].fin;   // la cuenta atrás de la temporada nueva sustituye a la pantalla de fin de la anterior
+    AD.cdD = null; AD.cdN = null; save(); AD.msg = "Cuenta atrás programada: la temporada " + n + " empieza el " + cdDate(at) + "."; AD.cls = "ok"; renderAdmin();
+  };
+  if ($("#cdTest")) $("#cdTest").onclick = () => { keep(); const n = parseInt($("#cdN").value); cdPrev = { at: Date.now() + 25000, t: Date.now(), n: n > 0 ? n : temporada() }; applyCountdown(); };
+  if ($("#cdDel")) $("#cdDel").onclick = async () => {
+    if (!(await ask("¿Quitar la cuenta atrás? Si estaba activa, los jugadores podrán entrar ya.", "Quitar"))) return;
+    const m = S.preds[MKEY]; if (m) { delete m.cd; if (!Object.keys(m).length) delete S.preds[MKEY]; }
+    AD.cdD = null; AD.cdN = null; save(); AD.msg = "Cuenta atrás quitada."; AD.cls = "ok"; renderAdmin();
+  };
+}
+
+// ===== Pantalla de fin de temporada =====
+// El admin la activa cuando acaba la temporada: S.preds[MKEY].fin = { n, t, sum }. Mientras esté activa nadie (salvo el admin) entra: ven «Ha terminado la temporada N,
+// gracias por participar», «Próximamente la temporada N+1», el botón de info y un resumen completo. El resumen se guarda DENTRO (sum) en el momento de activarla,
+// así sigue ahí aunque luego el admin empiece la temporada nueva y borre las jornadas. Programar una cuenta atrás la sustituye.
+const finCfg = () => { const m = S.preds[MKEY], f = m && m.fin; return f && f.n > 0 ? f : null; };
+let finPrev = null, finOn = false, finSumOpen = false;   // finSumOpen: el resumen de la temporada va tras un botón
+function finCup(id) { try { return trofeoSvg(TROFEOS.find(t => t.id === id), true).replace('viewBox="-1.75 -.05 3.5 3.2"', 'viewBox="-1 -.05 2 3.2"'); } catch (e) { return "🏆"; } }
+function finSnapshot(n) {
+  const L = standings(), rs = calcRounds(), ms = leagueMs(), one = q => ({ n: q.name, t: q.team || "" });
+  const tabla = L.map(q => ({ ...one(q), pt: q.pt, ex: q.ex || 0 }));
+  const eu = {}; Object.keys(CUP_ID).forEach(c => { const f = eMatch(c, "final"), w = f && f.result ? pById(eWinner(f)) : null; if (w) eu[c] = one(w); });
+  let prem = []; try { prem = premiosTemporada().slice(0, 12).map(d => { const q = pById(d.id) || {}; return { ...one(q), v: d.tot, it: d.it.map(o => ({ k: o.k, n: o.n, r: o.r })) }; }); } catch (e) {}
+  let best = null; S.players.filter(q => q.regAt).forEach(q => { const bn = rachaBonus(q.id, rs); rs.forEach(r => { const v = S.matches.filter(m => m.round === r).reduce((a, m) => a + ptsP((S.preds[m.id] || {})[q.id], m.result), 0) + (bn[r] || 0); if (!best || v > best.v) best = { ...one(q), v, r }; }); });
+  const top = key => { let b = null; L.forEach(q => { const v = key === "rmax" ? Math.max(q.rmax || 0, q.rmx || 0) : (q[key] || 0); if (v > 0 && (!b || v > b.v)) b = { ...one(q), v }; }); return b; };
+  let bdo = null; try { const f = bdoFase(); if (f && f.estado === "cerrada") { const g = bdoGanador(f)[0], q = g && pById(g.id); if (q) bdo = one(q); } } catch (e) {}
+  return { n, rondas: rs.length, preds: ms.reduce((a, m) => a + Object.keys(S.preds[m.id] || {}).length, 0), plenos: L.reduce((a, q) => a + (q.ex || 0), 0), pts: L.reduce((a, q) => a + q.pt, 0), tabla, eu, prem, best, plen: top("ex"), racha: top("rmax"), bdo };
+}
+function finBuild() {
+  let o = document.getElementById("fsn"); if (o) return o;
+  o = document.createElement("div"); o.id = "fsn"; o.hidden = true; o.setAttribute("role", "dialog"); o.setAttribute("aria-modal", "true"); o.setAttribute("aria-label", "Fin de temporada");
+  o.innerHTML = `<div class="fs-bg"></div><div class="fs-parts" id="fsParts"></div>
+  <button type="button" class="fs-info" id="fsInfoBtn" aria-expanded="false" aria-label="Qué es Súper Predict y cómo funciona"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="7.3" r="1.5" fill="currentColor"/></svg></button>
+  <div class="fs-in" id="fsIn"></div>
+  <div class="fs-sheet" id="fsSheet" hidden><div class="fs-sh"><button type="button" class="fs-x" id="fsX" aria-label="Cerrar">✕</button><div id="fsInfo"></div></div></div>`;
+  document.body.appendChild(o);
+  const P = o.querySelector("#fsParts");
+  for (let i = 0; i < 26; i++) { const e = document.createElement("i"), z = 2 + Math.random() * 4; if (i % 4 === 0) e.className = "c"; e.style.cssText = `left:${(Math.random() * 100).toFixed(1)}%;width:${z.toFixed(1)}px;height:${z.toFixed(1)}px;animation-duration:${(8 + Math.random() * 10).toFixed(1)}s;animation-delay:${(-Math.random() * 16).toFixed(1)}s`; P.appendChild(e); }
+  const sh = o.querySelector("#fsSheet"), ib = o.querySelector("#fsInfoBtn");
+  const setInfo = on => {
+    if (on && !o.querySelector("#fsInfo").firstChild) { o.querySelector("#fsInfo").innerHTML = $("#inicio").innerHTML; o.querySelectorAll("#fsInfo .fee").forEach(e => e.textContent = CONFIG.cuota); }
+    sh.hidden = !on; ib.setAttribute("aria-expanded", String(on)); if (on) o.querySelector(".fs-sh").scrollTop = 0;
+  };
+  ib.onclick = () => setInfo(sh.hidden);
+  o.querySelector("#fsX").onclick = () => setInfo(false);
+  sh.onclick = ev => { if (ev.target === sh) setInfo(false); };
+  o._closeInfo = () => setInfo(false);
+  return o;
+}
+function finHtml(f) {
+  const u = f.sum || {}, n = f.n, T = u.tabla || [], A = (i, h, cls) => `<div class="fs-a ${cls || ""}" style="transition-delay:${i * 0.05}s">${h}</div>`;
+  const cr = t => crest(t, false), nm = x => esc((x && x.n) || "");
+  const cd = cdCfg(), nxt = cd && cd.at - srvNow() > 0 ? `<em>Empieza el ${esc(cdDate(cd.at))}</em>` : "";
+  let h = `<svg class="cd-eye" viewBox="0 0 120 80" aria-hidden="true"><defs><radialGradient id="fsAu"><stop offset="0" stop-color="#ffc83c" stop-opacity=".55"/><stop offset=".6" stop-color="#ffc83c" stop-opacity=".12"/><stop offset="1" stop-color="#ffc83c" stop-opacity="0"/></radialGradient><radialGradient id="fsSc" cx=".5" cy=".5" r=".6"><stop offset=".55" stop-color="#fff"/><stop offset="1" stop-color="#c3d1da"/></radialGradient><radialGradient id="fsIr" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#e8b158"/><stop offset=".55" stop-color="#a9742a"/><stop offset="1" stop-color="#4a2c0b"/></radialGradient><clipPath id="fsCl"><path d="M6 40Q60 -4 114 40Q60 84 6 40Z"/></clipPath></defs><ellipse class="au" cx="60" cy="40" rx="88" ry="58" fill="url(#fsAu)"/><ellipse class="rg" cx="60" cy="40" rx="56" ry="32"/><ellipse class="rg r2" cx="60" cy="40" rx="56" ry="32"/><g class="bl"><ellipse cx="60" cy="40" rx="56" ry="32" fill="#2a2f35"/><path d="M6 40Q60 -4 114 40Q60 84 6 40Z" fill="url(#fsSc)"/><g clip-path="url(#fsCl)"><g class="lk"><circle cx="60" cy="40" r="22" fill="url(#fsIr)"/><circle cx="60" cy="40" r="16" fill="none" stroke="#ffd98a" stroke-opacity=".38" stroke-width="9" stroke-dasharray="1.1 2.6"/><circle cx="60" cy="40" r="21.3" fill="none" stroke="#2a1706" stroke-width="1.8"/><circle class="pu" cx="60" cy="40" r="12" fill="#1b1f24"/><circle cx="52" cy="31" r="5" fill="#fff"/><circle cx="68" cy="47" r="2.2" fill="#fff" opacity=".7"/></g></g><path d="M6 40Q60 -4 114 40Q60 84 6 40Z" fill="none" stroke="#2a2f35" stroke-width="1.6"/></g></svg>
+    <div class="fs-k">Súper Predict</div><h1 class="fs-t">Temporada ${n}<br>finalizada</h1>
+    <div class="fs-th">¡Gracias por participar!</div>
+    <p class="fs-p">Gracias por jugar, predecir y competir cada semana. Ha sido una temporada para el recuerdo.</p>
+    <div class="fs-soon"><small>Próximamente</small><b>Temporada ${n + 1}</b>${nxt}</div>`;
+  if (T.length) {
+    h += `<button type="button" class="fs-sumbtn" id="fsSumBtn" aria-expanded="${finSumOpen}" aria-controls="fsSum">${finSumOpen ? "Ocultar resumen de la temporada " + n : "📊 Ver resumen temporada " + n}</button><div class="fs-sum" id="fsSum"${finSumOpen ? "" : " hidden"}>`;
+    h += `<h2 class="fs-h">Resumen de la temporada ${n}</h2>`;
+    const ch = T[0];
+    h += A(0, `<div class="fs-champ"><div class="fs-cup">${finCup("spl")}</div>${cr(ch.t)}<b>${nm(ch)}</b><span>Campeón de la liga · ${ch.pt} pts</span></div>`);
+    if (T.length > 1) {
+      const pc = (q, i, c) => q ? `<div class="fs-pc p${c}"><span class="m">${i}º</span>${cr(q.t)}<strong>${nm(q)}</strong><em>${q.pt} pts</em></div>` : "<div></div>";
+      h += A(1, `<div class="fs-pod">${pc(T[1], 2, 2)}${pc(T[0], 1, 1)}${pc(T[2], 3, 3)}</div>`);
+    }
+    const EU = [["champions", "ucl", "Champions League", "u"], ["europa", "uel", "Europa League", "e"], ["conference", "uecl", "Conference League", "k"]], eu = u.eu || {};
+    if (EU.some(x => eu[x[0]])) h += `<h2 class="fs-h">Campeones de Europa</h2><div class="fs-eu">${EU.filter(x => eu[x[0]]).map((x, i) => A(i, `<div class="fs-ec ${x[3]}"><span class="ci">${finCup(x[1])}</span><div><small>${x[2]}</small><b>${cr(eu[x[0]].t)}<span>${nm(eu[x[0]])}</span></b></div></div>`)).join("")}</div>`;
+    if ((u.prem || []).length) h += `<h2 class="fs-h">Premios</h2><div class="fs-pr">${u.prem.map((d, i) => A(i, `<div class="fs-pw">${cr(d.t)}<div><strong>${nm(d)}</strong><small>${(d.it || []).map(o => esc(o.n === "Posición en Liga" ? "Liga " + o.r : o.n)).join(" · ")}</small></div><em>${eur(d.v)}</em></div>`)).join("")}</div>`;
+    const st = [], add = (v, l, d, g) => st.push(`<div class="fs-s${g ? " g" : ""}"><b>${v}</b><span>${l}</span>${d ? `<small>${d}</small>` : ""}</div>`);
+    add(u.rondas || 0, "Jornadas"); add(u.preds || 0, "Pronósticos"); add(u.plenos || 0, "Plenos", "", 1); add(u.pts || 0, "Puntos totales", "", 1);
+    if (u.best) add(u.best.v + " pts", "Mejor jornada (J" + u.best.r + ")", nm(u.best));
+    if (u.plen) add(u.plen.v, "Más plenos", nm(u.plen));
+    if (u.racha) add(u.racha.v, "Mayor racha", nm(u.racha));
+    if (u.bdo) add("🏅", "Balón de Oro", nm(u.bdo), 1);
+    h += `<h2 class="fs-h">Datos de la temporada</h2><div class="fs-st">${st.join("")}</div>`;
+    h += `<h2 class="fs-h">Clasificación final</h2><div class="fs-tb">${T.map((q, i) => `<div class="fs-r${i < 4 ? " z1" : i < 6 ? " z2" : i < 8 ? " z3" : ""}"><i>${i + 1}</i>${cr(q.t)}<span>${nm(q)}</span><b>${q.pt}</b></div>`).join("")}</div>`;
+    h += `</div>`;
+  }
+  h += `<div class="fs-bye">¡Nos vemos en la temporada ${n + 1}!</div><button type="button" class="fs-btn" id="fsAdm">${finPrev ? "Cerrar vista previa" : "Admin"}</button>`;
+  return h;
+}
+function applyFin() {
+  const f = finPrev || finCfg(), adminView = $("#admin").classList.contains("on");
+  const show = !!f && (!!finPrev || (!unlocked && !adminView && !cdOn));
+  if (!show && !finOn) return;
+  const o = finBuild(), box = o.querySelector("#fsIn");
+  if (show) {
+    if (!finOn) finSumOpen = false;   // cada vez que se abre la pantalla, el resumen empieza plegado
+    const sig = JSON.stringify(f) + "|" + (finPrev ? 1 : 0) + "|" + (cdCfg() ? cdCfg().at : 0);
+    if (!finOn || o._sig !== sig) {
+      o._sig = sig; box.innerHTML = finHtml(f);
+      const sb = box.querySelector("#fsSumBtn"), sm = box.querySelector("#fsSum");
+      if (sb && sm) sb.onclick = () => {
+        finSumOpen = sm.hidden; sm.hidden = !finSumOpen; sb.setAttribute("aria-expanded", String(finSumOpen));
+        sb.textContent = finSumOpen ? "Ocultar resumen de la temporada " + f.n : "📊 Ver resumen temporada " + f.n;
+        if (finSumOpen) { o.scrollTo({ top: o.scrollTop + sb.getBoundingClientRect().top - 12, behavior: "smooth" }); }
+      };
+      const b = box.querySelector("#fsAdm"); if (b) b.onclick = () => { if (finPrev) { finPrev = null; applyFin(); } else go("admin"); };
+      const els = [...box.querySelectorAll(".fs-a")];
+      if ("IntersectionObserver" in window) { const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { root: o, threshold: .12 }); els.forEach(e => io.observe(e)); } else els.forEach(e => e.classList.add("in"));
+    }
+    if (!finOn) { finOn = true; o.hidden = false; o.scrollTop = 0; }
+  } else {
+    finOn = false; finSumOpen = false; o.hidden = true; o._sig = ""; if (o._closeInfo) o._closeInfo();
+  }
+}
+// Panel del admin: activar, actualizar, quitar y probar la pantalla de fin de temporada
+function finAdminHtml() {
+  const f = finCfg(), n = f ? f.n : temporada();
+  const st = f ? `<b>Activa:</b> temporada ${f.n} finalizada. Nadie, salvo tú, puede entrar. El resumen está guardado${f.t ? " (" + esc(cdDate(f.t)) + ")" : ""}.` : "Desactivada.";
+  return `<div class="card" style="margin-top:22px${f ? ";border-color:#ffd466" : ""}"><h3>🏁 Fin de temporada</h3>
+    <p class="muted">Cuando acabe la temporada, actívala: los jugadores ven «Ha terminado la temporada, gracias por participar», «Próximamente la temporada siguiente», el botón de info y un resumen completo (campeón, podio, Europa, premios, datos y clasificación final). Actívala <b>antes</b> de pulsar «Nueva temporada»: el resumen se guarda al activarla y se conserva después.</p>
+    <p class="muted" style="color:${f ? "#ffd466" : "var(--mute)"}">${st}</p>
+    <label for="fsN">Número de la temporada que termina</label><input id="fsN" type="number" inputmode="numeric" min="1" max="99" value="${AD.fsN != null ? AD.fsN : n}" aria-label="Número de temporada que termina" style="width:100%">
+    <button class="btn" id="fsOn" style="width:100%">${f ? "Actualizar resumen y número" : "Mostrar pantalla de fin de temporada"}</button>
+    <button class="btn ghost" id="fsTest" style="width:100%">👁️ Vista previa</button>
+    ${f ? `<button class="btn del" id="fsOff" style="width:100%">Quitar pantalla de fin de temporada</button>` : ""}</div>`;
+}
+function finAdminBind() {
+  const fail = t => { AD.msg = t; AD.cls = "err"; renderAdmin(); };
+  const num = () => { AD.fsN = $("#fsN").value; return parseInt($("#fsN").value); };
+  if ($("#fsOn")) $("#fsOn").onclick = async () => {
+    const n = num(); if (isNaN(n) || n < 1 || n > 99) return fail("Pon un número de temporada entre 1 y 99.");
+    if (!calcRounds().length) return fail("No hay jornadas jugadas: no hay nada que resumir. Si ya empezaste la temporada nueva, deja la pantalla como estaba.");
+    const act = !!finCfg();
+    if (!(await ask(act ? `¿Actualizar el resumen con los datos actuales de la temporada ${n}?` : `¿Mostrar la pantalla de fin de la temporada ${n}? Nadie, salvo tú, podrá entrar hasta que la quites. Se guarda el resumen de la temporada ahora mismo.`, act ? "Actualizar" : "Mostrar"))) return;
+    (S.preds[MKEY] = S.preds[MKEY] || {}).fin = { n, t: srvNow(), sum: finSnapshot(n) };
+    AD.fsN = null; save(); AD.msg = "Pantalla de fin de la temporada " + n + " " + (act ? "actualizada." : "activada: los jugadores ya la ven."); AD.cls = "ok"; renderAdmin();
+  };
+  if ($("#fsTest")) $("#fsTest").onclick = () => {
+    const n = num(), f = finCfg();
+    if (f && !(n > 0 && n !== f.n)) finPrev = { ...f }; else if (calcRounds().length) finPrev = { n: n > 0 ? n : temporada(), t: Date.now(), sum: finSnapshot(n > 0 ? n : temporada()) }; else return fail("No hay jornadas jugadas para mostrar un resumen de prueba.");
+    applyFin();
+  };
+  if ($("#fsOff")) $("#fsOff").onclick = async () => {
+    if (!(await ask("¿Quitar la pantalla de fin de temporada? Los jugadores podrán entrar ya.", "Quitar"))) return;
+    const m = S.preds[MKEY]; if (m) { delete m.fin; if (!Object.keys(m).length) delete S.preds[MKEY]; }
+    save(); AD.msg = "Pantalla de fin de temporada quitada."; AD.cls = "ok"; renderAdmin();
+  };
 }
 
 // Clasificación tras la jornada r (por defecto, la última calculada)
@@ -3643,7 +4102,7 @@ function potPuede(t) {
   if (pendMatches().length) return { ok: false, why: "Ya has usado una poción en este partido." };
   return { ok: false, why: openMatches().length ? "Ya has enviado tu predicción de este partido. Solo puedes usarla cuando tengas una predicción pendiente." : "Solo puedes usarla cuando tengas una predicción pendiente. Ahora no hay ningún partido abierto." };
 }
-const shelfHtml = () => `<div id="penBox"></div><div id="penAmBox"></div><div class="pc-sec"><div class="pc-t">Pociones</div><div class="pc" id="pcHost" role="group" aria-label="Estantería de pociones. Toca una poción para ver qué hace."></div><p class="muted pc-h">Toca una poción para ver qué hace y cómo usarla</p></div>`;
+const shelfHtml = () => `<div id="penBox"></div><div id="penAmBox"></div><div class="pc-sec"><div class="pc-t">Pociones</div><p class="muted pc-w">⚠️ Cada poción solo se puede usar una vez</p><div class="pc" id="pcHost" role="group" aria-label="Estantería de pociones. Toca una poción para ver qué hace."></div><p class="muted pc-h">Toca una poción para ver qué hace y cómo usarla</p></div>`;
 // Lo que has visto con la poción visión
 function visSeen(ms) {
   const vm = ms.filter(m => visVista(me, m.id));
@@ -6136,6 +6595,7 @@ function adJornada(el) {
       <button class="btn del" id="newSeason" style="width:100%">${simOn() ? "Quitar simulación (nueva temporada)" : "Nueva temporada"}</button>
       <label for="seasonN">Número de temporada actual</label>
       <div class="row" style="align-items:center"><input id="seasonN" type="number" inputmode="numeric" min="1" max="99" value="${temporada()}" aria-label="Número de temporada" style="flex:1;min-width:0"><button class="btn ghost" id="setSeason" style="margin:0">Cambiar número</button></div></div>
+    ${finAdminHtml()}${cdAdminHtml()}
     <div class="card" style="margin-top:22px"><h3>🧪 Simulación de pruebas</h3>
       ${simOn() ? `<p class="muted">Simulación en marcha: ${S.players.filter(q => q.sim).length} usuarios inventados y ${leagueMs().length} jornadas. Se ve en todos los móviles. Para quitarla pulsa <b>Nueva temporada</b> (no cuenta como temporada nueva).</p>`
       : `<p class="muted">Completa la liga con usuarios inventados y les da predicciones, resultados y puntos de varias jornadas, también a los jugadores reales ya registrados, para probar la clasificación, los duelos, etc. Solo con la temporada vacía. Se quita con «Nueva temporada».</p>
@@ -6146,6 +6606,8 @@ function adJornada(el) {
       <button class="btn del" id="resetCromos" style="width:100%">Borrar cromos de todos</button></div>`;
 
   $("#newSeason").onclick = nuevaTemporada;
+  cdAdminBind();
+  finAdminBind();
   if ($("#votTst")) $("#votTst").onclick = votPrueba;
   if ($("#bdoTst")) $("#bdoTst").onclick = () => { BDO_TEST = BDO_TEST ? null : { v: null }; const b = document.getElementById("bdoBox"); if (b && !BDO_TEST) b.remove(); AD.msg = BDO_TEST ? "Prueba del Balón de Oro activada: ve a Inicio. Solo la ves tú." : "Prueba quitada."; AD.cls = "ok"; render(); };
   if ($("#bdoOpen")) $("#bdoOpen").onclick = async () => { if (!(await ask("¿Abrir ya la votación del Balón de Oro? Durará 48 horas y los nominados serán los 3 con más méritos ahora mismo.", "Abrir"))) return; AD.msg = bdoAbrir() ? "Votación abierta." : "No se pudo abrir (hacen falta al menos 4 jugadores)."; AD.cls = "ok"; render(); };
@@ -7891,6 +8353,7 @@ function renderTitulos() {   // tienda (pestaña Sobres, entre abrir sobres y el
     q.comprados = [...(q.comprados || []), id]; mergeGastos(); save(); toast("¡Título comprado: " + t.n + "!"); render();
   });
 }
+let marcosAbiertos = false;   // marcos animados del perfil: 3 a la vista y "Ver más" para el resto
 let titulosAbiertos = false;   // lista de títulos del perfil: 5 a la vista y "Ver más" para el resto
 const vistosKey = id => KEY + "_vistos_" + id;   // títulos que el jugador ya ha visto (por dispositivo): solo sirve para el aviso del puntito rojo
 const vistosLoad = id => { try { const v = JSON.parse(localStorage.getItem(vistosKey(id))); return Array.isArray(v) ? v : null; } catch (e) { return null; } };
@@ -7928,7 +8391,9 @@ function renderLogros() {
   const EUM = [["ucl", "Champions League", "Violeta con barrido de luz y destellos plateados"], ["uel", "Europa League", "Naranja y ámbar con barrido de luz y destellos cálidos"], ["uecl", "Conference League", "Verde y turquesa con barrido de luz y destellos"]];
   const euRow = ([k, nom, d]) => { const has = trofeosDe(p).includes(k), on = has && p.marco === k;
     return `<div class="ti-r mk mke e-${k}${has ? " ok" : ""}${on ? " on" : ""}"><div class="ti-i"><em class="ti-k">Marco animado</em><b>Marco ${nom}</b><span>${has ? "" : "Gana la " + nom}</span></div>${has ? `<button type="button" class="ti-b" data-mk="${k}">${on ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}<div class="mk-pv eu" role="img" aria-label="Vista previa de la animación del Marco ${nom}"><span class="mk-n">1º</span>${p.team ? crest(p.team, false) : ""}<span class="mk-u">${esc(p.name)}</span><span class="mk-t">Vista previa</span>${bdoSp(4)}</div></div>`; };
-  const marcoHtml = `<div class="ti-g"><div class="ti-r mk${hasM ? " ok" : ""}${onM ? " on" : ""}"><div class="ti-i"><em class="ti-k">Marco animado</em><b>Marco Coleccionista</b><span>${hasM ? "Estrellas fugaces y brillo cromático en tu fila de la clasificación y en tu perfil · Eres el primero en completar el álbum" : dueno ? "Exclusivo del primero en completar el álbum: ya es de " + esc(dueno.name) : "Exclusivo del primero en completar el álbum de cromos. Aún nadie lo ha conseguido"}</span></div>${hasM ? `<button type="button" class="ti-b" data-mk="col">${onM ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}<div class="mk-pv" role="img" aria-label="Vista previa de la animación del Marco Coleccionista"><span class="mk-n">1º</span>${p.team ? crest(p.team, false) : ""}<span class="mk-u">${esc(p.name)}</span><span class="mk-t">Vista previa</span></div></div>${bdoRow}${splRow}${EUM.map(euRow).join("")}</div>`;
+  const colRow = `<div class="ti-r mk${hasM ? " ok" : ""}${onM ? " on" : ""}"><div class="ti-i"><em class="ti-k">Marco animado</em><b>Marco Coleccionista</b><span>${hasM ? "Estrellas fugaces y brillo cromático en tu fila de la clasificación y en tu perfil · Eres el primero en completar el álbum" : dueno ? "Exclusivo del primero en completar el álbum: ya es de " + esc(dueno.name) : "Exclusivo del primero en completar el álbum de cromos. Aún nadie lo ha conseguido"}</span></div>${hasM ? `<button type="button" class="ti-b" data-mk="col">${onM ? "Equipado" : "Equipar"}</button>` : `<span class="ti-l" aria-label="Bloqueado">🔒</span>`}<div class="mk-pv" role="img" aria-label="Vista previa de la animación del Marco Coleccionista"><span class="mk-n">1º</span>${p.team ? crest(p.team, false) : ""}<span class="mk-u">${esc(p.name)}</span><span class="mk-t">Vista previa</span></div></div>`;
+  const mkList = [["col", colRow], ["bdo", bdoRow], ["spl", splRow], ...EUM.map(e => [e[0], euRow(e)])].sort((x, y) => (y[0] === p.marco) - (x[0] === p.marco));   // el equipado, arriba del todo
+  const marcoHtml = `<div class="ti-g">${(marcosAbiertos ? mkList : mkList.slice(0, 3)).map(x => x[1]).join("")}</div>${mkList.length > 3 ? `<button type="button" class="ti-more" id="mkMore">${marcosAbiertos ? "Ver menos" : "Ver más (" + (mkList.length - 3) + ")"}</button>` : ""}`;
   box.innerHTML = `<h2 style="margin-top:26px">Títulos de personalización</h2>
     <p class="muted" style="text-align:center;margin:-4px 8px 12px">Equipa uno para que salga bajo tu nombre.<br>Logros: ${have.size}/${TITULOS.length} · Comprados: ${own.size}</p>
     <div class="ti-g">${(titulosAbiertos ? lst : lst.slice(0, 5)).map(t => {
@@ -7957,6 +8422,7 @@ function renderLogros() {
     const q = meP(); if (!q || !S.players.includes(q)) return;
     q.marco = q.marco === k ? "" : k; save(); render();
   });
+  const mm = box.querySelector("#mkMore"); if (mm) mm.onclick = () => { marcosAbiertos = !marcosAbiertos; renderLogros(); };
   const mb = box.querySelector("#tiMore"); if (mb) mb.onclick = () => { titulosAbiertos = !titulosAbiertos; renderLogros(); };
   box.querySelectorAll("[data-ti]").forEach(b => b.onclick = () => {
     const id = b.dataset.ti; if (!real || !synced || !(have.has(id) || own.has(id) || copIds.includes(id))) return;
