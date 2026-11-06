@@ -2066,6 +2066,25 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 #pshBox #pshMsg:empty{display:none}
 #pshBox #pshMsg{margin:10px 2px 0;font-size:14px}
 @media (prefers-reduced-motion:reduce){#pshBox .psh-sw,#pshBox .psh-sw i{transition:none}}
+/* Música (perfil): mismo aspecto que Avisos */
+#musBox .psh{display:block;margin:10px 0 8px;padding:12px 14px}
+#musBox .psh-r{display:flex;align-items:center;gap:12px}
+#musBox .psh-i{width:42px;height:42px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:var(--cyan);border:1px solid #00b4d855;background:radial-gradient(circle at 50% 30%,#00b4d833,#00b4d80d)}
+#musBox .psh-i svg{width:22px;height:22px}
+#musBox .psh-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+#musBox .psh-t b{font:400 22px/1 var(--h);letter-spacing:.04em;text-transform:uppercase;color:var(--text)}
+#musBox .psh-t span{display:flex;align-items:center;gap:6px;font:700 13px/1.1 var(--b);color:var(--mute)}
+#musBox .psh-t span::before{content:"";width:8px;height:8px;border-radius:50%;background:#5b6b78;flex:0 0 auto}
+#musBox .psh-on .psh-i{color:#3be08a;border-color:#3be08a66;background:radial-gradient(circle at 50% 30%,#3be08a33,#3be08a0d)}
+#musBox .psh-on .psh-t span{color:#3be08a}
+#musBox .psh-on .psh-t span::before{background:#3be08a;box-shadow:0 0 8px #3be08a}
+#musBox .psh-instalar .psh-t span,#musBox .psh-bloqueado .psh-t span{color:#ffc21a}
+#musBox .psh-instalar .psh-t span::before,#musBox .psh-bloqueado .psh-t span::before{background:#ffc21a}
+#musBox .psh-sw{position:relative;flex:0 0 auto;width:54px;height:32px;padding:0;margin:0;border-radius:99px;border:1px solid var(--line);background:#0a1014;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .2s,border-color .2s}
+#musBox .psh-sw i{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#8b9aa6;transition:transform .2s,background .2s}
+#musBox .psh-sw.psh-on{background:#00b4d833;border-color:var(--cyan)}
+#musBox .psh-sw.psh-on i{transform:translateX(22px);background:var(--cyan);box-shadow:0 0 10px #00b4d8aa}
+#musBox .psh-sw:disabled{opacity:.55}
 /* ===== Marco Balón de Oro: dorado con barrido de brillo y destellos aleatorios (solo quien gana un Balón de Oro) ===== */
 @keyframes bdoGlow{0%,100%{box-shadow:inset 0 9px 9px -9px rgba(255,196,30,.4),inset 0 -9px 9px -9px rgba(255,196,30,.4),0 -8px 10px -8px rgba(255,196,30,.45),0 8px 10px -8px rgba(255,196,30,.45)}50%{box-shadow:inset 0 9px 9px -9px rgba(255,212,64,.8),inset 0 -9px 9px -9px rgba(255,212,64,.8),0 -8px 10px -8px rgba(255,212,64,.85),0 8px 10px -8px rgba(255,212,64,.85)}}
 @keyframes bdoGlowMy{0%,100%{box-shadow:0 0 12px rgba(255,196,30,.5),0 0 26px rgba(255,196,30,.22),inset 0 0 12px rgba(255,196,30,.3)}50%{box-shadow:0 0 18px rgba(255,212,64,.85),0 0 36px rgba(255,196,30,.4),inset 0 0 18px rgba(255,196,30,.5)}}
@@ -2604,6 +2623,7 @@ html,body{overscroll-behavior-y:none}
   <div id="euroHist"></div>
   <div id="logrosBox"></div>
   <div id="pshBox"></div>
+  <div id="musBox"></div>
 </section>
 
 <!-- ADMIN -->
@@ -9078,13 +9098,18 @@ boot();
 })();
 </script>
 <script>
-/* ===== Banda sonora de fondo: volumen 10 %, bucle infinito sin corte =====
+/* ===== Banda sonora de fondo: volumen 5 %, bucle infinito sin corte =====
    Archivo: /soundtrack.mp3 (junto al index.html). Está hecho para repetirse en periodo exacto de 153,6 s,
    y se reproduce con Web Audio (loopStart/loopEnd), que no deja hueco entre vueltas. */
 (function(){
-  const URL_BSO="/soundtrack.mp3", VOL=0.10, LOOP_START=1.0, LOOP_LEN=153.6, FADE_IN=2.5;
+  const URL_BSO="/soundtrack.mp3", VOL=0.05, LOOP_START=1.0, LOOP_LEN=153.6, FADE_IN=2.5;
   const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
-  let bytes=null, ctx=null, src=null, starting=false;
+  let bytes=null, ctx=null, src=null, starting=false, gain=null, fading=false;
+  const MKEY="bso_silencio";
+  const isMuted=()=>{ try{ return localStorage.getItem(MKEY)==="1"; }catch(e){ return false; } };
+  const applyVol=()=>{ if(!gain||!ctx) return; const t=ctx.currentTime; gain.gain.cancelScheduledValues(t); gain.gain.setValueAtTime(gain.gain.value,t); gain.gain.linearRampToValueAtTime(isMuted()?0:VOL,t+.25); };
+  window.BSO={ on:()=>!isMuted(),
+    toggle(){ const m=!isMuted(); try{ localStorage.setItem(MKEY,m?"1":"0"); }catch(e){} fading=false; applyVol(); if(!m&&!src&&!starting) start(); return !m; } };
   const getBytes=()=>bytes||(bytes=fetch(URL_BSO).then(r=>{ if(!r.ok) throw new Error("bso"); return r.arrayBuffer(); }));
   getBytes().catch(()=>{ bytes=null; });                       // precarga el archivo mientras el usuario navega
   const decode=(c,ab)=>new Promise((ok,ko)=>{ const p=c.decodeAudioData(ab,ok,ko); if(p&&p.catch) p.catch(ko); });
@@ -9095,7 +9120,8 @@ boot();
       if(ctx.state!=="running") ctx.resume().catch(()=>{});      // el navegador solo permite sonar tras un toque del usuario
       const buf=await decode(ctx,(await getBytes()).slice(0));
       const g=ctx.createGain(), t=ctx.currentTime;
-      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(VOL,t+FADE_IN);   // entrada suave y luego fijo al 10 %
+      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(isMuted()?0:VOL,t+FADE_IN);   // entrada suave y luego fijo al 5 % (0 si está silenciada)
+      gain=g;
       const s=ctx.createBufferSource(); s.buffer=buf; s.loop=true;
       if(buf.duration>=LOOP_START+LOOP_LEN){ s.loopStart=LOOP_START; s.loopEnd=LOOP_START+LOOP_LEN; }
       s.connect(g); g.connect(ctx.destination);
@@ -9110,6 +9136,34 @@ boot();
     if(!ctx||!src) return;
     if(document.hidden) ctx.suspend().catch(()=>{}); else ctx.resume().catch(()=>{});
   });
+})();
+</script>
+<script>
+/* Recuadro de música al final del perfil propio (debajo de Avisos) */
+(function(){
+  const icon=on=>on
+    ?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>'
+    :'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><path d="M3 3l18 18"/></svg>';
+  function paint(){
+    const box=document.getElementById("musBox"); if(!box) return;
+    const on=window.BSO?window.BSO.on():true;
+    box.innerHTML='<div class="card psh psh-'+(on?"on":"off")+'"><div class="psh-r"><span class="psh-i">'+icon(on)+'</span><div class="psh-t"><b>Música</b><span>'+(on?"Activada":"Desactivada")+'</span></div><button type="button" class="psh-sw'+(on?" psh-on":"")+'" id="musSw" role="switch" aria-checked="'+(on?"true":"false")+'" aria-label="'+(on?"Quitar la música":"Poner la música")+'"><i></i></button></div></div>';
+    const b=document.getElementById("musSw");
+    if(b) b.onclick=()=>{ if(window.BSO) window.BSO.toggle(); paint(); };
+  }
+  function sync(){
+    try{
+      const box=document.getElementById("musBox"), hb=document.getElementById("historialBox"), pl=meP();
+      if(!box) return;
+      if(!hb||!pl||(viewId&&viewId!==me)||!hb.firstChild){ box.innerHTML=""; return; }   // solo en el perfil propio
+      paint();
+    }catch(e){}
+  }
+  try{
+    const _rh=renderHistorial;
+    renderHistorial=function(){ const r=_rh.apply(this,arguments); sync(); return r; };
+    sync();
+  }catch(e){}
 })();
 </script>
 </body>
