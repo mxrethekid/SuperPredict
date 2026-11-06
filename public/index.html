@@ -5535,15 +5535,35 @@ function setupMyPos(t) {
   const root = document.documentElement;
   const reset = () => { nav.style.top = ""; nav.style.bottom = ""; root.style.removeProperty("--pin"); };
   const isField = el => !!el && (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) || el.isContentEditable);
+  // Altura "sana" de la pantalla visible (sin teclado ni encogimientos de iOS): se aprende cuando la app está bien colocada y se guarda en el móvil.
+  // Así, si al volver iOS encoge el viewport (la barra queda a media pantalla), se sabe exactamente dónde tiene que ir la barra.
+  const phone = Math.min(screen.width, screen.height) < 700;
+  const KK = "spl_vh_" + screen.width + "x" + screen.height + "_" + (window.devicePixelRatio || 1);
+  let known = 0; try { known = +localStorage.getItem(KK) || 0; } catch (e) {}
+  if (known > screen.height - 20) known = 0;   // valor imposible: se descarta
+  let seenVal = 0, seenAt = 0, shownAt = Date.now();
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) shownAt = Date.now(); });
+  const isStand = () => navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+  const learn = (L, vv, ae) => {
+    const ok = phone && isStand() && !document.hidden && window.innerWidth < window.innerHeight + 1 && !isField(ae) && vv.scale <= 1.01
+      && Math.abs(vv.offsetTop + vv.height - L) <= 1 && L <= screen.height - 20 && L > known + 2 && Date.now() - shownAt > 3000;
+    if (!ok) { seenVal = 0; return; }
+    if (Math.abs(L - seenVal) > 1) { seenVal = L; seenAt = Date.now(); return; }
+    if (Date.now() - seenAt >= 2500) { known = L; seenVal = 0; try { localStorage.setItem(KK, String(L)); } catch (e) {} }
+  };
   const fix = () => {
     raf = 0;
     const vv = window.visualViewport, ae = document.activeElement;
-    if (!vv || vv.scale > 1.01 || !nav.offsetHeight || isField(ae)) { reset(); return; }
+    if (!vv || vv.scale > 1.01 || !nav.offsetHeight) { reset(); return; }
+    const L = document.documentElement.clientHeight, stand = isStand();
+    learn(L, vv, ae);
+    const shrunk = phone && stand && window.innerWidth < window.innerHeight + 1 && known && known - L > 8;   // iOS ha encogido el viewport: la barra debe ir a la altura sana
+    if (isField(ae) && !shrunk) { reset(); return; }
     let bottom = vv.offsetTop + vv.height;
-    // Al volver de otra app, iOS a veces deja el viewport "encogido" (la app se ve a pantalla completa pero la maquetación cree que la pantalla mide menos): en la app instalada se usa la altura real de la pantalla
-    const stand = navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
-    if (stand && screen.width < screen.height && window.innerWidth < window.innerHeight + 1 && screen.height - bottom > 150) bottom = screen.height;
-    const gap = Math.round(document.documentElement.clientHeight - bottom);
+    if (shrunk) bottom = known;
+    // Al volver de otra app, iOS a veces deja el viewport "encogido" (la app se ve a pantalla completa pero la maquetación cree que la pantalla mide menos): si aún no se conoce la altura sana, en la app instalada se usa la altura real de la pantalla
+    else if (stand && screen.width < screen.height && window.innerWidth < window.innerHeight + 1 && screen.height - bottom > 150) bottom = screen.height;
+    const gap = Math.round(L - bottom);
     if (Math.abs(gap) > 2) { nav.style.bottom = "auto"; nav.style.top = (bottom - nav.offsetHeight) + "px"; root.style.setProperty("--pin", Math.max(0, -gap) + "px"); }
     else reset();
   };
@@ -7491,6 +7511,7 @@ async function abrirSobre() {
     <button type="button" class="pko-ok">Continuar</button>`;
   document.body.appendChild(o);
   document.documentElement.classList.add("pko-lock");
+  try { if (window.BSO) window.BSO.duck(true, 3); } catch (e) {}   // la música baja poco a poco mientras se abre el sobre
 
   const q = s => o.querySelector(s);
   const stage = q(".pko-stage"), aura = q(".pko-aura"), rays = q(".pko-rays"), ring = q(".pko-ring"), pk = q(".pko-pk"), pt = q(".pko-pk .pt"), pb = q(".pko-pk .pb"),
@@ -7509,6 +7530,7 @@ async function abrirSobre() {
   const cerrar = () => {
     if (!alive) return; alive = false;
     timers.forEach(t => { clearTimeout(t); clearInterval(t); });
+    try { if (window.BSO) window.BSO.duck(false, 3); } catch (e) {}   // y sube poco a poco al cerrar
     fx.stop(); if (fr) fr.stop(); o.classList.add("out");
     window.removeEventListener("keydown", onKey);
     setTimeout(() => { o.remove(); document.documentElement.classList.remove("pko-lock"); abriendo = false; renderSobres(); }, 320);
@@ -9104,11 +9126,13 @@ boot();
 (function(){
   const URL_BSO="/soundtrack.mp3", VOL=0.05, LOOP_START=1.0, LOOP_LEN=153.6, FADE_IN=2.5;
   const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
-  let bytes=null, ctx=null, src=null, starting=false, gain=null, fading=false;
+  let bytes=null, ctx=null, src=null, starting=false, gain=null, fading=false, ducked=false;
   const MKEY="bso_silencio";
   const isMuted=()=>{ try{ return localStorage.getItem(MKEY)==="1"; }catch(e){ return false; } };
-  const applyVol=()=>{ if(!gain||!ctx) return; const t=ctx.currentTime; gain.gain.cancelScheduledValues(t); gain.gain.setValueAtTime(gain.gain.value,t); gain.gain.linearRampToValueAtTime(isMuted()?0:VOL,t+.25); };
+  const target=()=>(isMuted()||ducked)?0:VOL;
+  const applyVol=(sec)=>{ if(!gain||!ctx) return; const t=ctx.currentTime; gain.gain.cancelScheduledValues(t); gain.gain.setValueAtTime(gain.gain.value,t); gain.gain.linearRampToValueAtTime(target(),t+(sec||.25)); };
   window.BSO={ on:()=>!isMuted(),
+    duck(on,sec){ ducked=!!on; applyVol(sec||2.5); },   // baja/sube la música poco a poco (al abrir un sobre)
     toggle(){ const m=!isMuted(); try{ localStorage.setItem(MKEY,m?"1":"0"); }catch(e){} fading=false; applyVol(); if(!m&&!src&&!starting) start(); return !m; } };
   const getBytes=()=>bytes||(bytes=fetch(URL_BSO).then(r=>{ if(!r.ok) throw new Error("bso"); return r.arrayBuffer(); }));
   getBytes().catch(()=>{ bytes=null; });                       // precarga el archivo mientras el usuario navega
@@ -9120,7 +9144,7 @@ boot();
       if(ctx.state!=="running") ctx.resume().catch(()=>{});      // el navegador solo permite sonar tras un toque del usuario
       const buf=await decode(ctx,(await getBytes()).slice(0));
       const g=ctx.createGain(), t=ctx.currentTime;
-      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(isMuted()?0:VOL,t+FADE_IN);   // entrada suave y luego fijo al 5 % (0 si está silenciada)
+      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(target(),t+FADE_IN);   // entrada suave y luego fijo al 5 % (0 si está silenciada)
       gain=g;
       const s=ctx.createBufferSource(); s.buffer=buf; s.loop=true;
       if(buf.duration>=LOOP_START+LOOP_LEN){ s.loopStart=LOOP_START; s.loopEnd=LOOP_START+LOOP_LEN; }
