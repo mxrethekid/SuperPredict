@@ -2034,8 +2034,10 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 @keyframes ecr{50%{opacity:.35}}
 .eu-sep{height:3px;margin:24px 8px;border-radius:3px;background:linear-gradient(90deg,transparent,var(--cyan),#9af2ff,var(--cyan),transparent) 0 0/200% 100%;box-shadow:0 0 12px #00b4d8aa;animation:ecsep 5s linear infinite}
 @keyframes ecsep{to{background-position:-200% 0}}
-#euroPlay .ecard .tdb.tdi{right:60px}   /* a su derecha va el chat y a su izquierda la forma: el botón de info se hace sitio */
-.ecard .tdb.tdi{position:absolute;top:12px;right:12px;margin:0;z-index:3;color:#fff;filter:drop-shadow(0 1px 4px #000)}
+/* Tarjeta europea: arriba a la izquierda la forma (estadísticas) y justo debajo el chat; arriba a la derecha el botón de info, alineado con el de la forma */
+.ecard > .chb:not(.fmb){top:60px;right:auto;left:12px}
+.ecard .tdb.tdi{position:absolute;top:12px;right:12px;margin:0;z-index:3;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;filter:drop-shadow(0 1px 4px #000)}
+.ecard .tdb.tdi svg{width:26px;height:26px}
 @media (prefers-reduced-motion:reduce){.ecard,.ecard::after,.en::after,.en-p.win,.ecr,.eu-sep{animation:none}}
 /* Marco Coleccionista sin bordes: solo brillo interior */
 @keyframes colGlow{0%{box-shadow:inset 0 0 16px rgba(255,77,141,.38)}16.67%{box-shadow:inset 0 0 16px rgba(255,177,61,.38)}33.33%{box-shadow:inset 0 0 16px rgba(230,255,77,.38)}50%{box-shadow:inset 0 0 16px rgba(77,255,154,.38)}66.67%{box-shadow:inset 0 0 16px rgba(77,200,255,.38)}83.33%{box-shadow:inset 0 0 16px rgba(154,107,255,.38)}100%{box-shadow:inset 0 0 16px rgba(255,77,141,.38)}}
@@ -5541,6 +5543,10 @@ function setupMyPos(t) {
   const KK = "spl_vh_" + screen.width + "x" + screen.height + "_" + (window.devicePixelRatio || 1);
   let known = 0; try { known = +localStorage.getItem(KK) || 0; } catch (e) {}
   if (known > screen.height - 20) known = 0;   // valor imposible: se descarta
+  // Respaldo: en la app instalada la pantalla visible empieza justo debajo de la barra de estado, así que la altura sana es el alto de pantalla menos esa barra (según modelo)
+  const SB = { 852: 59, 844: 47, 932: 59, 926: 47, 874: 62, 956: 62, 896: 48, 812: 50, 736: 20, 667: 20 };
+  const est = SB[screen.height] ? screen.height - SB[screen.height] : 0;
+  const healthy = () => Math.max(known, est);
   let seenVal = 0, seenAt = 0, shownAt = Date.now();
   document.addEventListener("visibilitychange", () => { if (!document.hidden) shownAt = Date.now(); });
   const isStand = () => navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
@@ -5557,12 +5563,11 @@ function setupMyPos(t) {
     if (!vv || vv.scale > 1.01 || !nav.offsetHeight) { reset(); return; }
     const L = document.documentElement.clientHeight, stand = isStand();
     learn(L, vv, ae);
-    const shrunk = phone && stand && window.innerWidth < window.innerHeight + 1 && known && known - L > 8;   // iOS ha encogido el viewport: la barra debe ir a la altura sana
+    const H = healthy();
+    const shrunk = phone && stand && window.innerWidth < window.innerHeight + 1 && H && H - L > 8;   // iOS ha encogido el viewport: la barra debe ir a la altura sana
     if (isField(ae) && !shrunk) { reset(); return; }
     let bottom = vv.offsetTop + vv.height;
-    if (shrunk) bottom = known;
-    // Al volver de otra app, iOS a veces deja el viewport "encogido" (la app se ve a pantalla completa pero la maquetación cree que la pantalla mide menos): si aún no se conoce la altura sana, en la app instalada se usa la altura real de la pantalla
-    else if (stand && screen.width < screen.height && window.innerWidth < window.innerHeight + 1 && screen.height - bottom > 150) bottom = screen.height;
+    if (shrunk) bottom = H;
     const gap = Math.round(L - bottom);
     if (Math.abs(gap) > 2) { nav.style.bottom = "auto"; nav.style.top = (bottom - nav.offsetHeight) + "px"; root.style.setProperty("--pin", Math.max(0, -gap) + "px"); }
     else reset();
