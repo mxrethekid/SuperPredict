@@ -961,6 +961,7 @@ td .crest{width:30px;height:30px}
 #historial .pf-badges span small{font:700 11px var(--b);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
 #historial .pf-badges .gd{border-color:rgba(242,194,48,.6);color:#ffe066;box-shadow:inset 0 0 14px rgba(242,194,48,.1),0 0 18px -6px rgba(242,194,48,.7)}
 #historial .pf-sec{margin:0 0 14px;text-align:center;font:700 17px/1.3 var(--b);color:var(--mute);letter-spacing:.12em;text-transform:uppercase}
+#historial .st b .fire.dn{filter:drop-shadow(0 0 8px rgba(47,168,79,.8))}
 #historial .st b .fire{display:inline;font-size:.62em;margin-left:6px;letter-spacing:0;text-transform:none;color:inherit;vertical-align:.08em;filter:drop-shadow(0 0 8px rgba(255,140,30,.8))}
 #historial .hrx{display:flex;align-items:center;justify-content:center;gap:8px;margin:-4px 0 14px;padding:9px 12px;border:1px solid rgba(255,179,71,.45);border-radius:12px;background:rgba(255,140,30,.1);color:#ffb347;font-weight:700;font-size:14px}
 #historial .pf-streak{display:inline-flex;align-items:center;gap:5px;margin-top:8px;font:400 22px var(--h);letter-spacing:.05em;color:#ffb347;text-shadow:0 0 12px rgba(255,140,30,.6)}
@@ -1580,6 +1581,16 @@ nav button.nw::after,nav button.nwp::after{top:7px;left:calc(50% + 10px)}
 #euRp .eu-sk{padding:10px 26px;border-radius:99px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font:700 13px/1 var(--b);letter-spacing:.06em;cursor:pointer}
 /* ===== Duelo de penaltis v3 ===== */
 .pz{position:relative;border:1px solid rgba(25,211,255,.35);border-radius:20px;background:linear-gradient(180deg,#0b1722,#0a1118);padding:14px 12px;box-shadow:0 0 22px rgba(25,211,255,.12)}
+/* Duelos minimizados: tarjeta compacta que se abre al tocarla */
+.pz.pz-min{display:flex;align-items:center;gap:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:12px 14px;transition:transform .15s}
+.pz.pz-min:active{transform:scale(.985)}
+.pz-min .crest{width:40px;height:40px;flex:none}
+.pz-min .pm-t{flex:1;min-width:0;text-align:left}
+.pz-min .pm-t b{display:block;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pz-min .pm-t small{display:block;color:var(--mute);font-size:12.5px;margin-top:2px}
+.pz-min .pm-t small.go{color:#ffc83d;font-weight:700}
+.pz-min .pm-c{flex:none;width:30px;height:30px;border-radius:50%;border:1px solid rgba(25,211,255,.45);background:rgba(25,211,255,.12);color:var(--cyan);display:flex;align-items:center;justify-content:center}
+.pz-min .pm-c svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
 .pz-sub{display:flex;align-items:center;justify-content:center;gap:6px;color:#ffc83d;font:700 12.5px/1 var(--b);margin-bottom:12px}.pz-sub img{width:18px;height:18px}
 .pz-vs{display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:start}
 .pz-p{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;padding:6px 2px;border-radius:14px;border:1px solid transparent;transition:background .3s,border-color .3s,box-shadow .3s}
@@ -2034,10 +2045,8 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 @keyframes ecr{50%{opacity:.35}}
 .eu-sep{height:3px;margin:24px 8px;border-radius:3px;background:linear-gradient(90deg,transparent,var(--cyan),#9af2ff,var(--cyan),transparent) 0 0/200% 100%;box-shadow:0 0 12px #00b4d8aa;animation:ecsep 5s linear infinite}
 @keyframes ecsep{to{background-position:-200% 0}}
-/* Tarjeta europea: arriba a la izquierda la forma (estadísticas) y justo debajo el chat; arriba a la derecha el botón de info, alineado con el de la forma */
-.ecard > .chb:not(.fmb){top:60px;right:auto;left:12px}
-.ecard .tdb.tdi{position:absolute;top:12px;right:12px;margin:0;z-index:3;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;filter:drop-shadow(0 1px 4px #000)}
-.ecard .tdb.tdi svg{width:26px;height:26px}
+#euroPlay .ecard .tdb.tdi{right:60px}   /* a su derecha va el chat y a su izquierda la forma: el botón de info se hace sitio */
+.ecard .tdb.tdi{position:absolute;top:12px;right:12px;margin:0;z-index:3;color:#fff;filter:drop-shadow(0 1px 4px #000)}
 @media (prefers-reduced-motion:reduce){.ecard,.ecard::after,.en::after,.en-p.win,.ecr,.eu-sep{animation:none}}
 /* Marco Coleccionista sin bordes: solo brillo interior */
 @keyframes colGlow{0%{box-shadow:inset 0 0 16px rgba(255,77,141,.38)}16.67%{box-shadow:inset 0 0 16px rgba(255,177,61,.38)}33.33%{box-shadow:inset 0 0 16px rgba(230,255,77,.38)}50%{box-shadow:inset 0 0 16px rgba(77,255,154,.38)}66.67%{box-shadow:inset 0 0 16px rgba(77,200,255,.38)}83.33%{box-shadow:inset 0 0 16px rgba(154,107,255,.38)}100%{box-shadow:inset 0 0 16px rgba(255,77,141,.38)}}
@@ -3251,7 +3260,10 @@ function effPred(p) {   // predicción con el cambiaforma aplicado (los goles nu
 }
 function bestPred(p, r) {   // marcador que cuenta: el único, o el mejor de los dos con clonadora
   const e = effPred(p); if (!e || e.h2 == null || !r) return e;
-  const b = { h: e.h2, a: e.a2 }; return pt1(b, r) > pt1(e, r) ? b : e;
+  const b = { h: e.h2, a: e.a2 }, pa = pt1(e, r), pb = pt1(b, r);
+  if (pb !== pa) return pb > pa ? b : e;
+  const g = Math.sign(r.h - r.a);   // a igualdad de puntos cuenta el marcador que acierta el signo
+  return Math.sign(b.h - b.a) === g && Math.sign(e.h - e.a) !== g ? b : e;
 }
 // Puntos "reales" (sin poción de puntos): los usan rachas, plenos, signos y desempates
 function pts(p, r) {
@@ -3316,7 +3328,7 @@ function eCmp(m) {   // { w: id del ganador (null = pendiente de penaltis), pen:
   const r = m.result, P = m.pl.map(id => (S.preds[m.id] || {})[id]), sc = P.map(q => pts(q, r));
   if (sc[0] !== sc[1]) return { w: sc[0] > sc[1] ? m.pl[0] : m.pl[1] };
   if (!m.calcAt) return { w: lg() };
-  const sg = (a, b) => Math.sign(a - b), ok = q => !!q && sg(q.h, q.a) === sg(r.h, r.a), er = q => q ? Math.abs(q.h - r.h) + Math.abs(q.a - r.a) : 99;
+  const sg = (a, b) => Math.sign(a - b), ok = q => { const x = bestPred(q, r); return !!x && sg(x.h, x.a) === sg(r.h, r.a); }, er = q => { const x = bestPred(q, r); return x ? Math.abs(x.h - r.h) + Math.abs(x.a - r.a) : 99; };   // con Clonadora y cambiaforma cuenta el mejor marcador, como en la liga
   if (ok(P[0]) !== ok(P[1])) return { w: ok(P[0]) ? m.pl[0] : m.pl[1] };
   if (er(P[0]) !== er(P[1])) return { w: er(P[0]) < er(P[1]) ? m.pl[0] : m.pl[1] };
   const T = standings(), lv = id => T.find(x => x.id === id) || {};   // 3º más plenos, 4º más aciertos de signo y 5º mayor racha, todos en la liga
@@ -3375,7 +3387,7 @@ function eSlot(c, st) {
   const w = st.from.map(k => eWinner(eMatch(c, k)));
   return { m: m || null, pl: w.every(Boolean) ? [...w].sort((a, b) => L.indexOf(a) - L.indexOf(b)) : w, prov: false };
 }
-const ecT = C => `<h3 class="ec-t">${C.nombre}</h3><button type="button" class="tdb tdi" aria-label="Criterios de desempate" title="Criterios de desempate"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="7.3" r="1.5" fill="currentColor"/></svg></button>`;
+const ecT = (C, sinInfo) => `<h3 class="ec-t">${C.nombre}</h3>${sinInfo ? "" : `<button type="button" class="tdb tdi" aria-label="Criterios de desempate" title="Criterios de desempate"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="7.3" r="1.5" fill="currentColor"/></svg></button>`}`;
 const CUP_ID = { champions: "ucl", europa: "uel", conference: "uecl" };
 function cupSvg(c) {   // el trofeo real de cada competición (el mismo de la vitrina); si no estuviera disponible, el emoji
   try { return trofeoSvg(TROFEOS.find(t => t.id === CUP_ID[c]), true).replace('viewBox="-1.75 -.05 3.5 3.2"', 'viewBox="-1 -.05 2 3.2"'); } catch (e) { return "🏆"; }
@@ -3523,7 +3535,7 @@ function renderEuroPlay() {
     const C = COMPS[m.comp], st = C.st.find(s => s.k === m.stage), open = closeAt(m) > now, cur = (S.preds[m.id] || {})[p.id];
     const rv = pById(m.pl.find(id => id !== p.id)), rp = (S.preds[m.id] || {})[rv.id];
     const wait = false;   // los dos finalistas pueden enviar a la vez, sin orden: ya hay desempates
-    return `<div class="ecard ${C.z}">${chatBtn(m)}${formaBtn(m)}${ecT(C)}<div class="ec-s">${st.nom}</div>
+    return `<div class="ecard ${C.z}">${chatBtn(m)}${formaBtn(m)}${ecT(C, true)}<div class="ec-s">${st.nom}</div>
       <div class="ec-vs"><span>${crest(p.team)}<b>${esc(p.name)}</b></span><i>VS</i><span><b>${esc(rv.name)}</b>${crest(rv.team)}</span></div>
       ${open ? `<div class="ec-cd">Se cerrará en: <b data-ecd="${closeAt(m)}">${fmtCd(closeAt(m) - now)}</b></div>` : '<div class="ec-cd off">Apuestas cerradas</div>'}
       <div class="mdate">${fmt(m.kickoff)}</div>
@@ -6354,13 +6366,13 @@ const hIcon = x => x === 3 ? '<svg viewBox="0 0 24 24" fill="none" stroke="curre
 function stCards(p) {   // las 6 tarjetas de estadísticas de un jugador
   const t = standings(), i = t.findIndex(q => q.id === p.id), jug = S.matches.filter(m => m.result);
   const pm = jug.map(m => pts((S.preds[m.id] || {})[p.id], m.result)), ex = pm.filter(x => x === 3).length;
-  const ef = jug.length ? Math.round(pm.reduce((x, y) => x + y, 0) / (3 * jug.length) * 100) + "%" : "0%";
+  const sig = jug.filter(m => { const q = bestPred((S.preds[m.id] || {})[p.id], m.result); return !!q && Math.sign(q.h - q.a) === Math.sign(m.result.h - m.result.a); }).length;   // partidos con el signo acertado (con Clonadora cuenta el mejor marcador)
   const part = jug.filter(m => (S.preds[m.id] || {})[p.id]).length, pc = n => jug.length ? Math.round(n / jug.length * 100) + "%" : "0%";
   return `<div class="st"><span>Posición actual</span><b>${i >= 0 ? i + 1 + "º" : "—"}</b></div>
       <div class="st"><span>Puntos totales</span><b>${i >= 0 ? t[i].pt : 0}<small> PT</small></b></div>
-      <div class="st"><span>Plenos</span><b>${pc(ex)}</b></div>
+      <div class="st"><span>Plenos</span><b>${ex}<span class="fire dn" aria-hidden="true">🎯</span></b></div>
       <div class="st"><span>Mayor racha</span><b>${rachaRec(p)}<span class="fire" aria-hidden="true">🔥</span></b></div>
-      <div class="st"><span>Efectividad</span><b>${ef}</b></div>
+      <div class="st"><span>Aciertos de signo</span><b>${sig}</b></div>
       <div class="st"><span>Participación</span><b>${pc(part)}</b></div>`;
 }
 function renderHistorial() {
@@ -8059,6 +8071,13 @@ function penActHtml(d, m, sd, an, sel) {
   const both = sel.s >= 0 && sel.k >= 0;
   return `<div class="pz-act">${row(first, 1, "")}${sel[first] >= 0 ? row(second, 2, an.r2 ? " rv" : "") : ""}${both ? `<div class="pz-okw${an.ok ? " rv" : ""}"><button type="button" class="pn-ok">¡Listo!</button></div>` : ""}</div>`;
 }
+// Duelos minimizados: salen como una tarjeta compacta; al tocarla se abre y, si hay una tanda por ver, la animación empieza en ese momento
+const pzOpen = new Set();   // duelos abiertos en esta sesión (al recargar vuelven a salir minimizados)
+function pzMinHtml(key, m, d, st, seen, done, nw, extra) {
+  const opp = d.A === m ? d.B : d.A, mineOk = !!st.next && (d.A === m ? st.next.aOk : st.next.bOk), myTurn = !st.over && !!st.next && !mineOk;
+  const stat = seen < done ? ["🎬 Hay una tanda por ver · toca para verla", 1] : st.over ? [st.winner === m ? "🏆 Ganado" : st.winner ? "Perdido" : "🤝 Empate", 0] : myTurn ? ["⚽ Te toca jugar", 1] : ["⏳ Tu jugada está lista · esperando al rival", 0];
+  return `<div class="pz pz-min${nw ? " nw" : ""}" role="button" tabindex="0" data-pzo="${key}" aria-label="Abrir duelo">${opp && opp.team ? crest(opp.team, false) : ""}<div class="pm-t"><b>${extra ? extra + " · " : ""}vs ${esc(opp ? opp.name : "—")}</b><small class="${stat[1] ? "go" : ""}">${stat[0]}</small></div><span class="pm-c" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></div>`;
+}
 function renderPen() { penUnstick(); const y = window.scrollY; _renderPen(); if (Math.abs(window.scrollY - y) > 2) window.scrollTo({ top: y, behavior: "instant" }); }   // al empezar la animación la pantalla se queda donde estaba
 function _renderPen() {
   const box = $("#penBox"), nb = document.querySelector('nav button[data-t="jugar"]');
@@ -8093,12 +8112,27 @@ function _renderPen() {
   else act = `<div class="pz-wt"><b>⚽</b> Tu jugada está lista · esperando al rival…</div>`;
   if (st.over && seen >= done) {   // duelo ya jugado: solo el resultado y cuándo llega el siguiente
     const gn = ganadasDe(m); if (penCoinSync !== gn) { penCoinSync = gn; renderSobres(); checkCoins(); }   // la moneda del duelo se da al momento: contador y aviso al terminar, sin cambiar de pestaña
+    const pk = "p" + w;
+    if (!pzOpen.has(pk)) {   // minimizado
+      const hm = TIT + pzMinHtml(pk, m, d, st, seen, done, penNew, "");
+      if (box.innerHTML !== hm) box.innerHTML = hm;
+      box.onclick = ev => { const o = ev.target.closest("[data-pzo]"); if (o) { pzOpen.add(o.dataset.pzo); renderPen(); } };
+      penWatch(box, false);
+      return;
+    }
     let nd = penDias();   // días hasta el próximo duelo: el lunes siguiente si esa semana hay partido de liga; si no, el de la primera semana posterior que lo tenga
     const fin20 = !eu && w20 !== null && w >= w20;
     if (!eu && !fin20) for (let i = 1; i <= 8; i++) if (penRoundOf(w + i) !== null) { nd += 7 * (i - 1); break; }
     box.innerHTML = TIT + `<div class="pz${penNew ? " nw" : ""}"><div class="pz-bd">${penBoardHtml(d, st, seen)}</div>${act}${eu ? "" : `<div class="pz-wt" style="margin-top:14px">${fin20 ? statTxt : `Próximo duelo ${nd === 1 ? "mañana" : "en " + nd + " días"}`}</div>`}</div>`;
     box.onclick = () => { if (penNew) penMark(); };
     penWatch(box, true);
+    return;
+  }
+  if (!pzOpen.has("p" + w)) {   // minimizado: no se dibuja el escenario ni arranca la animación hasta que se abra
+    const hm = TIT + pzMinHtml("p" + w, m, d, st, seen, done, penNew, "");
+    if (box.innerHTML !== hm) box.innerHTML = hm;
+    box.onclick = ev => { const o = ev.target.closest("[data-pzo]"); if (o) { pzOpen.add(o.dataset.pzo); renderPen(); } };
+    penWatch(box, false);
     return;
   }
   box.innerHTML = TIT + `<div class="pz${penNew ? " nw" : ""}">${eu ? euSub(eu) : `<div class="pz-sub"><img src="${COIN_IMG}" alt="">Gana el duelo y consigue 1 PredictCoin</div>`}
@@ -8210,13 +8244,14 @@ function _renderAm() {
       + `<div class="am-bt"><button type="button" class="btn" data-amok="${x.k}"${A.act ? " disabled" : ""}>Aceptar</button><button type="button" class="btn del" data-amno="${x.k}">Rechazar</button></div>`
       + (A.act ? '<div class="pz-wt" style="margin-top:10px">Termina tu tanda actual para aceptar</div>' : "") + "</div>";
   });
-  if (A.act) h += amDuelHtml(m, A.act, nw);
-  else if (A.fin) h += amDuelHtml(m, A.fin, false);
+  const amX = A.act || A.fin, amMin = !!amX && !pzOpen.has("a" + amX.k);   // el duelo amistoso también sale minimizado
+  if (amX) h += amMin ? pzMinHtml("a" + amX.k, m, amX.d, amX.st, amX.seen, amX.done, A.act ? nw : false, "Amistoso") : amDuelHtml(m, amX, A.act ? nw : false);
   A.outs.forEach(x => { h += `<div class="pz">${SUB}<div class="am-who">${amCr(x.rival)}<div class="am-msg">Has retado a <b>${esc(x.rival.name)}</b><small>Esperando a que acepte…</small></div></div></div>`; });
   if (A.no) h += `<div class="pz${nw ? " nw" : ""}"><div class="pz-wt"><b>${esc(A.no.rival.name)}</b> ha rechazado tu reto</div></div>`;
-  box.innerHTML = h;
+  if (!(amMin && box.innerHTML === h)) box.innerHTML = h;
   box.onclick = ev => {
     const t = ev.target, m2 = meP(); if (!m2 || penBusy) return;
+    const op = t.closest("[data-pzo]"); if (op) { pzOpen.add(op.dataset.pzo); if (amNew) amMark(); renderAm(); return; }
     if (amNew) amMark();
     const yes = t.closest("[data-amok]"), no = t.closest("[data-amno]");
     if (yes) { if (!yes.disabled) amAnswer(yes.dataset.amok, true); return; }
@@ -8236,7 +8271,7 @@ function _renderAm() {
   };
   const els = nw ? [...box.querySelectorAll(".pz.nw")] : [];
   if (els.length && !amUnseen) seenWatch("penal_am", els, amMark); else seenWatch("penal_am", [], () => {});
-  if (A.act && A.act.seen < A.act.done && box.offsetParent !== null) amReplay(box, A.act);
+  if (A.act && A.act.seen < A.act.done && box.offsetParent !== null && pzOpen.has("a" + A.act.k)) amReplay(box, A.act);
 }
 function amAnswer(k, yes) {   // aceptar (se crea mi ficha y empieza la tanda) o rechazar (mi ficha lleva x: 1)
   const m = meP(); if (!m || !synced || !S.players.includes(m)) return;
