@@ -4970,8 +4970,7 @@ function openForma(mid) {
       <div class="fm-sec">Comparativa</div>
       <div class="fm-leg"><span><i style="background:#19d3ff"></i>${esc(m.home)}</span><span><i style="background:#ff9d2e"></i>${esc(m.away)}</span></div>
       ${comp}
-      <p class="fm-note">${(ha || aw) && d.comp ? `Datos de ${NOMBRE[d.comp] || d.comp} ${String(d.season).slice(2)}/${String(d.season + 1).slice(2)}` : ""}</p>${aviso}
-      <p class="fm-note" style="opacity:.6;font-size:11px">${d.via ? `API: ${esc(d.via.home || "?")} · ${esc(d.via.away || "?")} · ` : ""}${d.t ? `consultado hace ${Math.max(0, Math.round((Date.now() - d.t) / 60000))} min${d.cached ? " (guardado)" : " (nuevo)"}` : ""}</p>`;
+      <p class="fm-note">${(ha || aw) && d.comp ? `Datos de ${NOMBRE[d.comp] || d.comp} ${String(d.season).slice(2)}/${String(d.season + 1).slice(2)}` : ""}</p>${aviso}`;
   };
   const cargar = async () => {
     if (FORMA_C[key] && Date.now() - (FORMA_C[key]._t || 0) < 6e5) { pintar(FORMA_C[key]); return; }
