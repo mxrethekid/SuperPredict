@@ -4947,7 +4947,7 @@ function openForma(mid) {
   const equipo = (nom, t, cls) => `<div class="fm-t">${crest(nom)}<b>${esc(nom)}</b><div class="fm-f" aria-label="Últimos partidos de ${esc(nom)}">${t && t.form && t.form.length ? t.form.map(r => `<div class="fm-r ${r.r}" title="${esc((r.loc ? "" : "en ") + r.opp)}"><b>${r.r}</b><small>${r.gf}-${r.ga}</small></div>`).join("") : '<span class="muted" style="font-size:13px">Sin datos</span>'}</div></div>`;
   const pintar = d => {
     const h2 = d.h2h || { matches: [], hw: 0, d: 0, aw: 0 }, tot = h2.hw + h2.d + h2.aw;
-    const seg = (n, c) => n ? `<span class="${c}" style="flex:${n}">${n}</span>` : "";
+    const seg = (n, c) => `<span class="${c}" style="flex:${n || 0.4}">${n}</span>`;   // siempre los tres tramos (también con 0), para que cuadren con las etiquetas de debajo
     const filas = h2.matches.map(x => {
       const loc = x.h === "home" ? m.home : m.away, vis = x.h === "home" ? m.away : m.home, gl = x.hs > x.as ? (x.h === "home" ? "h" : "a") : x.hs < x.as ? (x.h === "home" ? "a" : "h") : "d";
       return `<div class="fm-m"><time datetime="${esc(x.d)}">${fecha(x.d)}</time><div class="c">${crest(loc)}<span class="sc ${gl}">${x.hs} - ${x.as}</span>${crest(vis)}</div><em>${esc(COMP[x.comp] || x.comp || "")}</em></div>`;
@@ -4973,13 +4973,13 @@ function openForma(mid) {
       <p class="fm-note">${(ha || aw) && d.comp ? `Datos de ${NOMBRE[d.comp] || d.comp} ${String(d.season).slice(2)}/${String(d.season + 1).slice(2)}` : ""}</p>${aviso}`;
   };
   const cargar = async () => {
-    if (FORMA_C[key]) { pintar(FORMA_C[key]); return; }
+    if (FORMA_C[key] && Date.now() - (FORMA_C[key]._t || 0) < 6e5) { pintar(FORMA_C[key]); return; }
     box.innerHTML = '<p class="muted" style="text-align:center;margin:60px 0">Cargando datos…</p>';
     try {
       const r = await fetch("/.netlify/functions/forma?home=" + encodeURIComponent(m.home) + "&away=" + encodeURIComponent(m.away) + "&kickoff=" + encodeURIComponent(m.kickoff || "")), j = await r.json().catch(() => ({}));
       if (!document.getElementById("fmDlg")) return;
       if (!r.ok) throw new Error(j.error || "No se pudieron cargar los datos (" + r.status + ").");
-      FORMA_C[key] = j; pintar(j);
+      j._t = Date.now(); FORMA_C[key] = j; pintar(j);
     } catch (e) {
       if (!document.getElementById("fmDlg")) return;
       box.innerHTML = `<p class="msg err" style="text-align:center;margin:40px 0 16px">${esc(e.message || "No se pudieron cargar los datos.")}</p><button type="button" class="btn" id="fmR" style="width:100%">Reintentar</button>`;
@@ -6990,7 +6990,7 @@ function adParts(el) {
     ${(S.archivo || []).length ? S.archivo.map(a => `<div class="item" style="flex-wrap:wrap"><span class="pl" style="flex:1 1 100%">${a.team ? crest(a.team, false) : ""}<span>${esc(a.name)} <span class="muted">· archivado el ${new Date(a.archT || Date.now()).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}${jugInfo(a)}</span></span></span><span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><button class="btn" style="margin:0;padding:6px 10px;font-size:13px" data-rv="${a.id}">Reactivar</button><button class="btn del" data-ax="${a.id}">Eliminar</button></span></div>`).join("") : '<p class="muted" style="margin-top:10px">Nadie archivado todavía.</p>'}</div>
     <div class="card"><h3>Copia de seguridad</h3>
     <p class="muted">El servidor guarda una copia cada día (las 14 últimas), otra al terminar la temporada y otra al empezar una nueva. Aquí puedes verlas, descargarlas o restaurarlas.</p>
-    <div class="row" style="flex-wrap:wrap"><button class="btn ghost" id="exp">Exportar</button><button class="btn ghost" id="imp">Importar</button><button class="btn ghost" id="bkNow">Guardar copia ahora</button></div>
+    <div class="row" style="flex-wrap:wrap"><button class="btn ghost" id="exp">Exportar</button><button class="btn ghost" id="imp">Importar</button><button class="btn ghost" id="bkNow">Guardar copia ahora</button><button class="btn ghost" id="fmBorrar">Borrar estadísticas guardadas</button></div>
     <div id="bkList" class="muted" style="margin-top:14px">Cargando copias…</div>
     <input type="file" id="file" accept=".json" hidden><p class="msg" id="bmsg"></p></div>`;
   el.querySelectorAll("[data-pay]").forEach(b => b.onclick = () => { const p = S.players.find(x => x.id === b.dataset.pay); if (!p) return; p.paid = !p.paid; save(); renderAdmin(); });
@@ -7012,6 +7012,7 @@ function adParts(el) {
   });
   $("#exp").onclick = () => bkDescargar("super-predict-" + new Date().toISOString().slice(0, 10) + ".json", S);
   $("#imp").onclick = () => $("#file").click();
+  $("#fmBorrar").onclick = async () => { try { await pshPost("/api/push/forma-borrar", { pin: CONFIG.pin }); Object.keys(FORMA_C).forEach(k => delete FORMA_C[k]); bkMsg("Estadísticas borradas. Se volverán a buscar la próxima vez que se abra el botón de historial de un partido.", true); } catch (e) { bkMsg("No se pudieron borrar: " + e.message); } };
   $("#bkNow").onclick = async () => { try { await pshPost("/api/backup/save", { pin: CONFIG.pin, label: "Copia manual", tipo: "manual" }); bkMsg("Copia guardada en el servidor.", true); bkCargar(); } catch (e) { bkMsg("No se pudo guardar la copia: " + e.message); } };
   bkCargar();
   $("#file").onchange = e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = async () => { try { const d0 = JSON.parse(r.result), d = d0 && d0.state && d0.state.players ? d0.state : d0; if (!d || !d.players || !d.matches) throw 0; try { await pshPost("/api/backup/save", { pin: CONFIG.pin, label: "Antes de importar un archivo", tipo: "pre" }); } catch (e) {} S = norm(d); migrate(); save(); if (!meP()) setMe(""); AD.round = null; renderAdmin(); } catch (x) { $("#bmsg").className = "msg err"; $("#bmsg").textContent = "Archivo no válido."; } }; r.readAsText(f); };
