@@ -122,14 +122,21 @@ export class Store extends DurableObject {
   }
   _subs() { const d = this._get("push") || {}; d.subs ||= {}; return d; }
   // Presencia: la app avisa cada 25 s mientras está abierta y a la vista. Quien está dentro no recibe avisos (los verá en la propia app).
-  _dentro(pid) { const t = this._pres && this._pres[pid]; return !!t && Date.now() - t < 55e3; }
-  async presencia(pid, on) { this._pres ||= {}; if (on) this._pres[pid] = Date.now(); else delete this._pres[pid]; return true; }
+  // La presencia también se guarda en la base de datos: si el objeto se reinicia o se libera de memoria, no se pierde y se sigue sabiendo quién está dentro.
+  _presMap() { return (this._pres ||= this._get("pres") || {}); }
+  _dentro(pid) { const t = this._presMap()[pid]; return !!t && Date.now() - t < 55e3; }
+  async presencia(pid, on) {
+    const P = this._presMap(), now = Date.now();
+    if (on) P[pid] = now; else delete P[pid];
+    for (const k in P) if (now - P[k] > 3e5) delete P[k];   // se olvidan los que llevan más de 5 minutos sin latido
+    this._set("pres", P); return true;
+  }
   _jobs(msgs, st, forzar, autor) {   // cada aviso se convierte en un envío por cada móvil suscrito del jugador (salvo si está dentro de la app)
     if (!msgs.length) return [];
     const subs = this._subs().subs, jobs = [];
     const now = Date.now();
     for (const m of msgs) {
-      if (!forzar && m.pid !== autor && this._dentro(m.pid)) continue;   // ya está en la app: no hace falta avisarle (salvo a quien ha hecho el cambio: así se pueden probar los avisos desde el mismo móvil)
+      if (!forzar && this._dentro(m.pid)) continue;   // ya está en la app: no se le avisa, tampoco si el cambio lo ha hecho él (las pruebas desde el panel del admin siguen llegando: no pasan por aquí)
       const tab = TAB_AVISO[String(m.tag || "").split("-")[0]], n = pendientes(st, m.pid, now);
       for (const s of subs[m.pid] || []) jobs.push({ sub: s, payload: { t: m.title, b: m.body, tag: m.tag, url: tab ? "/#" + tab : "/", n } });
     }
@@ -162,6 +169,7 @@ export class Store extends DurableObject {
       try {   // un fallo en los avisos nunca debe impedir que se guarde
         const now = Date.now(), L = this._logOnce();
         const msgs = [...avisosNuevaJornada(st, antes, now, L.once), ...avisosResultado(st, antes, L.once), ...avisosPocion(st, antes, L.once), ...avisosPenaltis(st, now, L.once), ...avisosTrofeo(st, antes, L.once), ...avisosClasificado(st, antes, L.once), ...avisosBalon(st, antes, L.once)];
+        if (typeof autor === "string" && autor) this._presMap()[autor] = now;   // quien manda el cambio está dentro de la app ahora mismo
         L.save(); jobs = this._jobs(msgs, st, false, typeof autor === "string" ? autor : "");
       } catch (e) { console.error("avisos:", e && e.message); }
     }
