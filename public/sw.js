@@ -5,14 +5,17 @@ self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
 self.addEventListener("push", (e) => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch (_) { d = { t: "Súper Predict", b: e.data ? e.data.text() : "" }; }
-  e.waitUntil(self.registration.showNotification(d.t || "Súper Predict", {
+  // Número rojo del icono: el servidor manda en "n" los partidos abiertos que aún no has pronosticado; así se actualiza aunque la app esté cerrada
+  const nav = self.navigator, insignia = typeof d.n === "number" && nav && "setAppBadge" in nav
+    ? (d.n > 0 ? nav.setAppBadge(d.n) : nav.clearAppBadge()).catch(() => {}) : null;
+  e.waitUntil(Promise.all([insignia, self.registration.showNotification(d.t || "Súper Predict", {
     body: d.b || "",
     icon: "/icon-192.png",
     badge: "/icon-192.png",
     tag: d.tag || undefined,
     renotify: !!d.tag,   // misma etiqueta (p. ej. dos pruebas seguidas): el aviso vuelve a sonar en vez de cambiarse en silencio
     data: { url: d.url || "/" },
-  }));
+  })]));
 });
 
 self.addEventListener("notificationclick", (e) => {
