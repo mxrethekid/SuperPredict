@@ -165,9 +165,12 @@ html,body{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%}   /* sin zoom 
 #cdn.f10 .cd-big.pop{animation:cdBig 1s ease-in-out}
 #cdn.f3 .cd-big{color:#fff3c4;text-shadow:0 0 30px #ffb52e,0 0 80px #ff8a1e,0 0 140px rgba(255,90,30,.7)}
 @keyframes cdBig{0%{opacity:0;transform:scale(1.04)}35%{opacity:1;transform:scale(1)}100%{opacity:.9;transform:scale(.98)}}
-#cdn.f10::after{content:"";position:absolute;left:50%;top:50%;width:46vmin;height:46vmin;margin:-23vmin 0 0 -23vmin;border-radius:50%;border:3px solid rgba(0,220,255,.85);box-shadow:0 0 40px rgba(0,200,255,.7);pointer-events:none;animation:cdShock 1s ease-out infinite}
+#cdn.f10::after{content:"";position:absolute;left:50%;top:50%;width:46vmin;height:46vmin;margin:-23vmin 0 0 -23vmin;border-radius:50%;border:3px solid rgba(0,220,255,.85);box-shadow:0 0 40px rgba(0,200,255,.7);pointer-events:none;animation:none}
+#cdn.f10.pa::after{animation:cdShock 1s ease-out both}
+#cdn.f10.pb::after{animation:cdShockB 1s ease-out both}   /* dos copias para reiniciar el pulso en cada cambio de número */
 #cdn.f3::after{border-color:rgba(255,196,60,.9);box-shadow:0 0 40px rgba(255,160,40,.8)}
 @keyframes cdShock{0%{transform:scale(.7);opacity:.35}100%{transform:scale(1.8);opacity:0}}
+@keyframes cdShockB{0%{transform:scale(.7);opacity:.35}100%{transform:scale(1.8);opacity:0}}
 #cdn .cd-fin{display:none;flex-direction:column;align-items:center}
 #cdn.fin .cd-pre{display:none}
 #cdn.fin .cd-fin{display:flex}
@@ -196,14 +199,14 @@ html,body{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%}   /* sin zoom 
 #cdInfo h2{margin-top:6px}
 @media (prefers-reduced-motion:reduce){#cdn *,#cdn::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
 /* ===== Fin de temporada: gracias por participar + resumen de la temporada ===== */
-#fsn{position:fixed;inset:0;z-index:148;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:#05090d;color:#eafcff}
+#fsn{position:fixed;inset:0;z-index:148;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:#05090d;color:#eafcff}
 #fsn[hidden]{display:none}
 #fsn .fs-bg{position:fixed;inset:0;pointer-events:none;background:radial-gradient(120% 60% at 50% -8%,rgba(255,196,60,.28),transparent 60%),radial-gradient(100% 60% at 50% 110%,rgba(0,180,216,.3),transparent 60%)}
 #fsn .fs-bg::before{content:"";position:absolute;inset:0;opacity:.16;background-image:linear-gradient(rgba(255,200,80,.6) 1px,transparent 1px),linear-gradient(90deg,rgba(255,200,80,.6) 1px,transparent 1px);background-size:44px 44px;-webkit-mask-image:radial-gradient(70% 55% at 50% 30%,#000,transparent);mask-image:radial-gradient(70% 55% at 50% 30%,#000,transparent);animation:cdGrid 12s linear infinite}
 #fsn .fs-parts{position:fixed;inset:0;pointer-events:none;overflow:hidden}
 #fsn .fs-parts i{position:absolute;bottom:-14px;border-radius:50%;background:#ffd466;box-shadow:0 0 10px 2px rgba(255,196,60,.85);opacity:0;animation:cdUp linear infinite}
 #fsn .fs-parts i.c{background:#9af2ff;box-shadow:0 0 10px 2px rgba(0,200,255,.85)}
-#fsn .fs-in{position:relative;z-index:2;max-width:460px;margin:0 auto;padding:calc(36px + env(safe-area-inset-top,0px)) 16px calc(40px + env(safe-area-inset-bottom,0px));text-align:center}
+#fsn .fs-in{position:relative;z-index:2;width:100%;max-width:460px;margin:auto;box-sizing:border-box;padding:calc(36px + env(safe-area-inset-top,0px)) 16px calc(40px + env(safe-area-inset-bottom,0px));text-align:center}
 #fsn .fs-a{opacity:0;transform:translateY(26px);transition:opacity .7s ease-out,transform .7s cubic-bezier(.2,.9,.3,1)}
 #fsn .fs-a.in{opacity:1;transform:none}
 #fsn .cd-eye{width:120px;height:auto;overflow:visible;filter:drop-shadow(0 0 20px rgba(255,196,60,.55))}
@@ -365,7 +368,7 @@ html,body{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%}   /* sin zoom 
 .rk{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .rk li{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid var(--line)}
 .rk .n{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:400 16px var(--h);color:#04222b;background:var(--cyan)}
-.rk .br{height:8px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}
+.rk .br{display:block;height:8px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}   /* display:block: la otra clase .br (cuadro) las centraba */
 .rk .br i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--cyan),#5fd8f2)}
 .rk .e{font:400 20px var(--h);color:var(--gold);white-space:nowrap}
 .eu{--c:var(--ucl);display:flex;align-items:center;gap:12px;padding:12px 14px;margin-top:10px;border-radius:12px;border:1px solid var(--c);border-left-width:5px;background:var(--panel);background:linear-gradient(90deg,color-mix(in srgb,var(--c) 32%,var(--panel)),var(--panel) 85%)}
@@ -981,7 +984,7 @@ td .crest{width:30px;height:30px}
 #votBox{margin:22px 0 6px}
 #votBox .ja-t{margin:0 0 10px}
 #votBox .vt-n{text-align:center;margin:0 0 10px;font-size:13px;line-height:1.4}
-#votBox .vt-l{max-height:min(62vh,540px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:2px}
+#votBox .vt-l{padding:2px}   /* sin scroll interno: salen todos los partidos de la votación, la página es la que se desplaza */
 #votBox .vt-r{width:100%;display:flex;align-items:center;gap:14px;padding:10px 12px;margin:0 0 6px;text-align:left;background:#0e1419;border:1px solid var(--line);border-radius:12px;color:var(--text);font:600 17px var(--b);cursor:pointer;-webkit-tap-highlight-color:transparent}
 #votBox .vt-r .crest{width:38px;height:38px;flex:none}
 #votBox .vt-r .vt-t{flex:1;min-width:0}
@@ -1591,6 +1594,8 @@ nav button.nw::after,nav button.nwp::after{top:7px;left:calc(50% + 10px)}
 .pz-min .pm-t small.go{color:#ffc83d;font-weight:700}
 .pz-min .pm-c{flex:none;width:30px;height:30px;border-radius:50%;border:1px solid rgba(25,211,255,.45);background:rgba(25,211,255,.12);color:var(--cyan);display:flex;align-items:center;justify-content:center}
 .pz-min .pm-c svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.pz-mn{position:absolute;top:10px;left:10px;z-index:5;width:30px;height:30px;padding:0;border-radius:50%;border:1px solid rgba(25,211,255,.45);background:rgba(25,211,255,.12);color:var(--cyan);display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.pz-mn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
 .pz-sub{display:flex;align-items:center;justify-content:center;gap:6px;color:#ffc83d;font:700 12.5px/1 var(--b);margin-bottom:12px}.pz-sub img{width:18px;height:18px}
 .pz-vs{display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:start}
 .pz-p{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;padding:6px 2px;border-radius:14px;border:1px solid transparent;transition:background .3s,border-color .3s,box-shadow .3s}
@@ -1835,9 +1840,9 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 /* Copa de la Súper Predict League: apoyada arriba a la izquierda de la clasificación */
 #tabla{padding-top:8px}
 #tabla .lgt{position:relative;overflow:visible;margin-top:0}
-#tabla>#tablaNav{margin-top:0}   /* el selector de jornada va arriba del todo */
-#tabla>#tablaNav .jhead{padding:0 0 4px}
-#tabla>h2.lg-ttl{display:flex;align-items:center;justify-content:center;height:74px;margin:0;padding:0 0 6px 76px;box-sizing:border-box}   /* el título queda a la altura del trofeo, a su derecha */
+#tabla>#tablaNav{margin-top:10px;padding-left:76px}   /* mismo desplazamiento que el título (por el trofeo): selector y título quedan centrados entre sí */
+#tabla>#tablaNav .jhead{padding:0}
+#tabla>h2.lg-ttl{display:flex;align-items:center;justify-content:center;height:74px;margin:-4px 0 0;padding:0 0 6px 76px;box-sizing:border-box}   /* el título queda a la altura del trofeo, a su derecha */
 .lg-cup{position:absolute;left:8px;bottom:100%;width:62px;height:82px;margin-bottom:-1px;pointer-events:none;z-index:3}
 .lg-cup canvas.cup3d{position:absolute;left:50%;bottom:0;height:100%;aspect-ratio:.85;transform:translate(-50%,13%);opacity:0;transition:opacity .4s}
 .lg-cup.on3 canvas.cup3d{opacity:1}
@@ -3711,7 +3716,7 @@ function applyMaint() {
 // 10 segundos en grande y, al llegar a cero, un final con confeti y el botón de entrar. Sirve para cualquier temporada: basta con programar otra.
 const cdCfg = () => { const m = S.preds[MKEY], c = m && m.cd; return c && c.at > 0 ? c : null; };
 let cdPrev = null;      // vista previa del admin (solo en este dispositivo)
-let cdFin = 0, cdLast = 0, cdnTimer = null, cdOn = false;   // cdFin: cuenta atrás cuyo final se está mostrando; cdLast: la que se ha visto correr en esta sesión
+let cdFin = 0, cdLast = 0, cdnTimer = null, cdnMs = 250, cdOn = false;   // cdFin: cuenta atrás cuyo final se está mostrando; cdLast: la que se ha visto correr en esta sesión
 const cdCur = () => cdPrev || cdCfg();
 const cdNum = c => c && c.n > 0 ? c.n : temporada();
 function cdDate(at) { try { const t = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(new Date(at)) + " h"; return t.charAt(0).toUpperCase() + t.slice(1); } catch (e) { return new Date(at).toLocaleString(); } }
@@ -3795,7 +3800,13 @@ function cdTick() {
     const bar = document.getElementById("cdBar"), tot = c.at - (c.t || 0);
     if (bar) bar.style.width = (c.t > 0 && tot > 0 ? Math.max(0, Math.min(100, (1 - left / tot) * 100)) : 0).toFixed(2) + "%";
     const f = s <= 10; o.classList.toggle("f10", f); o.classList.toggle("f3", s <= 3);
-    if (f) cdSet("cdBig", String(s));
+    if (f) {
+      const big = document.getElementById("cdBig"), nv = String(s), cambia = !big || big.textContent !== nv;
+      cdSet("cdBig", nv);
+      if (cambia) { o._pu = !o._pu; o.classList.toggle("pa", o._pu); o.classList.toggle("pb", !o._pu); }   // el pulso se reinicia justo con el número nuevo
+    }
+    const rap = s <= 11 ? 40 : 250;   // al final se mira muy seguido para que el número cambie en el segundo exacto
+    if (cdnMs !== rap) { cdnMs = rap; clearInterval(cdnTimer); cdnTimer = setInterval(cdTick, rap); }
   } else if (!o.classList.contains("fin")) {
     o.classList.remove("f10", "f3"); o.classList.add("fin");
     document.getElementById("cdFinT").textContent = "¡Empieza la temporada " + cdNum(c) + "!";
@@ -3826,7 +3837,7 @@ function applyCountdown() {
     document.getElementById("cdAdm").hidden = !!cdPrev;
     document.getElementById("cdConf").innerHTML = "";
     if (cdPrev) { o.classList.remove("fin"); }
-    clearInterval(cdnTimer); cdnTimer = setInterval(cdTick, 250); cdTick();
+    cdnMs = 250; clearInterval(cdnTimer); cdnTimer = setInterval(cdTick, 250); cdTick();
   } else if (show) {
     document.getElementById("cdSea").textContent = "Temporada " + cdNum(c);
     document.getElementById("cdDate").textContent = cdDate(c.at);
@@ -5997,7 +6008,7 @@ function albumVerHtml(pl) {
   return `<h2 style="margin-top:34px">Cromos favoritos</h2><div class="fv-ver">${f.length ? `<div class="fv-g">${[0, 1, 2].map(cell).join("")}</div>` : `<p class="muted" style="text-align:center">${esc(pl.name)} aún no ha elegido cromos favoritos.</p>`}</div>`;
 }
 function bindAlbumVer() {}
-const pocionesOtroHtml = who => `<h2 style="margin-top:46px;margin-bottom:-4px">Pociones</h2><div class="pc-sec" style="margin-top:0"><div class="pc" id="pfPcHost" role="group" aria-label="Pociones de ${esc(who.name)}"></div><p class="muted pc-h">Las vacías son las que ya ha gastado</p></div>`;
+const pocionesOtroHtml = who => `<h2 style="margin-top:38px;margin-bottom:4px">Pociones</h2><div class="pc-sec" style="margin-top:0"><div class="pc" id="pfPcHost" role="group" aria-label="Pociones de ${esc(who.name)}"></div><p class="muted pc-h">Las vacías son las que ya ha gastado</p></div>`;
 let pfPcCtl = null;
 function bindPocionesOtro(box, who) {
   const host = box.querySelector("#pfPcHost");
@@ -8071,6 +8082,7 @@ function penActHtml(d, m, sd, an, sel) {
   return `<div class="pz-act">${row(first, 1, "")}${sel[first] >= 0 ? row(second, 2, an.r2 ? " rv" : "") : ""}${both ? `<div class="pz-okw${an.ok ? " rv" : ""}"><button type="button" class="pn-ok">¡Listo!</button></div>` : ""}</div>`;
 }
 // Duelos minimizados: salen como una tarjeta compacta; al tocarla se abre y, si hay una tanda por ver, la animación empieza en ese momento
+const pzMnBtn = key => `<button type="button" class="pz-mn" data-pzm="${key}" aria-label="Minimizar duelo"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button>`;   // botón para volver a minimizar un duelo abierto
 const pzOpen = new Set();   // duelos abiertos en esta sesión (al recargar vuelven a salir minimizados)
 function pzMinHtml(key, m, d, st, seen, done, nw, extra) {
   const opp = d.A === m ? d.B : d.A, mineOk = !!st.next && (d.A === m ? st.next.aOk : st.next.bOk), myTurn = !st.over && !!st.next && !mineOk;
@@ -8122,8 +8134,8 @@ function _renderPen() {
     let nd = penDias();   // días hasta el próximo duelo: el lunes siguiente si esa semana hay partido de liga; si no, el de la primera semana posterior que lo tenga
     const fin20 = !eu && w20 !== null && w >= w20;
     if (!eu && !fin20) for (let i = 1; i <= 8; i++) if (penRoundOf(w + i) !== null) { nd += 7 * (i - 1); break; }
-    box.innerHTML = TIT + `<div class="pz${penNew ? " nw" : ""}"><div class="pz-bd">${penBoardHtml(d, st, seen)}</div>${act}${eu ? "" : `<div class="pz-wt" style="margin-top:14px">${fin20 ? statTxt : `Próximo duelo ${nd === 1 ? "mañana" : "en " + nd + " días"}`}</div>`}</div>`;
-    box.onclick = null;
+    box.innerHTML = TIT + `<div class="pz${penNew ? " nw" : ""}">${pzMnBtn(pk)}<div class="pz-bd">${penBoardHtml(d, st, seen)}</div>${act}${eu ? "" : `<div class="pz-wt" style="margin-top:14px">${fin20 ? statTxt : `Próximo duelo ${nd === 1 ? "mañana" : "en " + nd + " días"}`}</div>`}</div>`;
+    box.onclick = ev => { const mn = ev.target.closest("[data-pzm]"); if (mn) { pzOpen.delete(mn.dataset.pzm); renderPen(); } };
     penWatch(box, true);
     return;
   }
@@ -8134,11 +8146,12 @@ function _renderPen() {
     penWatch(box, false);
     return;
   }
-  box.innerHTML = TIT + `<div class="pz${penNew ? " nw" : ""}">${eu ? euSub(eu) : `<div class="pz-sub"><img src="${COIN_IMG}" alt="">Gana el duelo y consigue 1 PredictCoin</div>`}
+  box.innerHTML = TIT + `<div class="pz${penNew ? " nw" : ""}">${pzMnBtn("p" + w)}${eu ? euSub(eu) : `<div class="pz-sub"><img src="${COIN_IMG}" alt="">Gana el duelo y consigue 1 PredictCoin</div>`}
     <div class="pz-bd">${penBoardHtml(d, st, seen)}</div>
     <div class="pz-rn">${rnN >= 0 ? "Ronda " + (rnN + 1) : ""}</div>
     ${penStage(d.A, d.B)}${act}</div>`;
   box.onclick = ev => {
+    const mn = ev.target.closest("[data-pzm]"); if (mn) { pzOpen.delete(mn.dataset.pzm); renderPen(); return; }
     const b = ev.target.closest(".pz-b");
     if (b && myTurn) {   // se actualiza solo la zona de botones: el segundo paso aparece con animación y nada más se redibuja
       const t = b.dataset.t, z = +b.dataset.z, first = d.A === m ? "s" : "k", had = penSel[first] >= 0, hadBoth = penSel.s >= 0 && penSel.k >= 0;
@@ -8219,8 +8232,8 @@ function amDuelHtml(m, x, nw) {
   else if (st.over) act = st.winner === m ? '<div class="pz-end win">🏆 ¡Reto ganado!</div>' : st.winner ? '<div class="pz-end lose">Reto perdido</div>' : '<div class="pz-end">🤝 Empate</div>';
   else if (myTurn) act = penActHtml(d, m, sd, null, amSel);
   else act = '<div class="pz-wt"><b>⚽</b> Tu jugada está lista · esperando al rival…</div>';
-  if (st.over && seen >= done) return `<div class="pz${nw ? " nw" : ""}" data-amk="${x.k}">${SUB}<div class="pz-bd">${penBoardHtml(d, st, seen)}</div>${act}</div>`;
-  return `<div class="pz${nw ? " nw" : ""}" data-amk="${x.k}">${SUB}<div class="pz-bd">${penBoardHtml(d, st, seen)}</div><div class="pz-rn">${rnN >= 0 ? "Ronda " + (rnN + 1) : ""}</div>${penStage(d.A, d.B)}${act}</div>`;
+  if (st.over && seen >= done) return `<div class="pz${nw ? " nw" : ""}" data-amk="${x.k}">${pzMnBtn("a" + x.k)}${SUB}<div class="pz-bd">${penBoardHtml(d, st, seen)}</div>${act}</div>`;
+  return `<div class="pz${nw ? " nw" : ""}" data-amk="${x.k}">${pzMnBtn("a" + x.k)}${SUB}<div class="pz-bd">${penBoardHtml(d, st, seen)}</div><div class="pz-rn">${rnN >= 0 ? "Ronda " + (rnN + 1) : ""}</div>${penStage(d.A, d.B)}${act}</div>`;
 }
 function renderAm() { penUnstick(); const y = window.scrollY; _renderAm(); if (Math.abs(window.scrollY - y) > 2) window.scrollTo({ top: y, behavior: "instant" }); }
 function _renderAm() {
@@ -8253,6 +8266,7 @@ function _renderAm() {
   box.onclick = ev => {
     const t = ev.target, m2 = meP(); if (!m2 || penBusy) return;
     const op = t.closest("[data-pzo]"); if (op) { pzOpen.add(op.dataset.pzo); if (amNoNew) amMark(); renderAm(); return; }
+    const mn = t.closest("[data-pzm]"); if (mn) { pzOpen.delete(mn.dataset.pzm); renderAm(); return; }
     if (amNoNew) amMark();
     const yes = t.closest("[data-amok]"), no = t.closest("[data-amno]");
     if (yes) { if (!yes.disabled) amAnswer(yes.dataset.amok, true); return; }
@@ -9029,7 +9043,7 @@ async function adAvisos(el) {
     <button class="btn" id="pshSend" style="width:100%">Enviar aviso</button><p class="msg" id="pshRes"></p></div>
     <div class="card"><h3>Probar avisos</h3>
     <p class="muted">Manda un aviso de prueba al móvil del jugador elegido arriba en «Para». Se puede repetir las veces que quieras y llega aunque esté dentro de la app.</p>
-    <div id="pshDemo" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${[["jornada", "🆕 Nueva jornada"], ["cierre", "⏰ Queda 1 h"], ["resultado", "🏁 Final"], ["pocion", "🧪 Poción"], ["votacion", "🗳️ Votación abierta"], ["votacion_re", "🗳️ Votación reabierta"], ["votorec", "🗳️ Quedan 6 h"], ["reto", "🤝 Reto penaltis"], ["turno", "⚽ Te toca tirar"], ["duelo", "⚽ Duelo listo"], ["trofeo", "🏆 Trofeo ganado"], ["clasif", "🌍 Clasificado"], ["nominado", "⭐️ Nominado"], ["votobdo", "🗳️ Vota Balón de Oro"]].map(([k, t]) => `<button class="btn" data-k="${k}" style="padding:10px 6px;font-size:14px">${t}</button>`).join("")}</div>
+    <div id="pshDemo" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${[["jornada", "🆕 Nueva jornada"], ["cierre", "⏰ Queda 1 h"], ["resultado", "🏁 Final"], ["pocion", "🧪 Poción"], ["votacion", "🗳️ Votación abierta"], ["votacion_re", "🗳️ Votación reabierta"], ["votorec", "🗳️ Queda 1 h (voto)"], ["reto", "🤝 Reto penaltis"], ["turno", "⚽ Te toca tirar"], ["duelo", "⚽ Duelo listo"], ["trofeo", "🏆 Trofeo ganado"], ["clasif", "🌍 Clasificado"], ["nominado", "⭐️ Nominado"], ["votobdo", "🗳️ Vota Balón de Oro"]].map(([k, t]) => `<button class="btn" data-k="${k}" style="padding:10px 6px;font-size:14px">${t}</button>`).join("")}</div>
     <p class="msg" id="pshDRes"></p></div>`;
   const res = (t, c) => { const m = $("#pshRes"); if (m) { m.className = "msg" + (c ? " " + c : ""); m.textContent = t; } };
   $("#pshU").onchange = e => { AD.pshU = e.target.value; };
