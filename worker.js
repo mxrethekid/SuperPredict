@@ -50,6 +50,13 @@ export class Store extends DurableObject {
     do { this.sql.exec("INSERT INTO kv (k, i, v) VALUES (?, ?, ?)", k, n, s.slice(n * CH, (n + 1) * CH)); n++; } while (n * CH < s.length);
   }
   async get(k) { return this._get(k); }
+  async pinIntento(ip, ok) {   // PIN de admin: 8 fallos desde la misma IP en 10 minutos → bloqueo hasta que pasen esos 10 minutos (también con el PIN bueno)
+    const D = this._get("pinfail") || {}, now = Date.now(), r = D[ip] && now - D[ip].t <= 6e5 ? D[ip] : { n: 0, t: now };
+    if (r.n >= 8) return { bloqueado: true };
+    if (ok) delete D[ip]; else { r.n++; D[ip] = r; }
+    for (const k in D) if (now - D[k].t > 6e5) delete D[k];
+    this._set("pinfail", D); return { bloqueado: false };
+  }
   async borrarForma() { this.sql.exec("DELETE FROM kv WHERE k LIKE 'datos%' OR k = 'equipos'"); return true; }   // borra las estadísticas guardadas de los partidos y la lista de equipos
   async set(k, v) { this._set(k, v); return true; }
   _state() {
@@ -947,13 +954,21 @@ async function enviar(env, estado, jobs) {
   return { enviados, fallidos };
 }
 
+// ======================= PIN de administrador (solo vive aquí, en el secreto ADMIN_PIN) =======================
+const igualPin = (a, b) => { a = String(a); b = String(b); let d = a.length ^ b.length; for (let i = 0; i < Math.max(a.length, b.length); i++) d |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0); return d === 0; };
+async function pinGuard(env, req, b) {   // null = PIN correcto; si no, la respuesta de error
+  if (!env.ADMIN_PIN) return json({ error: "Falta el secreto ADMIN_PIN en Cloudflare" }, 500);
+  const ok = igualPin((b && b.pin) || "", env.ADMIN_PIN), ip = req.headers.get("cf-connecting-ip") || "?";
+  const r = await env.STORE.get(env.STORE.idFromName("cache")).pinIntento(ip, ok);
+  if (r.bloqueado) return json({ error: "Demasiados intentos. Espera 10 minutos." }, 429);
+  return ok ? null : json({ error: "PIN incorrecto" }, 403);
+}
 // ======================= Copias de seguridad (solo con el PIN de administrador) =======================
 async function backupRoutes(req, env, estado, p) {
   if (req.method !== "POST") return json({ error: "método no permitido" }, 405);
   let b; try { b = await req.json(); } catch { return json({ error: "bad json" }, 400); }
   b = b || {};
-  if (!env.ADMIN_PIN) return json({ error: "Falta el secreto ADMIN_PIN en Cloudflare" }, 500);
-  if (String(b.pin || "") !== String(env.ADMIN_PIN)) return json({ error: "PIN incorrecto" }, 403);
+  { const g = await pinGuard(env, req, b); if (g) return g; }
   const id = b.id ? String(b.id) : "";
   if (p === "/api/backup/list") return json({ copias: await estado.backupLista() });
   if (p === "/api/backup/save") return json({ ok: true, copia: await estado.backupCrear(b.label, b.tipo) });
@@ -971,7 +986,7 @@ async function pushRoutes(req, env, estado, ctx, p) {
   if (req.method !== "POST") return json({ error: "método no permitido" }, 405);
   let b; try { b = await req.json(); } catch { return json({ error: "bad json" }, 400); }
   b = b || {};
-  const admin = () => !!env.ADMIN_PIN && String(b.pin || "") === String(env.ADMIN_PIN);
+  if (p === "/api/push/admin-check") return (await pinGuard(env, req, b)) || json({ ok: true });   // la app comprueba aquí el PIN que se teclea para entrar al panel de admin
   const cut = (s, n) => String(s || "").slice(0, n);
 
   if (p === "/api/push/presence") {   // latido de la app abierta (on) o aviso de que se ha cerrado / pasado a segundo plano (off)
@@ -980,7 +995,7 @@ async function pushRoutes(req, env, estado, ctx, p) {
   }
   if (p === "/api/push/demo") {   // avisos de prueba desde el panel del admin
     if (!env.ADMIN_PIN) return json({ error: "Falta el secreto ADMIN_PIN en Cloudflare" }, 500);
-    if (!admin()) return json({ error: "PIN incorrecto" }, 403);
+    { const g = await pinGuard(env, req, b); if (g) return g; }
     const r = await estado.pushDemo(String(b.kind || ""), String(b.pid || ""));
     if (r.desconocido) return json({ error: "aviso desconocido" }, 400);
     if (r.sinAvisos) return json({ ok: true, enviados: 0, fallidos: 0, sinAvisos: true });
@@ -1007,12 +1022,12 @@ async function pushRoutes(req, env, estado, ctx, p) {
     return json({ ok: r.enviados > 0, ...r });
   }
   if (p === "/api/push/stats") {
-    if (!admin()) return json({ error: "PIN incorrecto" }, 403);
+    { const g = await pinGuard(env, req, b); if (g) return g; }
     return json(await estado.pushStats());
   }
   if (p === "/api/push/admin") {
     if (!env.ADMIN_PIN) return json({ error: "Falta el secreto ADMIN_PIN en Cloudflare" }, 500);
-    if (!admin()) return json({ error: "PIN incorrecto" }, 403);
+    { const g = await pinGuard(env, req, b); if (g) return g; }
     const t = cut(b.title, 80).trim(), cuerpo = cut(b.body, 300).trim();
     if (!t || !cuerpo) return json({ error: "Falta el título o el mensaje" }, 400);
     const pids = Array.isArray(b.to) ? b.to.map(String) : null;   // null = todos
@@ -1023,7 +1038,7 @@ async function pushRoutes(req, env, estado, ctx, p) {
   }
   if (p === "/api/push/forma-borrar") {   // borra las estadísticas guardadas (forma, enfrentamientos, comparativa): se vuelven a buscar al abrir el botón
     if (!env.ADMIN_PIN) return json({ error: "Falta el secreto ADMIN_PIN en Cloudflare" }, 500);
-    if (!admin()) return json({ error: "PIN incorrecto" }, 403);
+    { const g = await pinGuard(env, req, b); if (g) return g; }
     await env.STORE.get(env.STORE.idFromName("cache")).borrarForma();
     return json({ ok: true });
   }
@@ -1049,6 +1064,12 @@ export default {
     if (p.startsWith("/api/backup/")) return backupRoutes(req, env, estado, p);
     if (p === "/.netlify/functions/calendario") return calendario(req, env);
     if (p === "/.netlify/functions/forma") return forma(req, env, env.STORE.get(env.STORE.idFromName("cache")));
+    if (p.startsWith("/img/")) {   // imágenes con el nombre = su contenido: el móvil las guarda un año y no las vuelve a pedir
+      const r = await env.ASSETS.fetch(req);
+      if (r.status !== 200 && r.status !== 304) return r;
+      const hd = new Headers(r.headers); hd.set("cache-control", "public, max-age=31536000, immutable");
+      return new Response(r.body, { status: r.status, statusText: r.statusText, headers: hd });
+    }
     // la página y el resto de archivos de la carpeta public
     return env.ASSETS.fetch(p === "/" ? new Request(new URL("/index.html", url), req) : req);
   },
