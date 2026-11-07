@@ -1833,9 +1833,11 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 .br-cup.on3 svg{visibility:hidden;animation:none!important}
 .en.wide .br-cup.on3{filter:drop-shadow(0 0 16px rgba(255,200,60,.5))}
 /* Copa de la Súper Predict League: apoyada arriba a la izquierda de la clasificación */
-#tabla .lgt{position:relative;overflow:visible;margin-top:26px}
-#tabla>h2{padding-left:40px;margin-top:18px}   /* título un poco más a la derecha, separado del trofeo, y algo más bajo */
-#tabla>#tablaNav{padding-left:40px;margin-top:8px}   /* el selector de jornada queda centrado justo bajo el título */
+#tabla{padding-top:8px}
+#tabla .lgt{position:relative;overflow:visible;margin-top:0}
+#tabla>#tablaNav{margin-top:0}   /* el selector de jornada va arriba del todo */
+#tabla>#tablaNav .jhead{padding:0 0 4px}
+#tabla>h2.lg-ttl{display:flex;align-items:center;justify-content:center;height:74px;margin:0;padding:0 0 6px 76px;box-sizing:border-box}   /* el título queda a la altura del trofeo, a su derecha */
 .lg-cup{position:absolute;left:8px;bottom:100%;width:62px;height:82px;margin-bottom:-1px;pointer-events:none;z-index:3}
 .lg-cup canvas.cup3d{position:absolute;left:50%;bottom:0;height:100%;aspect-ratio:.85;transform:translate(-50%,13%);opacity:0;transition:opacity .4s}
 .lg-cup.on3 canvas.cup3d{opacity:1}
@@ -2599,8 +2601,8 @@ html,body{overscroll-behavior-y:none}
   <div id="premTop"></div>
   <div id="euroTop"></div>
   <button type="button" class="btn ghost" id="ligaToggle" aria-expanded="false" hidden></button>
-  <h2>Super Predict League</h2>
   <div id="tablaNav"></div>
+  <h2 class="lg-ttl">Super Predict League</h2>
   <div class="card lgt" style="padding:6px 10px"><div class="lg-cup" aria-hidden="true"><canvas class="cup3d" data-cup="spl" data-z="7"></canvas></div><div id="tablaBox"></div></div>
   <div class="muted lgleg" style="margin:12px 0;line-height:1.6"><div>- <b>PG</b>: Puntos ganados en la jornada</div><div>- <b>PT</b>: Puntos totales</div></div>
   <button type="button" class="btn" id="wrapTopBtn" style="width:100%;margin:0 0 14px" hidden>✨ Ver Wrapped</button>
@@ -5390,6 +5392,7 @@ function renderEquipo() {
 
 // Tabla
 let tv = null;   // jornada que se está viendo (null = la última)
+let tvLast = null;   // última jornada calculada que ya se vio: si aparece una nueva, la tabla pasa sola a ella
 // Gráfica de evolución de posiciones por jornada (todos los participantes)
 let evolOpen = false, evolSX = null, evolEnd = true;
 const EVOL_SCROLL_FROM = 7;   // desde esta jornada la gráfica se desliza en horizontal
@@ -5452,7 +5455,9 @@ function renderTabla() {
   renderEvol();
   { const wb = $("#wrapTopBtn"); if (wb) wb.hidden = !meP() || !calcRounds().includes(CONFIG.jornadas); }
   { const lc = document.querySelector(".lg-cup"); if (lc && !lc.querySelector("svg")) { try { lc.insertAdjacentHTML("afterbegin", trofeoSvg(TROFEOS.find(t => t.id === "spl"), true)); } catch (e) {} } setTimeout(mountCups, 0); }   // copa 3D de la liga (la 2D queda de reserva)
-  const rs = calcRounds(), last = rs[rs.length - 1], cur = rs.includes(tv) ? tv : last, idx = rs.indexOf(cur);
+  const rs = calcRounds(), last = rs[rs.length - 1];
+  if (last !== tvLast) { tvLast = last; tv = null; }   // resultado nuevo → se muestra la clasificación actualizada
+  const cur = rs.includes(tv) ? tv : last, idx = rs.indexOf(cur);
   const t = standings(cur);
   if (!t.length) { $("#tablaNav").innerHTML = ""; $("#tablaBox").innerHTML = '<p class="muted" style="padding:10px">Todavía no hay jugadores.</p>'; setupMyPos([]); return; }
   const nav = rs.length ? `<div class="jhead"><div class="jn">${rs.length > 1 ? `<button class="jb" data-jd="-1" ${idx <= 0 ? "disabled" : ""} aria-label="Jornada anterior">‹</button>` : ""}<b>Jornada ${cur}</b>${rs.length > 1 ? `<button class="jb" data-jd="1" ${idx >= rs.length - 1 ? "disabled" : ""} aria-label="Jornada siguiente">›</button>` : ""}</div></div>` : "";
