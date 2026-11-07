@@ -386,7 +386,7 @@ async function forma(req, env, cache) {
     await guardar("equipos", tm);
 
     const ko = Date.parse(q.get("kickoff") || "");   // hora del partido en la app: sirve para saber de qué competición es
-    const clave = `datos7:${eh ? eh.id : "x" + NF(nombres.home)}-${ea ? ea.id : "x" + NF(nombres.away)}:${Number.isFinite(ko) ? new Date(ko).toISOString().slice(0, 10) : "s"}`;
+    const clave = `datos8:${eh ? eh.id : "x" + NF(nombres.home)}-${ea ? ea.id : "x" + NF(nombres.away)}:${Number.isFinite(ko) ? new Date(ko).toISOString().slice(0, 10) : "s"}`;
     const debug = q.get("debug") === "1";
     const hit = debug || q.get("fresh") === "1" ? null : await leer(clave);
     if (hit && Date.now() - hit.t < TTL_DATOS) return Response.json({ ...hit.data, t: hit.t, cached: true }, { headers: { "cache-control": "no-store" } });
@@ -438,10 +438,10 @@ async function forma(req, env, cache) {
       const cand = mh.filter(entre).sort((a, b) => Date.parse(b.utcDate) - Date.parse(a.utcDate));
       const fut = proximo || cand.find((m) => m.status !== "FINISHED") || cand[0];
       let lista = [];
-      if (fut) { try { lista = (await call(`/matches/${fut.id}/head2head?limit=10`)).matches || []; } catch (e) { if (e.status === 429) throw e; } }
+      if (fut) { try { lista = (await call(`/matches/${fut.id}/head2head?limit=40`)).matches || []; } catch (e) { if (e.status === 429) throw e; } }
       if (!lista.length) lista = cand;
       const vistos = new Set();
-      h2h = lista.filter(jugado).filter((m) => entre(m) && !vistos.has(m.id) && vistos.add(m.id))
+      h2h = lista.filter(jugado).filter((m) => entre(m) && (!compCode || (m.competition && m.competition.code === compCode)) && !vistos.has(m.id) && vistos.add(m.id))   // partido de liga: solo enfrentamientos de liga; de Champions: solo de Champions
         .sort((a, b) => Date.parse(b.utcDate) - Date.parse(a.utcDate)).slice(0, 5)
         .map((m) => ({ d: m.utcDate, h: m.homeTeam.id === eh.id ? "home" : "away", hs: m.score.fullTime.home, as: m.score.fullTime.away, comp: m.competition && m.competition.code }));
     }
