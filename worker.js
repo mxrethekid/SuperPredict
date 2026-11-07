@@ -311,6 +311,30 @@ const ALIAS_F = {
   "sporting cp": ["sporting clube de portugal", "sporting lisbon", "sporting"],
   "slavia praha": ["sk slavia praha", "slavia prague"],
 };
+// Nombres de la app → cómo los escribe football-data.org (normalizados). Evitan que "Barcelona" se confunda con "RCD Espanyol de Barcelona" o "Deportivo" con "Deportivo Alavés".
+Object.assign(ALIAS_F, {
+  "barcelona": ["fc barcelona", "barca", "fcb"],
+  "espanyol": ["rcd espanyol de barcelona", "rcd espanyol", "espanyol"],
+  "deportivo": ["rc deportivo la coruna", "deportivo la coruna", "rc deportivo", "deportivo"],
+  "alaves": ["deportivo alaves", "cd alaves", "alaves"],
+  "real madrid": ["real madrid cf"],
+  "atletico de madrid": ["club atletico de madrid", "atletico madrid", "atleti"],
+  "athletic club": ["athletic", "athletic bilbao"],
+  "celta de vigo": ["rc celta de vigo", "celta vigo", "celta"],
+  "real betis": ["real betis balompie", "betis"],
+  "real sociedad": ["real sociedad de futbol"],
+  "rayo vallecano": ["rayo vallecano de madrid", "rayo"],
+  "osasuna": ["ca osasuna"], "malaga": ["malaga cf"], "elche": ["elche cf"], "getafe": ["getafe cf"],
+  "levante": ["levante ud"], "valencia": ["valencia cf"], "villarreal": ["villarreal cf"], "sevilla fc": ["sevilla"],
+  "tottenham": ["tottenham hotspur fc", "tottenham hotspur", "spurs"],
+  "manchester city": ["manchester city fc", "man city"], "manchester united": ["manchester united fc", "man united"],
+  "brighton": ["brighton hove albion fc", "brighton hove albion", "brighton hove"],
+  "newcastle united": ["newcastle united fc", "newcastle"],
+  "inter": ["fc internazionale milano", "internazionale"], "milan": ["ac milan"],
+  "bayern munchen": ["fc bayern munchen", "bayern"], "koln": ["1 fc koln", "fc koln"], "mainz 05": ["1 fsv mainz 05", "mainz"],
+  "borussia monchengladbach": ["borussia monchengladbach", "gladbach"],
+  "paris saint germain": ["paris saint germain fc", "psg"], "marseille": ["olympique de marseille"], "lyon": ["olympique lyonnais"],
+});
 // 3 = exacto (o alias), 2 = lo contiene, 1 = tiene todas sus palabras, 0 = no coincide
 const scoreF = (app, t) => {
   if (!t) return 0;
@@ -345,7 +369,7 @@ async function forma(req, env, cache) {
     if (!tm || !Array.isArray(tm.list) || Date.now() - tm.t > TTL_EQUIPOS) tm = { t: Date.now(), list: [], done: [] };
     const buscar = (nombre) => {
       let best = null, bs = 0;
-      for (const t of tm.list) { const s = scoreF(nombre, t); if (s > bs) { bs = s; best = t; } }
+      for (const t of tm.list) { const s = scoreF(nombre, t); if (s > bs || (s === bs && s > 0 && TF(t.name).length < TF(best.name).length)) { bs = s; best = t; } }
       return bs >= 1 ? best : null;
     };
     let eh = buscar(nombres.home), ea = buscar(nombres.away);
@@ -362,10 +386,10 @@ async function forma(req, env, cache) {
     await guardar("equipos", tm);
 
     const ko = Date.parse(q.get("kickoff") || "");   // hora del partido en la app: sirve para saber de qué competición es
-    const clave = `datos6:${eh ? eh.id : "x" + NF(nombres.home)}-${ea ? ea.id : "x" + NF(nombres.away)}:${Number.isFinite(ko) ? new Date(ko).toISOString().slice(0, 10) : "s"}`;
+    const clave = `datos7:${eh ? eh.id : "x" + NF(nombres.home)}-${ea ? ea.id : "x" + NF(nombres.away)}:${Number.isFinite(ko) ? new Date(ko).toISOString().slice(0, 10) : "s"}`;
     const debug = q.get("debug") === "1";
-    const hit = debug ? null : await leer(clave);
-    if (hit && Date.now() - hit.t < TTL_DATOS) return Response.json(hit.data, { headers: { "cache-control": "no-store" } });
+    const hit = debug || q.get("fresh") === "1" ? null : await leer(clave);
+    if (hit && Date.now() - hit.t < TTL_DATOS) return Response.json({ ...hit.data, t: hit.t, cached: true }, { headers: { "cache-control": "no-store" } });
 
     // 2) partidos de la temporada de cada equipo (una llamada por equipo)
     const d = new Date(), season = d.getUTCMonth() >= 6 ? d.getUTCFullYear() : d.getUTCFullYear() - 1;
@@ -427,9 +451,10 @@ async function forma(req, env, cache) {
 
     if (debug) return Response.json({ season, equipos: { home: eh, away: ea }, compCode, home, away, h2h });
     delete home.all; delete away.all;
-    const data = { season, comp: compCode, home, away, h2h: { matches: h2h, hw: cuenta.h, d: cuenta.d, aw: cuenta.a }, falta: { home: !eh, away: !ea } };
-    await guardar(clave, { t: Date.now(), data });
-    return Response.json(data, { headers: { "cache-control": "no-store" } });
+    const data = { season, comp: compCode, home, away, h2h: { matches: h2h, hw: cuenta.h, d: cuenta.d, aw: cuenta.a }, falta: { home: !eh, away: !ea }, via: { home: eh ? eh.name : null, away: ea ? ea.name : null } };
+    const t0 = Date.now();
+    await guardar(clave, { t: t0, data });
+    return Response.json({ ...data, t: t0, cached: false }, { headers: { "cache-control": "no-store" } });
   } catch (e) {
     return Response.json({ error: e.message || "Error inesperado" }, { status: e.status === 429 ? 429 : 502 });
   }
