@@ -1453,20 +1453,6 @@ nav button.nw::after,nav button.nwp::after{top:7px;left:calc(50% + 10px)}
 .chb svg{width:20px;height:20px}
 .chb i{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--bad);color:#fff;font:700 11px/18px var(--b,inherit);font-style:normal;text-align:center;box-sizing:border-box}
 .chb.fmb{right:auto;left:12px}
-#historial .pf-hero>.chb.cpb{position:absolute;top:12px;right:12px;left:auto;z-index:3}   /* el hero pone position:relative a todo lo que lleva dentro */
-#campoO{position:fixed;inset:0;z-index:9000;background:#05090d;touch-action:none;overflow:hidden;animation:bkin .25s ease-out}
-#campoO.out{opacity:0;transition:opacity .2s}
-#campoO canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-#campoO .cp-x{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:3;width:44px;height:44px;padding:0;border-radius:50%;border:1px solid rgba(0,180,216,.5);background:rgba(8,14,20,.7);color:var(--cyan);font-size:18px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-#campoO .cp-hd{position:absolute;left:18px;right:74px;top:calc(14px + env(safe-area-inset-top,0px));z-index:2;color:#eafcff;text-shadow:0 2px 8px rgba(0,0,0,.7)}
-#campoO .cp-hd small{display:block;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#7fd8ef}
-#campoO .cp-hd b{display:block;font:400 30px/1.05 var(--h);letter-spacing:.02em;margin-top:2px}
-#campoO .cp-ft{position:absolute;left:18px;right:18px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:2;color:#eafcff;text-shadow:0 2px 8px rgba(0,0,0,.7)}
-#campoO .cp-fans{font-size:15px;font-weight:700}
-#campoO .cp-fans b{font:400 34px/1 var(--h);color:#ffc83d;margin-right:4px}
-#campoO .cp-bar{height:8px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden;margin:8px 0 6px}
-#campoO .cp-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#00b4d8,#7fe7ff)}
-#campoO .cp-ft small{display:block;font-size:12px;color:#b9d6df;line-height:1.35}
 #fmDlg{position:fixed;inset:0;z-index:70;background:var(--bg);display:flex;flex-direction:column;overscroll-behavior:none;touch-action:none}
 #fmDlg .fm-hd{position:relative;display:flex;align-items:center;justify-content:center;min-height:44px;padding:calc(14px + env(safe-area-inset-top,0px)) 64px 10px}
 #fmDlg .fm-hd b{font:700 17px/1.3 var(--b);letter-spacing:.12em;text-transform:uppercase;text-align:center;color:var(--mute)}
@@ -5017,132 +5003,6 @@ function openForma(mid) {
 }
 
 const chLabel = m => m.comp && COMPS[m.comp] ? COMPS[m.comp].nombre + ((COMPS[m.comp].st.find(x => x.k === m.stage) || {}).nom ? " · " + COMPS[m.comp].st.find(x => x.k === m.stage).nom : "") : "Jornada " + m.round;   // los partidos europeos no tienen jornada: se muestra la competición y la fase
-// ===== Mi campo: estadio visto desde dentro del césped. Nivel y aficionados salen de los puntos, la racha y los cromos (no se guarda nada) =====
-const CAMPO_NIV = [
-  { n: "Campo de barrio", min: 0 }, { n: "Campo municipal", min: 80 }, { n: "Estadio pequeño", min: 200 },
-  { n: "Gran estadio", min: 400 }, { n: "Estadio de leyenda", min: 700 },
-];
-function campoDatos(pl) {   // aficionados = 10 + 6 por punto + 20 por cada jornada de mayor racha + 8 por cromo
-  const e = standings().find(p => p.id === pl.id), pts = e ? (e.pt || 0) : 0, rk = rachaRec(pl) || 0, cr = (pl.cromos || []).length;
-  const fans = 10 + pts * 6 + rk * 20 + cr * 8;
-  let lv = 0; CAMPO_NIV.forEach((L, i) => { if (fans >= L.min) lv = i; });
-  return { fans, lv, sig: CAMPO_NIV[lv + 1] || null };
-}
-function campoBtn(pl) {
-  return `<button type="button" class="chb cpb" data-campo="${pl.id}" aria-label="Entrar al campo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M12 5v14"/><circle cx="12" cy="12" r="2.6"/><path d="M3 9.5h2.5v5H3M21 9.5h-2.5v5H21"/></svg></button>`;
-}
-function campoEscena(cv, pl, D, still) {
-  const ctx = cv.getContext("2d"), lv = D.lv, K = 3.5;
-  let W = 0, H = 0, DPR = 1, seats = [], houses = [], hy = 0, yb = 0, xTL = 0, xTR = 0, xBL = 0, xBR = 0, Hs = 0, raf = 0, last = 0, alive = true;
-  const hashS = s => { let h = 2166136261; for (const ch of String(s)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
-  const mk = () => { let a = hashS(pl.id) || 1; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; };
-  const yAt = d => hy + (yb - hy) * (1 / (1 + K * d) - 1 / (1 + K)) / (1 - 1 / (1 + K));
-  const xl = y => xTL + (xBL - xTL) * (y - hy) / (yb - hy), xr = y => xTR + (xBR - xTR) * (y - hy) / (yb - hy);
-  const P = (f, d) => { const y = yAt(d); return [xl(y) + (xr(y) - xl(y)) * f, y]; };
-  const sc = y => 0.1 + 0.9 * (y - hy) / (yb - hy);
-  const STRUCT = ["#6b4a2b", "#5d6873", "#4b5866", "#3a4656", "#2d3848"][lv];
-  function build() {
-    const r = mk(); seats = []; houses = [];
-    hy = H * 0.44; yb = H * 1.03; xTL = W * 0.26; xTR = W * 0.74; xBL = -W * 0.1; xBR = W * 1.1;
-    const occ = Math.max(0.1, Math.min(1, D.fans / (D.sig ? D.sig.min : 1200)));
-    const base = `hsl(${hashS(pl.team || pl.name) % 360},72%,52%)`, pal = [base, base, base, "#ffffff", "#ffd166", "#4cc9f0", "#e63946"];
-    const rows = [4, 5, 7, 9, 11][lv]; Hs = H * (0.115 + 0.027 * lv); const rh = Hs / rows, sp = 9;
-    for (let ri = 0; ri < rows; ri++) { const y = hy - (ri + 0.7) * rh; for (let x = 6 + (ri % 2) * 4; x < W - 3; x += sp) {
-      const tifo = lv === 4 && Math.floor(x / sp / 3) % 2 === 0, on = r() < (tifo ? Math.max(occ, 0.85) : occ);
-      seats.push({ x, y, s: rh * 0.42, on, col: tifo ? "#ffffff" : pal[Math.floor(r() * pal.length)], ph: r() * 6.28, bob: r() < 0.4, side: false });
-    } }
-    const sideRows = [0, 2, 3, 5, 7][lv];
-    if (sideRows) for (const sd of [-1, 1]) { let y = yb - 4; while (y > hy + 6) { const s = sc(y), edge = sd < 0 ? xl(y) : xr(y);
-      for (let ri = 0; ri < sideRows; ri++) seats.push({ x: edge + sd * (12 * s + ri * 17 * s), y: y - ri * 15 * s - 4 * s, s: 6.5 * s + 1.1, on: r() < occ, col: pal[Math.floor(r() * pal.length)], ph: r() * 6.28, bob: r() < 0.4, side: true });
-      y -= 14 * s + 1.5; } }
-    seats.sort((a, b) => a.y - b.y);
-    for (let x = -10; x < W; x += 14 + r() * 18) houses.push({ x, w: 12 + r() * 16, h: 8 + r() * (lv < 2 ? 26 : 12), t: r() < 0.3 });
-  }
-  function resize() {
-    DPR = Math.min(2, window.devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight; if (!W || !H) return;
-    cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); build(); draw(0);
-  }
-  function poly(pts, fill) { ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); }
-  function line(a, b, w, col) { ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineWidth = w; ctx.strokeStyle = col; ctx.stroke(); }
-  function draw(t) {
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
-    let g = ctx.createLinearGradient(0, 0, 0, hy); g.addColorStop(0, "#07101f"); g.addColorStop(1, lv >= 2 ? "#2f5a80" : "#27496a"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, hy + 2);
-    houses.forEach(h => { ctx.fillStyle = "#0d1a28"; ctx.fillRect(h.x, hy - Hs - h.h, h.w, h.h + 2); if (h.t) { ctx.fillStyle = "#ffd16688"; ctx.fillRect(h.x + 3, hy - Hs - h.h + 4, 3, 3); } });
-    ctx.fillStyle = STRUCT; ctx.fillRect(0, hy - Hs, W, Hs + 2);
-    ctx.fillStyle = "rgba(0,0,0,.28)"; ctx.fillRect(0, hy - Hs, W, Hs + 2);
-    for (const s of seats) if (!s.side) seat(s, t);
-    if (lv >= 3) {   // techo y pilares
-      poly([[0, hy - Hs - H * 0.045], [W, hy - Hs - H * 0.045], [W, hy - Hs - H * 0.008], [0, hy - Hs - H * 0.008]], "#1a222b");
-      for (let x = W / 12; x < W; x += W / 6) line([x, hy - Hs - H * 0.008], [x, hy], 2, "rgba(10,15,20,.7)");
-    }
-    if (lv >= 2) {   // marcador
-      const w = W * 0.4, h = H * 0.058, x = W / 2 - w / 2, y = hy - Hs - H * (lv >= 3 ? 0.11 : 0.075);
-      ctx.fillStyle = "#0b1217"; ctx.fillRect(x, y, w, h); ctx.strokeStyle = "#00b4d8"; ctx.lineWidth = 1.5; ctx.strokeRect(x, y, w, h);
-      ctx.fillStyle = "#ffc83d"; ctx.textAlign = "center"; ctx.font = `700 ${Math.round(h * 0.34)}px sans-serif`; ctx.fillText(String(pl.team || pl.name).toUpperCase().slice(0, 22), W / 2, y + h * 0.42);
-      ctx.font = `600 ${Math.round(h * 0.26)}px sans-serif`; ctx.fillStyle = "#cfeaf2"; ctx.fillText(D.fans.toLocaleString("es-ES") + " AFICIONADOS", W / 2, y + h * 0.78);
-    }
-    if (lv >= 2) {   // focos
-      const torres = lv >= 4 ? [[W * 0.06, 1], [W * 0.94, 1], [W * 0.2, 0.7], [W * 0.8, 0.7]] : [[W * 0.07, 1], [W * 0.93, 1]];
-      torres.forEach(([x, k]) => { const top = hy - Hs - H * 0.2 * k; line([x, hy - Hs * 0.2], [x, top], 2.5, "#1d252e");
-        poly([[x - 13 * k, top - 8 * k], [x + 13 * k, top - 8 * k], [x + 13 * k, top + 6 * k], [x - 13 * k, top + 6 * k]], "#e9f6ff");
-        ctx.save(); ctx.globalCompositeOperation = "lighter"; const rg = ctx.createRadialGradient(x, top, 1, x, top, 52 * k); rg.addColorStop(0, "rgba(220,240,255,.6)"); rg.addColorStop(1, "rgba(220,240,255,0)"); ctx.fillStyle = rg; ctx.fillRect(x - 55 * k, top - 55 * k, 110 * k, 110 * k); ctx.restore(); });
-    }
-    poly([[0, hy], [xTL, hy], [xBL, yb], [0, yb]], lv === 0 ? "#2b4d2b" : STRUCT); poly([[W, hy], [xTR, hy], [xBR, yb], [W, yb]], lv === 0 ? "#2b4d2b" : STRUCT);   // suelo / base de las gradas laterales
-    if (lv > 0) { ctx.fillStyle = "rgba(0,0,0,.3)"; ctx.fillRect(0, hy, xTL, yb - hy); ctx.fillRect(xTR, hy, W - xTR, yb - hy); }
-    // césped
-    const LI = ["#4d7c36", "#3f8a3d", "#2f9a46", "#2aa04a", "#25a84e"][lv], DK = ["#44702f", "#378037", "#288a3d", "#238f41", "#1f9745"][lv], N = 12;
-    for (let i = 0; i < N; i++) { const y0 = yAt(i / N), y1 = yAt((i + 1) / N); poly([[xl(y0), y0], [xr(y0), y0], [xr(y1), y1], [xl(y1), y1]], i % 2 ? DK : LI); }
-    if (lv === 0) { ctx.fillStyle = "rgba(120,90,50,.35)"; [[0.5, 0.74, 34, 9], [0.3, 0.3, 40, 12], [0.7, 0.5, 46, 14], [0.5, 0.1, 60, 18]].forEach(([f, d, rx, ry]) => { const p = P(f, d); ctx.beginPath(); ctx.ellipse(p[0], p[1], rx * sc(p[1]) + 6, ry * sc(p[1]) + 2, 0, 0, 6.283); ctx.fill(); }); }
-    // vallas / publicidad
-    const bh = H * 0.026;
-    if (lv === 0) { for (let x = 0; x < W; x += 16) line([x, hy], [x, hy - bh * 0.9], 1.5, "rgba(210,215,220,.6)"); line([0, hy - bh * 0.5], [W, hy - bh * 0.5], 1, "rgba(210,215,220,.45)"); }
-    else { const cols = ["#e63946", "#ffd166", "#00b4d8", "#ffffff", "#2a9d8f"]; for (let x = 0, i = 0; x < W; x += W * 0.12, i++) { ctx.fillStyle = cols[i % 5]; ctx.fillRect(x, hy - bh, W * 0.12 - 1, bh); } }
-    // marcas
-    const W2 = "rgba(255,255,255,.88)", L = (a, b) => line(a, b, 2, W2);
-    L(P(0, 1), P(1, 1)); L(P(0.2, 0.62), P(0.8, 0.62)); L(P(0.2, 0.62), P(0.2, 1)); L(P(0.8, 0.62), P(0.8, 1));
-    L(P(0.36, 0.84), P(0.64, 0.84)); L(P(0.36, 0.84), P(0.36, 1)); L(P(0.64, 0.84), P(0.64, 1));
-    const sp = P(0.5, 0.74); ctx.fillStyle = W2; ctx.beginPath(); ctx.ellipse(sp[0], sp[1], 3, 1.6, 0, 0, 6.283); ctx.fill();
-    L(P(0, 0), P(0, 1)); L(P(1, 0), P(1, 1));
-    // portería
-    const gw = (xr(hy) - xl(hy)) * 0.17, gh = gw * 0.42, gx = W / 2 - gw / 2;
-    ctx.fillStyle = "rgba(255,255,255,.1)"; ctx.fillRect(gx, hy - gh, gw, gh); ctx.lineWidth = 0.6; ctx.strokeStyle = "rgba(255,255,255,.4)";
-    for (let x = gx; x <= gx + gw; x += 4) { ctx.beginPath(); ctx.moveTo(x, hy - gh); ctx.lineTo(x, hy); ctx.stroke(); } for (let y = hy - gh; y <= hy; y += 4) { ctx.beginPath(); ctx.moveTo(gx, y); ctx.lineTo(gx + gw, y); ctx.stroke(); }
-    line([gx, hy], [gx, hy - gh], 2.4, "#fff"); line([gx + gw, hy], [gx + gw, hy - gh], 2.4, "#fff"); line([gx, hy - gh], [gx + gw, hy - gh], 2.4, "#fff");
-    [[xTL, 0], [xTR, 0]].forEach(([x]) => { line([x, hy], [x, hy - 11], 1.4, "#fff"); poly([[x, hy - 11], [x + 6, hy - 8.5], [x, hy - 6]], "#e63946"); });
-    for (const s of seats) if (s.side) seat(s, t);
-    let v = ctx.createLinearGradient(0, 0, 0, 110); v.addColorStop(0, "rgba(5,9,13,.8)"); v.addColorStop(1, "rgba(5,9,13,0)"); ctx.fillStyle = v; ctx.fillRect(0, 0, W, 110);
-    v = ctx.createLinearGradient(0, H - 150, 0, H); v.addColorStop(0, "rgba(5,9,13,0)"); v.addColorStop(1, "rgba(5,9,13,.88)"); ctx.fillStyle = v; ctx.fillRect(0, H - 150, W, 150);
-  }
-  function seat(s, t) {
-    ctx.fillStyle = STRUCT; ctx.fillRect(s.x - s.s * 1.2, s.y - s.s * 0.5, s.s * 2.4, s.s * 1.3);
-    if (!s.on) return;
-    const b = s.bob && t ? Math.max(0, Math.sin(t * 0.008 + s.ph)) * s.s * 0.55 : 0;
-    ctx.fillStyle = s.col; ctx.fillRect(s.x - s.s * 0.75, s.y - s.s * 0.55 - b, s.s * 1.5, s.s * 1.1);
-    ctx.fillStyle = "#f1c9a5"; ctx.beginPath(); ctx.arc(s.x, s.y - s.s * 0.95 - b, s.s * 0.45, 0, 6.283); ctx.fill();
-  }
-  const loop = ts => { if (!alive) return; if (ts - last >= 55) { last = ts; draw(ts); } raf = requestAnimationFrame(loop); };
-  const onR = () => resize(); window.addEventListener("resize", onR);
-  resize(); if (!still) raf = requestAnimationFrame(loop);
-  return { stop() { alive = false; cancelAnimationFrame(raf); window.removeEventListener("resize", onR); } };
-}
-function abrirCampo(id) {
-  const pl = S.players.find(p => p.id === id); if (!pl || document.getElementById("campoO")) return;
-  const D = campoDatos(pl), L = CAMPO_NIV[D.lv], mine = pl.id === me, fmt = n => n.toLocaleString("es-ES");
-  const pct = D.sig ? Math.max(0, Math.min(100, Math.round((D.fans - L.min) / (D.sig.min - L.min) * 100))) : 100;
-  const o = document.createElement("div"); o.id = "campoO"; o.setAttribute("role", "dialog"); o.setAttribute("aria-modal", "true"); o.setAttribute("aria-label", mine ? "Tu campo" : "Campo de " + pl.name);
-  o.innerHTML = `<canvas></canvas><button type="button" class="cp-x" aria-label="Salir del campo">✕</button>
-    <div class="cp-hd"><small>${mine ? "Tu campo" : "Campo de " + esc(pl.name)} · Nivel ${D.lv + 1}</small><b>${L.n}</b></div>
-    <div class="cp-ft"><div class="cp-fans"><b>${fmt(D.fans)}</b> aficionados</div><div class="cp-bar"><i style="width:${pct}%"></i></div>
-      <small>${D.sig ? `Siguiente nivel: ${D.sig.n} · ${fmt(D.sig.min)} aficionados` : "Nivel máximo conseguido"}</small><small>Más aficionados con puntos, rachas y cromos</small></div>`;
-  document.body.appendChild(o); document.documentElement.classList.add("pko-lock");
-  const reduce = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
-  const sc = campoEscena(o.querySelector("canvas"), pl, D, reduce);
-  const cerrar = () => { sc.stop(); window.removeEventListener("keydown", onKey); o.classList.add("out"); setTimeout(() => { o.remove(); if (!document.getElementById("pko") && !document.getElementById("albk")) document.documentElement.classList.remove("pko-lock"); }, 220); };
-  const onKey = e => { if (e.key === "Escape") cerrar(); };
-  window.addEventListener("keydown", onKey);
-  o.querySelector(".cp-x").onclick = () => { try { SFX.init(); SFX.tap("back"); } catch (e) {} cerrar(); };
-}
-document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest("[data-campo]"); if (b) { ev.preventDefault(); try { SFX.init(); } catch (e) {} abrirCampo(b.dataset.campo); } });
 
 function chatBtn(m) {
   const n = chUnread(m);
@@ -6545,7 +6405,7 @@ function renderHistorial() {
   const colOn = marcoOn(who), bdoOn = marcoBdo(who), splOn = marcoSpl(who), euK = marcoEu(who), fireOn = ix >= 0 && tt[ix].rc >= 3;   // en racha: el recuadro del perfil lleva llamas
   const rk = rachaRec(who);   // mayor racha conseguida (no baja nunca; para la cabecera)
   const head = (other ? `<div class="pf-top"><button class="pf-back" id="pfBack" aria-label="Volver">‹ Volver</button>${penRetoBtn(other)}</div>` : "") + `
-    <div class="pf-hero${ix < 0 ? "" : ix < 4 ? " z-ucl" : ix < 6 ? " z-uel" : ix < 8 ? " z-uecl" : ""}${fireOn ? " fire" : ""}${colOn ? " colf" : ""}${bdoOn ? " bdof" : ""}${splOn ? " splf" : ""}${euK ? " euf e-" + euK : ""}">${campoBtn(who)}${fireOn ? '<span class="pf-fire" aria-hidden="true"><i class="u"></i></span>' : ""}${colOn ? '<span class="pf-col" aria-hidden="true"><i class="w"></i><i class="s s1"></i><i class="s s2"></i><i class="s s3"></i><i class="s s4"></i><i class="s s5"></i></span>' : ""}${bdoOn ? `<span class="pf-bdo" aria-hidden="true"><i class="hx"></i><i class="sw"></i>${bdoSi(14)}</span>` : ""}${splOn ? `<span class="pf-spl" aria-hidden="true"><i class="sw"></i>${splCf(18)}</span>` : ""}${euK ? `<span class="pf-eu" aria-hidden="true"><i class="hx"></i><i class="sw"></i>${bdoSi(14)}</span>` : ""}<div class="pf-crest">${crest(who.team)}</div><div class="pf-name" role="heading" aria-level="2">${esc(who.name)}</div>${ttlHtml(who, "ptl")}
+    <div class="pf-hero${ix < 0 ? "" : ix < 4 ? " z-ucl" : ix < 6 ? " z-uel" : ix < 8 ? " z-uecl" : ""}${fireOn ? " fire" : ""}${colOn ? " colf" : ""}${bdoOn ? " bdof" : ""}${splOn ? " splf" : ""}${euK ? " euf e-" + euK : ""}">${fireOn ? '<span class="pf-fire" aria-hidden="true"><i class="u"></i></span>' : ""}${colOn ? '<span class="pf-col" aria-hidden="true"><i class="w"></i><i class="s s1"></i><i class="s s2"></i><i class="s s3"></i><i class="s s4"></i><i class="s s5"></i></span>' : ""}${bdoOn ? `<span class="pf-bdo" aria-hidden="true"><i class="hx"></i><i class="sw"></i>${bdoSi(14)}</span>` : ""}${splOn ? `<span class="pf-spl" aria-hidden="true"><i class="sw"></i>${splCf(18)}</span>` : ""}${euK ? `<span class="pf-eu" aria-hidden="true"><i class="hx"></i><i class="sw"></i>${bdoSi(14)}</span>` : ""}<div class="pf-crest">${crest(who.team)}</div><div class="pf-name" role="heading" aria-level="2">${esc(who.name)}</div>${ttlHtml(who, "ptl")}
     <div class="pf-badges"><span class="gd">${ix >= 0 ? ix + 1 + "º" : "—"}</span><span>${ix >= 0 ? tt[ix].pt : 0}<small>PT</small></span><span class="fr" title="Mayor racha" aria-label="Mayor racha: ${rk}">${rk}<i aria-hidden="true">🔥</i></span></div></div>` + (other ? `
     <p class="pf-sec">Sus predicciones</p>` : `
     <h2>Historial</h2>`);
