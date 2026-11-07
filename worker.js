@@ -50,6 +50,7 @@ export class Store extends DurableObject {
     do { this.sql.exec("INSERT INTO kv (k, i, v) VALUES (?, ?, ?)", k, n, s.slice(n * CH, (n + 1) * CH)); n++; } while (n * CH < s.length);
   }
   async get(k) { return this._get(k); }
+  async borrarForma() { this.sql.exec("DELETE FROM kv WHERE k LIKE 'datos%' OR k = 'equipos'"); return true; }   // borra las estadísticas guardadas de los partidos y la lista de equipos
   async set(k, v) { this._set(k, v); return true; }
   _state() {
     const st = this._get("state") || emptyState();
@@ -364,7 +365,7 @@ async function forma(req, env, cache) {
     const clave = `datos6:${eh ? eh.id : "x" + NF(nombres.home)}-${ea ? ea.id : "x" + NF(nombres.away)}:${Number.isFinite(ko) ? new Date(ko).toISOString().slice(0, 10) : "s"}`;
     const debug = q.get("debug") === "1";
     const hit = debug ? null : await leer(clave);
-    if (hit && Date.now() - hit.t < TTL_DATOS) return Response.json(hit.data, { headers: { "cache-control": "public, max-age=600" } });
+    if (hit && Date.now() - hit.t < TTL_DATOS) return Response.json(hit.data, { headers: { "cache-control": "no-store" } });
 
     // 2) partidos de la temporada de cada equipo (una llamada por equipo)
     const d = new Date(), season = d.getUTCMonth() >= 6 ? d.getUTCFullYear() : d.getUTCFullYear() - 1;
@@ -428,7 +429,7 @@ async function forma(req, env, cache) {
     delete home.all; delete away.all;
     const data = { season, comp: compCode, home, away, h2h: { matches: h2h, hw: cuenta.h, d: cuenta.d, aw: cuenta.a }, falta: { home: !eh, away: !ea } };
     await guardar(clave, { t: Date.now(), data });
-    return Response.json(data, { headers: { "cache-control": "public, max-age=600" } });
+    return Response.json(data, { headers: { "cache-control": "no-store" } });
   } catch (e) {
     return Response.json({ error: e.message || "Error inesperado" }, { status: e.status === 429 ? 429 : 502 });
   }
@@ -995,6 +996,12 @@ async function pushRoutes(req, env, estado, ctx, p) {
     if (!jobs.length) return json({ ok: true, enviados: 0, fallidos: 0, jugadores: 0, omitidos });
     const r = await enviar(env, estado, jobs);
     return json({ ok: true, jugadores, omitidos, ...r });
+  }
+  if (p === "/api/push/forma-borrar") {   // borra las estadísticas guardadas (forma, enfrentamientos, comparativa): se vuelven a buscar al abrir el botón
+    if (!env.ADMIN_PIN) return json({ error: "Falta el secreto ADMIN_PIN en Cloudflare" }, 500);
+    if (!admin()) return json({ error: "PIN incorrecto" }, 403);
+    await env.STORE.get(env.STORE.idFromName("cache")).borrarForma();
+    return json({ ok: true });
   }
   return json({ error: "ruta desconocida" }, 404);
 }
