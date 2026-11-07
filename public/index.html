@@ -7907,7 +7907,7 @@ function penMerge(cur, inc) {   // las elecciones solo crecen: si el servidor tr
 }
 // ===== fin lógica del duelo =====
 // ---- Tarjeta del duelo (arriba en la pestaña de perfil: el duelo de la semana de ese jugador y contra quién) ----
-let amNew = false, amUnseen = false, amTok = "", amSel = { key: "", s: -1, k: -1 };   // retos amistosos
+let amNew = false, amPlay = false, amNoNew = false, amUnseen = false, amTok = "", amSel = { key: "", s: -1, k: -1 };   // retos amistosos
 let penCoinGo = false, jugarDirty = false;   // penCoinGo: ya ha salido la pantalla de duelo ganado (el aviso de la moneda puede salir); jugarDirty: había que redibujar Jugar mientras sonaba una animación
 function penCoinHold() {
   if (penBusy && !penCoinGo) return true;   // animación de un duelo en marcha
@@ -7924,12 +7924,6 @@ function penEndJugar() {   // al acabar cualquier animación de duelo: se suelta
 }
 let penTok = "", penNew = false, penCoinSync = null, penSel = { key: "", s: -1, k: -1 }, penBusy = false, penBusyAt = 0, penUnseen = false, penAC = null;
 const penTokOf = (d, st, m, w) => w + ":" + st.rounds.filter(R => R.done).length + ":" + (st.next && (d.A === m ? st.next.bOk : st.next.aOk) ? 1 : 0);   // cambia cuando hay algo nuevo en el duelo (semana nueva, ronda resuelta, el rival ya ha jugado)
-function penMark() {   // el jugador ya ha visto la novedad del duelo: se quita el puntito (tarjeta y pestaña)
-  const m = meP(); if (!m || !penTok) return;
-  avSet(avKey("penal", m.id), penTok); penNew = false;
-  document.querySelectorAll("#penBox .pz.nw").forEach(e => e.classList.remove("nw"));
-  const nb = document.querySelector('nav button[data-t="jugar"]'); if (nb && !amNew) nb.classList.remove("pn-dot");
-}
 function penUnstick() { if (penBusy && Date.now() - penBusyAt > 90000) { penBusy = false; penFast = false; penHost = null; penCoinGo = false; jugarDirty = false; } }   // red de seguridad: si una animación se quedara colgada, no bloquea los botones para siempre
 const penSeenKey = (m, w) => "pen_seen_" + m.id + "_" + w;
 let penWait = false, amWait = false;   // este jugador ya eligió y espera al rival (se mira el servidor más a menudo)
@@ -8055,12 +8049,11 @@ async function penReplay(box, d, m, w, st, seen) {   // reproduce las rondas ya 
     }
     else if (st.next) { rn.textContent = "Ronda " + (st.next.r + 1); penSnd("round"); await penFx("rd", { n: st.next.r + 1, sd: st.next.r >= 3, ms: 1500 }); }
   } catch (e) { try { localStorage.setItem(penSeenKey(m, w), st.rounds.filter(R => R.done).length); } catch (e2) {} }   // si algo falla, la tanda se da por vista: no se repite en bucle
-  try { avSet(avKey("penal", m.id), penTokOf(d, st, m, w)); } catch (e) {}   // lo acaba de ver en la animación
   penFast = false; penBusy = false; penEndJugar();
 }
 function penWatch(box, ok) {   // da por visto el duelo cuando lleva un momento en pantalla (o al tocarlo), igual que la tienda y los partidos
   const bd = box.querySelector(".pz-bd");
-  if (penNew && ok && bd) seenWatch("penal", [bd], penMark); else seenWatch("penal", [], () => {});
+  seenWatch("penal", [], () => {});   // ya no hay "visto" que quite el puntito: solo se quita al jugar la ronda
 }
 // Botones por pasos: el local primero TIRA y después PARA; el visitante al revés (primero PARA y luego TIRA)
 function penActHtml(d, m, sd, an, sel) {
@@ -8094,7 +8087,7 @@ function _renderPen() {
   penUnseen = seen < done;
   penWait = !!st && !st.over && !!st.next && mineOk && seen >= done;
   penTok = st ? penTokOf(d, st, m, w) : "";
-  penNew = !!(m && synced && st && avGet(avKey("penal", m.id)) !== penTok);
+  penNew = !!(m && synced && st && myTurn);   // el puntito sigue hasta que juegas la ronda; reaparece cuando hay otra ronda para jugar
   if (nb) nb.classList.toggle("pn-dot", penNew || amNew);
   if (!box) return;
   const TIT = eu ? '<h2 class="ja-t">Desempate por penaltis</h2>' : `<h2 class="ja-t">Duelo de penaltis</h2>`;
@@ -8124,7 +8117,7 @@ function _renderPen() {
     const fin20 = !eu && w20 !== null && w >= w20;
     if (!eu && !fin20) for (let i = 1; i <= 8; i++) if (penRoundOf(w + i) !== null) { nd += 7 * (i - 1); break; }
     box.innerHTML = TIT + `<div class="pz${penNew ? " nw" : ""}"><div class="pz-bd">${penBoardHtml(d, st, seen)}</div>${act}${eu ? "" : `<div class="pz-wt" style="margin-top:14px">${fin20 ? statTxt : `Próximo duelo ${nd === 1 ? "mañana" : "en " + nd + " días"}`}</div>`}</div>`;
-    box.onclick = () => { if (penNew) penMark(); };
+    box.onclick = null;
     penWatch(box, true);
     return;
   }
@@ -8140,7 +8133,6 @@ function _renderPen() {
     <div class="pz-rn">${rnN >= 0 ? "Ronda " + (rnN + 1) : ""}</div>
     ${penStage(d.A, d.B)}${act}</div>`;
   box.onclick = ev => {
-    if (penNew && seen >= done) penMark();
     const b = ev.target.closest(".pz-b");
     if (b && myTurn) {   // se actualiza solo la zona de botones: el segundo paso aparece con animación y nada más se redibuja
       const t = b.dataset.t, z = +b.dataset.z, first = d.A === m ? "s" : "k", had = penSel[first] >= 0, hadBoth = penSel.s >= 0 && penSel.k >= 0;
@@ -8200,14 +8192,14 @@ function amState(m) {
   const by = (s, f) => all.filter(x => x.s === s && (!f || f(x))).sort((a, b) => a.ts - b.ts);
   const inc = by("in"), on = by("on"), act = on.find(x => !x.fin) || null, fin = act ? null : (on.filter(x => x.fin).pop() || null);
   const outs = by("out"), no = by("no", x => x.mine).pop() || null;
-  const tok = [...inc.map(x => "i" + x.k), act ? "a" + penTokOf(act.d, act.st, m, act.k) : "", no ? "n" + no.k : ""].filter(Boolean).join("|");
+  const tok = no ? "n" + no.k : "";   // solo el aviso informativo de reto rechazado se da por visto; lo demás (retos por contestar y rondas por jugar) deja el puntito hasta que actúas
   return { all, inc, act, fin, outs, no, tok, outN: outs.length };
 }
-function amMark() {   // lo nuevo ya se ha visto: fuera el puntito (tarjeta y pestaña Inicio)
+function amMark() {   // el aviso de reto rechazado ya se ha visto (lo pendiente de jugar mantiene el puntito)
   const m = meP(); if (!m || !amTok) return;
-  avSet(amTokKey(m), amTok); amNew = false;
-  document.querySelectorAll("#penAmBox .pz.nw").forEach(e => e.classList.remove("nw"));
-  const nb = document.querySelector('nav button[data-t="jugar"]'); if (nb && !penNew) nb.classList.remove("pn-dot");
+  avSet(amTokKey(m), amTok); amNoNew = false; amNew = amPlay;
+  document.querySelectorAll("#penAmBox [data-amn].nw").forEach(e => e.classList.remove("nw"));
+  const nb = document.querySelector('nav button[data-t="jugar"]'); if (nb) nb.classList.toggle("pn-dot", penNew || amNew);
 }
 const amCr = p => (p.team ? crest(p.team, false) : "");
 function amDuelHtml(m, x, nw) {
@@ -8231,28 +8223,31 @@ function _renderAm() {
   if (simBots()) save();
   const ok = !!m && m !== pend && synced && S.players.includes(m), A = ok ? amState(m) : null;
   amTok = A ? A.tok : "";
-  amNew = !!(ok && amTok && avGet(amTokKey(m)) !== amTok);
+  const actTurn = !!(A && A.act && !A.act.st.over && !!A.act.st.next && !(A.act.d.A === m ? A.act.st.next.aOk : A.act.st.next.bOk));   // me toca jugar una ronda del reto en curso
+  amPlay = !!(A && (A.inc.length || actTurn));   // retos por contestar o ronda por jugar: puntito hasta que actúo
+  amNoNew = !!(ok && amTok && avGet(amTokKey(m)) !== amTok);
+  amNew = amPlay || amNoNew;
   amUnseen = !!(A && A.act && A.act.seen < A.act.done);
   amWait = !!(A && A.act && !A.act.st.over && !!A.act.st.next && (A.act.d.A === m ? A.act.st.next.aOk : A.act.st.next.bOk) && A.act.seen >= A.act.done);
   if (nb) nb.classList.toggle("pn-dot", penNew || amNew);
   if (!box) return;
   if (!A || !(A.inc.length || A.act || A.fin || A.outs.length || A.no)) { box.innerHTML = ""; box.onclick = null; seenWatch("penal_am", [], () => {}); return; }
-  const nw = amNew, SUB = '<div class="pz-sub">🤝 Reto amistoso</div>';
+  const SUB = '<div class="pz-sub">🤝 Reto amistoso</div>';
   let h = '<h2 class="ja-t">Duelos amistosos</h2>';
   A.inc.forEach(x => {   // el mensaje de reto: aceptar o rechazar
-    h += `<div class="pz${nw ? " nw" : ""}" data-amk="${x.k}">${SUB}<div class="am-who">${amCr(x.rival)}<div class="am-msg"><b>${esc(x.rival.name)}</b> te reta a una tanda de penaltis</div></div>`
+    h += `<div class="pz nw" data-amk="${x.k}">${SUB}<div class="am-who">${amCr(x.rival)}<div class="am-msg"><b>${esc(x.rival.name)}</b> te reta a una tanda de penaltis</div></div>`
       + `<div class="am-bt"><button type="button" class="btn" data-amok="${x.k}"${A.act ? " disabled" : ""}>Aceptar</button><button type="button" class="btn del" data-amno="${x.k}">Rechazar</button></div>`
       + (A.act ? '<div class="pz-wt" style="margin-top:10px">Termina tu tanda actual para aceptar</div>' : "") + "</div>";
   });
   const amX = A.act || A.fin, amMin = !!amX && !pzOpen.has("a" + amX.k);   // el duelo amistoso también sale minimizado
-  if (amX) h += amMin ? pzMinHtml("a" + amX.k, m, amX.d, amX.st, amX.seen, amX.done, A.act ? nw : false, "Amistoso") : amDuelHtml(m, amX, A.act ? nw : false);
+  if (amX) h += amMin ? pzMinHtml("a" + amX.k, m, amX.d, amX.st, amX.seen, amX.done, A.act ? actTurn : false, "Amistoso") : amDuelHtml(m, amX, A.act ? actTurn : false);
   A.outs.forEach(x => { h += `<div class="pz">${SUB}<div class="am-who">${amCr(x.rival)}<div class="am-msg">Has retado a <b>${esc(x.rival.name)}</b><small>Esperando a que acepte…</small></div></div></div>`; });
-  if (A.no) h += `<div class="pz${nw ? " nw" : ""}"><div class="pz-wt"><b>${esc(A.no.rival.name)}</b> ha rechazado tu reto</div></div>`;
+  if (A.no) h += `<div class="pz${amNoNew ? " nw" : ""}" data-amn="1"><div class="pz-wt"><b>${esc(A.no.rival.name)}</b> ha rechazado tu reto</div></div>`;
   if (!(amMin && box.innerHTML === h)) box.innerHTML = h;
   box.onclick = ev => {
     const t = ev.target, m2 = meP(); if (!m2 || penBusy) return;
-    const op = t.closest("[data-pzo]"); if (op) { pzOpen.add(op.dataset.pzo); if (amNew) amMark(); renderAm(); return; }
-    if (amNew) amMark();
+    const op = t.closest("[data-pzo]"); if (op) { pzOpen.add(op.dataset.pzo); if (amNoNew) amMark(); renderAm(); return; }
+    if (amNoNew) amMark();
     const yes = t.closest("[data-amok]"), no = t.closest("[data-amno]");
     if (yes) { if (!yes.disabled) amAnswer(yes.dataset.amok, true); return; }
     if (no) { amAnswer(no.dataset.amno, false); return; }
@@ -8269,7 +8264,7 @@ function _renderAm() {
     }
     if (t.closest(".pn-ok") && amSel.s >= 0 && amSel.k >= 0) { const s = amSel.s, kk = amSel.k; amSel = { key: "", s: -1, k: -1 }; penPut(d, s, kk); renderAm(); }
   };
-  const els = nw ? [...box.querySelectorAll(".pz.nw")] : [];
+  const els = amNoNew ? [...box.querySelectorAll("[data-amn].nw")] : [];
   if (els.length && !amUnseen) seenWatch("penal_am", els, amMark); else seenWatch("penal_am", [], () => {});
   if (A.act && A.act.seen < A.act.done && box.offsetParent !== null && pzOpen.has("a" + A.act.k)) amReplay(box, A.act);
 }
