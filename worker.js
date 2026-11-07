@@ -137,7 +137,7 @@ export class Store extends DurableObject {
     const subs = this._subs().subs, jobs = [];
     const now = Date.now();
     for (const m of msgs) {
-      if (!forzar && this._dentro(m.pid)) continue;   // ya está en la app: no se le avisa, tampoco si el cambio lo ha hecho él (las pruebas desde el panel del admin siguen llegando: no pasan por aquí)
+      if (!forzar && this._dentro(m.pid) && /^(duelo|reto|turno)-/.test(m.tag || "")) continue;   // dentro de la app solo se omiten los avisos de duelos de penaltis; el resto llegan siempre   // ya está en la app: no se le avisa, tampoco si el cambio lo ha hecho él (las pruebas desde el panel del admin siguen llegando: no pasan por aquí)
       const tab = TAB_AVISO[String(m.tag || "").split("-")[0]], n = pendientes(st, m.pid, now);
       for (const s of subs[m.pid] || []) jobs.push({ sub: s, payload: { t: m.title, b: m.body, tag: m.tag, url: tab ? "/#" + tab : "/", n } });
     }
@@ -204,7 +204,7 @@ export class Store extends DurableObject {
       pocion: ["🧪 ¡Te han lanzado una poción!", `${rival} ha usado Cambiaforma.\n+1 gol a ${m.home}.`],
       votacion: ["🗳️ ¡Votación abierta!", `Elige el partido de la próxima jornada.\nCierra el ${votCierreTxt(f)}.`],
       votacion_re: ["🗳️ Votación reabierta", `Se han borrado los votos: vuelve a votar.\nCierra el ${votCierreTxt(f)}.`],
-      votorec: ["🗳️ Quedan 6 horas para votar", `Aún no has votado el partido de la próxima jornada.\nCierra a las ${horaEs(f.close)}.`],
+      votorec: ["🗳️ ¡Queda 1 hora para votar!", `Aún no has votado el partido de la próxima jornada.\nCierra a las ${horaEs(f.close)}.`],
       reto: ["🤝🏼Reto Amistoso", `${rival} te reta a una tanda de penaltis. Acepta el reto desde la pestaña de inicio.`],
       turno: ["⚽️¡Es tu turno!", `${rival} ya ha jugado la ronda 2 de vuestra tanda. ¡Te toca!`],
       duelo: ["⚽Duelo de penaltis", `Tienes una tanda contra ${rival}. ¡Entra a jugarla!`],
@@ -241,7 +241,6 @@ export class Store extends DurableObject {
     for (const pid of Object.keys(subs)) {
       if (pids && !pids.includes(pid)) continue;
       if (!vivos.has(pid)) continue;   // archivados o eliminados: sin avisos
-      if (this._dentro(pid)) { omitidos++; continue; }   // dentro de la app: sin aviso
       jugadores++; for (const s of subs[pid]) jobs.push({ sub: s, payload });
     }
     return { jobs, jugadores, omitidos };
@@ -735,16 +734,16 @@ function avisosVotacion(st, now, once) {
   const body = (f.r ? "Se han borrado los votos: vuelve a votar." : "Elige el partido de la próxima jornada.") + `\nCierra el ${votCierreTxt(f)}.`;
   return aviso.map((p) => ({ pid: p.id, tag: "votacion-" + f.w, title, body }));
 }
-// Aviso: quedan 6 horas para votar (solo a quien aún no ha votado)
+// Aviso: queda 1 hora para votar (solo a quien aún no ha votado)
 function avisosVotoRecordatorio(st, now, once) {
   const f = votFase(st, now);
   if (f.w < VOT_INI || !f.ab || votFinalCreada(st)) return [];
-  const quedan = f.close - now, T = 6;
+  const quedan = f.close - now, T = 1;
   if (!(quedan <= T * HORA && quedan > T * HORA - 25 * 6e4)) return [];   // ventana de 25 min por si algún cron se retrasa
   const aviso = votSinVotar(st, f);
   if (!aviso.length || !once(`vr:${f.w}:${f.r}`)) return [];
   const body = `Aún no has votado el partido de la próxima jornada.\nCierra a las ${horaEs(f.close)}.`;
-  return aviso.map((p) => ({ pid: p.id, tag: "votorec-" + f.w, title: `🗳️ Quedan ${T} horas para votar`, body }));
+  return aviso.map((p) => ({ pid: p.id, tag: "votorec-" + f.w, title: "🗳️ ¡Queda 1 hora para votar!", body }));
 }
 
 // ---- Cierre automático: al cerrarse la votación, el partido ganador pasa a ser el partido de la semana (antes lo creaba el primer móvil que abría la app) ----
