@@ -4140,6 +4140,7 @@ function renderCuenta() {
       if (found && found.pin) return fail("Ese usuario ya está registrado. Usa la pestaña Iniciar sesión.");
       if (!found) {
         if (arch) return fail("Ese usuario pertenece a un jugador archivado. Si eres tú, pide al administrador que te reactive.");
+        if (/\p{Extended_Pictographic}|\p{Regional_Indicator}|[\u{1F3FB}-\u{1F3FF}\u200D\uFE0F\u20E3]/u.test(name)) return fail("El usuario no puede llevar emojis.");   // solo en registros nuevos: quien ya tenga uno puede seguir entrando
         if (Array.from(name).length > 10) return fail("El usuario puede tener 10 caracteres como máximo.");
         if (S.players.length >= MAX_PLAYERS) return fail("La liga está completa (20 jugadores).");
       }
