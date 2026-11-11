@@ -1006,6 +1006,11 @@ async function pushRoutes(req, env, estado, ctx, p) {
     const r = await enviar(env, estado, jobs);
     return json({ ok: r.enviados > 0, ...r });
   }
+  if (p === "/api/push/admin-check") {   // el panel de admin comprueba aquí el PIN (no está escrito en la página)
+    if (!env.ADMIN_PIN) return json({ error: "Falta el secreto ADMIN_PIN en Cloudflare" }, 500);
+    if (!admin()) return json({ error: "PIN incorrecto" }, 403);
+    return json({ ok: true });
+  }
   if (p === "/api/push/stats") {
     if (!admin()) return json({ error: "PIN incorrecto" }, 403);
     return json(await estado.pushStats());
