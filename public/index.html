@@ -8890,6 +8890,22 @@ const pshB64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace
 const pshKey = k => Uint8Array.from(atob((k + "=".repeat((4 - k.length % 4) % 4)).replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
 async function pshSub() { try { const reg = await navigator.serviceWorker.getRegistration("/"); return reg ? await reg.pushManager.getSubscription() : null; } catch (e) { return null; } }
 if (!LOCAL && "serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
+// Si hay versión nueva desplegada, la app se recarga sola al volver a primer plano
+if (!LOCAL) (() => {
+  let actual = null, ultimo = 0;
+  const check = async () => {
+    if (Date.now() - ultimo < 30000) return; ultimo = Date.now();
+    try {
+      const { v } = await (await fetch("/api/version", { cache: "no-store" })).json();
+      if (!v) return;
+      if (actual === null) actual = v;
+      else if (v !== actual) { toast("Nueva versión disponible, actualizando…"); setTimeout(() => location.reload(), 1200); }
+    } catch (_) {}
+  };
+  check();
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) check(); });
+  setInterval(() => { if (!document.hidden) check(); }, 5 * 60 * 1000);
+})();
 
 let pshSynced = "", pshLast = "";
 async function pshSync(intento) {   // apunta este móvil al jugador que ha entrado (si ya tenía los avisos activados)
