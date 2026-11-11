@@ -17,5 +17,6 @@
     "VAPID_PUBLIC": "BHu5jKvBU1JBht8bUgZkIVB64_i6coOxmTtvrfBmfP02RQd3oAlCjeJjsVPKjrNjba71obGZacVAOtWvzRT-smI",
     "VAPID_SUBJECT": "mailto:avisos@superpredict.app"
   },
+  "version_metadata": { "binding": "CF_VERSION" },
   "observability": { "enabled": true }
 }
