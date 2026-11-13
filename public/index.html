@@ -5163,17 +5163,20 @@ function votMount() {
   if (!f.ab) return;
   const old = document.getElementById("votBox"); if (old) old.remove();
   const el = document.createElement("div"); el.id = "votBox";
-  const ref = box.querySelector("h2.ja-t") || box.querySelector("#penBox") || box.querySelector(".pc-sec");
+  const ref = [...box.querySelectorAll("h2.ja-t")].find(h => !h.closest("#penBox, #penAmBox")) || box.querySelector("#penBox") || box.querySelector(".pc-sec");   // nunca dentro de #penBox/#penAmBox: esos contenedores se reescriben enteros (al abrir un duelo se borraba la votación)
   if (ref) ref.before(el); else box.appendChild(el);
   votPaint(el, f, p);
 }
+const votCnt = f => { const reg = S.players.filter(q => q.regAt); return { n: reg.filter(q => q.vot && q.vot.w === f.w && (q.vot.r || 0) === f.r).length, t: reg.length }; };
+const votCntHtml = f => { if (VOT_TEST) return ""; const c = votCnt(f); return `<div class="muted" style="margin-top:6px">Han votado <b>${c.n}</b> de <b>${c.t}</b> jugadores</div>`; };
 function votPaint(el, f, p) {
   const hd = '<h2 class="ja-t">VOTACIÓN SIGUIENTE JORNADA</h2>', v = VOT_TEST ? VOT_TEST.v : p.vot && p.vot.w === f.w && (p.vot.r || 0) === f.r ? p.vot : null;
   if (v && !VOT_UI.edit) {
-    el.innerHTML = hd + `<div class="card vt-ok"><b>Votación hecha ✅</b><div class="muted" style="margin-top:4px">Tu voto: ${esc(v.h)} – ${esc(v.a)}</div></div>`;
+    el.innerHTML = hd + `<div class="card vt-ok"><b>Votación hecha ✅</b><div class="muted" style="margin-top:4px">Tu voto: ${esc(v.h)} – ${esc(v.a)}</div>${votCntHtml(f)}<div class="muted" style="margin-top:6px">La votación se cierra el ${votCierreTxt(f)} y se elegirá el partido más votado.</div></div>`;
     return;
   }
   const note = `<p class="muted vt-n">Elige el partido que quieres para la próxima jornada. Cierra el ${votCierreTxt(f)}.</p>`;
+  const nota = note.replace("</p>", "</p>" + votCntHtml(f).replace('style="margin-top:6px"', 'style="text-align:center;margin:-4px 0 10px;font-size:13px"'));
   if (VOT_UI.err) {
     el.innerHTML = hd + `<div class="card"><p class="msg err" style="margin:0 0 10px;text-align:center">${esc(VOT_UI.err)}</p><button type="button" class="btn ghost" id="vtRe" style="margin:0 auto;display:block">Reintentar</button></div>`;
     el.querySelector("#vtRe").onclick = () => { VOT_UI.err = ""; votMount(); };
@@ -5187,7 +5190,7 @@ function votPaint(el, f, p) {
   }
   if (!cand.length) { el.innerHTML = hd + '<div class="card muted" style="text-align:center">Semana de parón: no hay partidos la semana que viene.</div>'; return; }
   const html = cand.map(c => `<button type="button" class="vt-r${v && v.k === c.k ? " on" : ""}" data-k="${esc(c.k)}">${crest(c.h)}${crest(c.a)}<span class="vt-t">${esc(c.h)} – ${esc(c.a)}</span></button>`).join("");
-  el.innerHTML = hd + note + `<div class="vt-l">${html}</div>`;
+  el.innerHTML = hd + nota + `<div class="vt-l">${html}</div>`;
   const lst = el.querySelector(".vt-l"); lst.scrollTop = VOT_UI.st || 0;
   lst.onscroll = () => { VOT_UI.st = lst.scrollTop; };
   lst.onclick = e => {
