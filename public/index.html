@@ -5193,9 +5193,10 @@ function votPaint(el, f, p) {
   lst.onclick = e => {
     const b = e.target.closest(".vt-r"); if (!b) return;
     const c = cand.find(x => x.k === b.dataset.k); if (!c || v) return;   // un voto por jugador: no se puede cambiar
+    const pf = meP(); if (!pf) return;   // ficha actual: una sincronización con el servidor sustituye los objetos de S.players y "p" quedaría obsoleto (el voto se perdía y había que pulsar dos veces)
     if (VOT_TEST) { VOT_TEST.v = c; VOT_UI.edit = false; VOT_UI.st = 0; toast("Votación hecha ✅"); votMount(); return; }
     if (Date.now() > f.close) { toast("La votación ya se ha cerrado."); renderJugar(); return; }
-    p.vot = { w: f.w, r: f.r, k: c.k, h: c.h, a: c.a, t: c.t, c: c.c };
+    pf.vot = { w: f.w, r: f.r, k: c.k, h: c.h, a: c.a, t: c.t, c: c.c };
     VOT_UI.edit = false; VOT_UI.st = 0; save(); toast("Votación hecha ✅"); votMount();
   };
 }
