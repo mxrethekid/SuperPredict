@@ -1735,6 +1735,7 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 #penAmBox{margin:0 0 18px}#penAmBox:empty{display:none}
 #penAmBox .pz+.pz{margin-top:12px}
 #penAmBox .pz.nw::after{content:"";position:absolute;top:-4px;right:-3px;width:11px;height:11px;border-radius:50%;background:#ff3b4a;box-shadow:0 0 0 2px #0c1115,0 0 8px #ff3b4a}
+.am-gl{text-align:center;color:var(--mute);font:600 12px/1 var(--b);margin-bottom:12px;letter-spacing:.5px}
 .am-who{display:flex;align-items:center;justify-content:center;gap:12px;margin:2px 0 12px}
 .am-who .crest{width:46px;height:46px;flex:none}
 .am-msg{font-size:14.5px;line-height:1.35;text-align:left}.am-msg b{color:var(--text)}.am-msg small{display:block;color:var(--mute);font-size:12px;margin-top:2px}
@@ -8254,7 +8255,7 @@ function amState(m) {
   });
   const by = (s, f) => all.filter(x => x.s === s && (!f || f(x))).sort((a, b) => a.ts - b.ts);
   const inc = by("in"), on = by("on"), acts = on.filter(x => !x.fin), act = acts[0] || null, fin = acts.length ? null : (on.filter(x => x.fin).pop() || null);
-  const outs = by("out"), no = by("no", x => x.mine).pop() || null;
+  const outs = by("out"), no = null;   // los retos rechazados ya no se muestran
   const tok = no ? "n" + no.k : "";   // solo el aviso informativo de reto rechazado se da por visto; lo demás (retos por contestar y rondas por jugar) deja el puntito hasta que actúas
   return { all, inc, acts, act, fin, outs, no, tok, outN: outs.length, slots: acts.length + outs.length };
 }
@@ -8265,11 +8266,27 @@ function amMark() {   // el aviso de reto rechazado ya se ha visto (lo pendiente
   const nb = document.querySelector('nav button[data-t="jugar"]'); if (nb) nb.classList.toggle("pn-dot", penNew || amNew);
 }
 const amCr = p => (p.team ? crest(p.team, false) : "");
+function amH2H(m, d) {   // amistosos terminados entre estos dos jugadores (sin caducidad): [victorias del local de este duelo, victorias del visitante]
+  let a = 0, b = 0; if (!d) return [0, 0];
+  const o = d.A === m ? d.B : d.A;
+  const ks = new Set([...Object.keys(m.pen || {}), ...Object.keys(o.pen || {})]);
+  ks.forEach(k => {
+    if (k[0] !== "a") return;
+    const e1 = m.pen && m.pen[k], e2 = o.pen && o.pen[k];
+    if (!e1 || !e2 || e1.x || e2.x || e1.o !== o.id || e2.o !== m.id) return;
+    const dd = penOfKey(m, k); if (!dd) return;
+    const st = penState(dd); if (!st.over || !st.winner) return;
+    let seen = 0; try { seen = +localStorage.getItem(penSeenKey(m, k)) || 0; } catch (e) {}
+    if (seen < st.rounds.filter(R => R.done).length) return;   // no se cuenta hasta haber visto la tanda
+    if (st.winner === d.A) a++; else b++;
+  });
+  return [a, b];
+}
 function amDuelHtml(m, x, nw) {
   const { d, st, seen, done } = x, rnN = seen < done ? seen : st.next ? st.next.r : -1, sd = rnN >= 3;
   const mineOk = !!st.next && (d.A === m ? st.next.aOk : st.next.bOk), myTurn = !st.over && !!st.next && !mineOk;
   const key = x.k + "|" + (st.next ? st.next.r : "x"), sel = amSelOf(x.k, key);
-  const SUB = '<div class="pz-sub">🤝 Reto amistoso</div>';
+  const gl = amH2H(m, d), SUB = `<div class="pz-sub" style="margin-bottom:4px">🤝 Reto amistoso</div><div class="am-gl">Global: ${gl[0]}-${gl[1]}</div>`;
   let act = "";
   if (seen < done) act = "";
   else if (st.over) act = st.winner === m ? '<div class="pz-end win">🏆 ¡Reto ganado!</div>' : st.winner ? '<div class="pz-end lose">Reto perdido</div>' : '<div class="pz-end">🤝 Empate</div>';
@@ -8295,7 +8312,7 @@ function _renderAm() {
   amWait = !!(A && A.acts.some(waitOf));
   if (nb) nb.classList.toggle("pn-dot", penNew || amNew);
   if (!box) return;
-  if (!A || !(A.inc.length || A.acts.length || A.fin || A.outs.length || A.no)) { box.innerHTML = ""; box.onclick = null; seenWatch("penal_am", [], () => {}); return; }
+  if (!A || !(A.inc.length || A.acts.length || A.fin || A.outs.length)) { box.innerHTML = ""; box.onclick = null; seenWatch("penal_am", [], () => {}); return; }
   const SUB = '<div class="pz-sub">🤝 Reto amistoso</div>', full = A.slots >= AM_MAX;
   let h = '<h2 class="ja-t">Duelos amistosos' + (A.slots ? ` <small class="am-cnt">${A.slots}/${AM_MAX}</small>` : "") + '</h2>';
   A.inc.forEach(x => {   // el mensaje de reto: aceptar o rechazar
@@ -8309,7 +8326,6 @@ function _renderAm() {
     h += min ? pzMinHtml("a" + x.k, m, x.d, x.st, x.seen, x.done, tn, "Amistoso") : amDuelHtml(m, x, tn);
   });
   A.outs.forEach(x => { h += `<div class="pz">${SUB}<div class="am-who">${amCr(x.rival)}<div class="am-msg">Has retado a <b>${esc(x.rival.name)}</b><small>Esperando a que acepte…</small></div></div></div>`; });
-  if (A.no) h += `<div class="pz${amNoNew ? " nw" : ""}" data-amn="1"><div class="pz-wt"><b>${esc(A.no.rival.name)}</b> ha rechazado tu reto</div></div>`;
   if (!(xs.every(x => !pzOpen.has("a" + x.k)) && box.innerHTML === h)) box.innerHTML = h;
   box.onclick = ev => {
     const t = ev.target, m2 = meP(); if (!m2 || penBusy) return;
