@@ -1738,6 +1738,7 @@ nav button.pn-dot::after{content:"";position:absolute;top:7px;left:calc(50% + 10
 .am-who{display:flex;align-items:center;justify-content:center;gap:12px;margin:2px 0 12px}
 .am-who .crest{width:46px;height:46px;flex:none}
 .am-msg{font-size:14.5px;line-height:1.35;text-align:left}.am-msg b{color:var(--text)}.am-msg small{display:block;color:var(--mute);font-size:12px;margin-top:2px}
+.am-cnt{font-size:.62em;color:var(--mute);margin-left:6px;font-weight:700;letter-spacing:.05em;vertical-align:middle}
 .am-bt{display:flex;gap:10px}.am-bt .btn{flex:1;width:auto;margin:0}
 .pv-h{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .pv-ch{flex:none;font:700 24px/1 var(--b);font-style:normal;color:var(--mute);margin-left:2px;transition:transform .2s}.pv.open .pv-ch{transform:rotate(90deg)}
@@ -7965,7 +7966,7 @@ function penMerge(cur, inc) {   // las elecciones solo crecen: si el servidor tr
 }
 // ===== fin lógica del duelo =====
 // ---- Tarjeta del duelo (arriba en la pestaña de perfil: el duelo de la semana de ese jugador y contra quién) ----
-let amNew = false, amPlay = false, amNoNew = false, amUnseen = false, amTok = "", amSel = { key: "", s: -1, k: -1 };   // retos amistosos
+let amNew = false, amPlay = false, amNoNew = false, amUnseen = false, amTok = "", amSels = {};   // retos amistosos (amSels: elección en curso de cada duelo, por separado, para poder jugar varios a la vez)
 let penCoinGo = false, jugarDirty = false;   // penCoinGo: ya ha salido la pantalla de duelo ganado (el aviso de la moneda puede salir); jugarDirty: había que redibujar Jugar mientras sonaba una animación
 function penCoinHold() {
   if (penBusy && !penCoinGo) return true;   // animación de un duelo en marcha
@@ -8221,7 +8222,9 @@ if (!window._penIv) window._penIv = setInterval(() => { const b = document.query
 // Desde el perfil de otro jugador se le puede retar a una tanda. El reto es una ficha p.pen["a<hora en base36>"] = { o: rival, f: 1, s: [], k: [] }
 // que solo escribe el retador. El retado la acepta creando SU ficha (f: 0) o la rechaza con x: 1. Cada uno escribe solo en la suya.
 // No dan monedas ni logros: penWins y el sorteo semanal solo miran las fichas "w<semana>".
-const AM_PEND = 48 * 36e5, AM_LIVE = 7 * 864e5, AM_MAX_OUT = 3;   // una solicitud caduca a las 48 h; una tanda sin terminar, a los 7 días
+const AM_PEND = 48 * 36e5, AM_LIVE = 7 * 864e5, AM_MAX = 3;   // AM_MAX: como mucho 3 amistosos a la vez (tandas en curso + retos enviados esperando respuesta)
+//   // una solicitud caduca a las 48 h; una tanda sin terminar, a los 7 días
+function amSelOf(k, key) { let q = amSels[k]; if (!q || q.key !== key) q = amSels[k] = { key, s: -1, k: -1 }; return q; }   // elección en curso de un duelo concreto
 const amTs = k => parseInt(k.slice(1), 36) || 0;
 const amTokKey = m => avKey("penal_am", m.id);
 function amList(m) {   // retos de este jugador: s = "in" (me retan), "out" (he retado), "on" (aceptado), "no" (rechazado)
@@ -8250,10 +8253,10 @@ function amState(m) {
     return { ...x, d, st, done, seen, fin: st.over && seen >= done };
   });
   const by = (s, f) => all.filter(x => x.s === s && (!f || f(x))).sort((a, b) => a.ts - b.ts);
-  const inc = by("in"), on = by("on"), act = on.find(x => !x.fin) || null, fin = act ? null : (on.filter(x => x.fin).pop() || null);
+  const inc = by("in"), on = by("on"), acts = on.filter(x => !x.fin), act = acts[0] || null, fin = acts.length ? null : (on.filter(x => x.fin).pop() || null);
   const outs = by("out"), no = by("no", x => x.mine).pop() || null;
   const tok = no ? "n" + no.k : "";   // solo el aviso informativo de reto rechazado se da por visto; lo demás (retos por contestar y rondas por jugar) deja el puntito hasta que actúas
-  return { all, inc, act, fin, outs, no, tok, outN: outs.length };
+  return { all, inc, acts, act, fin, outs, no, tok, outN: outs.length, slots: acts.length + outs.length };
 }
 function amMark() {   // el aviso de reto rechazado ya se ha visto (lo pendiente de jugar mantiene el puntito)
   const m = meP(); if (!m || !amTok) return;
@@ -8265,13 +8268,12 @@ const amCr = p => (p.team ? crest(p.team, false) : "");
 function amDuelHtml(m, x, nw) {
   const { d, st, seen, done } = x, rnN = seen < done ? seen : st.next ? st.next.r : -1, sd = rnN >= 3;
   const mineOk = !!st.next && (d.A === m ? st.next.aOk : st.next.bOk), myTurn = !st.over && !!st.next && !mineOk;
-  const key = x.k + "|" + (st.next ? st.next.r : "x");
-  if (amSel.key !== key) amSel = { key, s: -1, k: -1 };
+  const key = x.k + "|" + (st.next ? st.next.r : "x"), sel = amSelOf(x.k, key);
   const SUB = '<div class="pz-sub">🤝 Reto amistoso</div>';
   let act = "";
   if (seen < done) act = "";
   else if (st.over) act = st.winner === m ? '<div class="pz-end win">🏆 ¡Reto ganado!</div>' : st.winner ? '<div class="pz-end lose">Reto perdido</div>' : '<div class="pz-end">🤝 Empate</div>';
-  else if (myTurn) act = penActHtml(d, m, sd, null, amSel);
+  else if (myTurn) act = penActHtml(d, m, sd, null, sel);
   else act = '<div class="pz-wt"><b>⚽</b> Tu jugada está lista · esperando al rival…</div>';
   if (st.over && seen >= done) return `<div class="pz${nw ? " nw" : ""}" data-amk="${x.k}">${pzMnBtn("a" + x.k)}${SUB}<div class="pz-bd">${penBoardHtml(d, st, seen)}</div>${act}</div>`;
   return `<div class="pz${nw ? " nw" : ""}" data-amk="${x.k}">${pzMnBtn("a" + x.k)}${SUB}<div class="pz-bd">${penBoardHtml(d, st, seen)}</div><div class="pz-rn">${rnN >= 0 ? "Ronda " + (rnN + 1) : ""}</div>${penStage(d.A, d.B)}${act}</div>`;
@@ -8283,27 +8285,32 @@ function _renderAm() {
   if (simBots()) save();
   const ok = !!m && m !== pend && synced && S.players.includes(m), A = ok ? amState(m) : null;
   amTok = A ? A.tok : "";
-  const actTurn = !!(A && A.act && !A.act.st.over && !!A.act.st.next && !(A.act.d.A === m ? A.act.st.next.aOk : A.act.st.next.bOk));   // me toca jugar una ronda del reto en curso
-  amPlay = !!(A && (A.inc.length || actTurn));   // retos por contestar o ronda por jugar: puntito hasta que actúo
+  const mineOkOf = x => !!x.st.next && (x.d.A === m ? x.st.next.aOk : x.st.next.bOk);
+  const turnOf = x => !x.st.over && !!x.st.next && !mineOkOf(x);   // me toca jugar una ronda de ese reto
+  const waitOf = x => !x.st.over && mineOkOf(x) && x.seen >= x.done;   // ya elegí y espero al rival
+  amPlay = !!(A && (A.inc.length || A.acts.some(turnOf)));   // retos por contestar o ronda por jugar en cualquiera de los duelos: puntito hasta que actúo
   amNoNew = !!(ok && amTok && avGet(amTokKey(m)) !== amTok);
   amNew = amPlay || amNoNew;
-  amUnseen = !!(A && A.act && A.act.seen < A.act.done);
-  amWait = !!(A && A.act && !A.act.st.over && !!A.act.st.next && (A.act.d.A === m ? A.act.st.next.aOk : A.act.st.next.bOk) && A.act.seen >= A.act.done);
+  amUnseen = !!(A && A.acts.some(x => x.seen < x.done));
+  amWait = !!(A && A.acts.some(waitOf));
   if (nb) nb.classList.toggle("pn-dot", penNew || amNew);
   if (!box) return;
-  if (!A || !(A.inc.length || A.act || A.fin || A.outs.length || A.no)) { box.innerHTML = ""; box.onclick = null; seenWatch("penal_am", [], () => {}); return; }
-  const SUB = '<div class="pz-sub">🤝 Reto amistoso</div>';
-  let h = '<h2 class="ja-t">Duelos amistosos</h2>';
+  if (!A || !(A.inc.length || A.acts.length || A.fin || A.outs.length || A.no)) { box.innerHTML = ""; box.onclick = null; seenWatch("penal_am", [], () => {}); return; }
+  const SUB = '<div class="pz-sub">🤝 Reto amistoso</div>', full = A.slots >= AM_MAX;
+  let h = '<h2 class="ja-t">Duelos amistosos' + (A.slots ? ` <small class="am-cnt">${A.slots}/${AM_MAX}</small>` : "") + '</h2>';
   A.inc.forEach(x => {   // el mensaje de reto: aceptar o rechazar
     h += `<div class="pz nw" data-amk="${x.k}">${SUB}<div class="am-who">${amCr(x.rival)}<div class="am-msg"><b>${esc(x.rival.name)}</b> te reta a una tanda de penaltis</div></div>`
-      + `<div class="am-bt"><button type="button" class="btn" data-amok="${x.k}"${A.act ? " disabled" : ""}>Aceptar</button><button type="button" class="btn del" data-amno="${x.k}">Rechazar</button></div>`
-      + (A.act ? '<div class="pz-wt" style="margin-top:10px">Termina tu tanda actual para aceptar</div>' : "") + "</div>";
+      + `<div class="am-bt"><button type="button" class="btn" data-amok="${x.k}"${full ? " disabled" : ""}>Aceptar</button><button type="button" class="btn del" data-amno="${x.k}">Rechazar</button></div>`
+      + (full ? `<div class="pz-wt" style="margin-top:10px">Ya tienes ${AM_MAX} amistosos a la vez · termina uno para aceptar</div>` : "") + "</div>";
   });
-  const amX = A.act || A.fin, amMin = !!amX && !pzOpen.has("a" + amX.k);   // el duelo amistoso también sale minimizado
-  if (amX) h += amMin ? pzMinHtml("a" + amX.k, m, amX.d, amX.st, amX.seen, amX.done, A.act ? actTurn : false, "Amistoso") : amDuelHtml(m, amX, A.act ? actTurn : false);
+  const xs = A.acts.length ? A.acts : (A.fin ? [A.fin] : []);   // hasta 3 duelos a la vez; si no hay ninguno en curso, el último terminado
+  xs.forEach(x => {
+    const min = !pzOpen.has("a" + x.k), tn = x.fin ? false : turnOf(x);   // cada duelo sale minimizado o abierto por separado
+    h += min ? pzMinHtml("a" + x.k, m, x.d, x.st, x.seen, x.done, tn, "Amistoso") : amDuelHtml(m, x, tn);
+  });
   A.outs.forEach(x => { h += `<div class="pz">${SUB}<div class="am-who">${amCr(x.rival)}<div class="am-msg">Has retado a <b>${esc(x.rival.name)}</b><small>Esperando a que acepte…</small></div></div></div>`; });
   if (A.no) h += `<div class="pz${amNoNew ? " nw" : ""}" data-amn="1"><div class="pz-wt"><b>${esc(A.no.rival.name)}</b> ha rechazado tu reto</div></div>`;
-  if (!(amMin && box.innerHTML === h)) box.innerHTML = h;
+  if (!(xs.every(x => !pzOpen.has("a" + x.k)) && box.innerHTML === h)) box.innerHTML = h;
   box.onclick = ev => {
     const t = ev.target, m2 = meP(); if (!m2 || penBusy) return;
     const op = t.closest("[data-pzo]"); if (op) { pzOpen.add(op.dataset.pzo); if (amNoNew) amMark(); renderAm(); return; }
@@ -8312,26 +8319,28 @@ function _renderAm() {
     const yes = t.closest("[data-amok]"), no = t.closest("[data-amno]");
     if (yes) { if (!yes.disabled) amAnswer(yes.dataset.amok, true); return; }
     if (no) { amAnswer(no.dataset.amno, false); return; }
-    const x2 = amState(m2).act; if (!x2 || x2.seen < x2.done) return;
+    const card = t.closest(".pz[data-amk]"); if (!card) return;
+    const x2 = amState(m2).acts.find(y => y.k === card.dataset.amk); if (!x2 || x2.seen < x2.done) return;   // el duelo concreto sobre el que se ha tocado
     const { d, st } = x2, mineOk = !!st.next && (d.A === m2 ? st.next.aOk : st.next.bOk);
     if (st.over || !st.next || mineOk) return;
-    const sd = st.next.r >= 3, b = t.closest(".pz-b");
-    if (b) {   // se actualiza solo la zona de botones, igual que en el duelo semanal
-      const tt = b.dataset.t, z = +b.dataset.z, first = d.A === m2 ? "s" : "k", had = amSel[first] >= 0, hadBoth = amSel.s >= 0 && amSel.k >= 0;
-      amSel[tt] = z; penSnd("tap");
-      const both = amSel.s >= 0 && amSel.k >= 0, ac = box.querySelector(".pz-act");
-      if (ac) ac.outerHTML = penActHtml(d, m2, sd, { t: tt, z, r2: !had && amSel[first] >= 0, ok: !hadBoth && both }, amSel);
+    const sd = st.next.r >= 3, b = t.closest(".pz-b"), sel = amSelOf(x2.k, x2.k + "|" + st.next.r);
+    if (b) {   // se actualiza solo la zona de botones de ese duelo, igual que en el duelo semanal
+      const tt = b.dataset.t, z = +b.dataset.z, first = d.A === m2 ? "s" : "k", had = sel[first] >= 0, hadBoth = sel.s >= 0 && sel.k >= 0;
+      sel[tt] = z; penSnd("tap");
+      const both = sel.s >= 0 && sel.k >= 0, ac = card.querySelector(".pz-act");
+      if (ac) ac.outerHTML = penActHtml(d, m2, sd, { t: tt, z, r2: !had && sel[first] >= 0, ok: !hadBoth && both }, sel);
       return;
     }
-    if (t.closest(".pn-ok") && amSel.s >= 0 && amSel.k >= 0) { const s = amSel.s, kk = amSel.k; amSel = { key: "", s: -1, k: -1 }; penPut(d, s, kk); renderAm(); }
+    if (t.closest(".pn-ok") && sel.s >= 0 && sel.k >= 0) { const s1 = sel.s, kk = sel.k; delete amSels[x2.k]; penPut(d, s1, kk); renderAm(); }
   };
   const els = amNoNew ? [...box.querySelectorAll("[data-amn].nw")] : [];
   if (els.length && !amUnseen) seenWatch("penal_am", els, amMark); else seenWatch("penal_am", [], () => {});
-  if (A.act && A.act.seen < A.act.done && box.offsetParent !== null && pzOpen.has("a" + A.act.k)) amReplay(box, A.act);
+  const rp = A.acts.find(x => x.seen < x.done && pzOpen.has("a" + x.k));   // las tandas por ver se reproducen de una en una; al acabar una arranca la siguiente
+  if (rp && box.offsetParent !== null) amReplay(box, rp);
 }
 function amAnswer(k, yes) {   // aceptar (se crea mi ficha y empieza la tanda) o rechazar (mi ficha lleva x: 1)
   const m = meP(); if (!m || !synced || !S.players.includes(m)) return;
-  const A = amState(m), x = A.inc.find(y => y.k === k); if (!x || (yes && A.act)) return;
+  const A = amState(m), x = A.inc.find(y => y.k === k); if (!x || (yes && A.slots >= AM_MAX)) return;
   m.pen = m.pen || {}; m.pen[k] = yes ? { o: x.rival.id, f: 0, s: [], k: [] } : { o: x.rival.id, f: 0, s: [], k: [], x: 1 };
   save(); avSet(amTokKey(m), amState(m).tok); amNew = false; penSnd(yes ? "whistle" : "tap");
   renderAm(); renderPen(); try { renderHistorial(); } catch (e) {}
@@ -8371,14 +8380,14 @@ function penRetoBtn(q) {
   const { A, x } = r;
   if (x && x.s === "out") return '<button type="button" class="pf-pen dis" disabled>⏳ Reto enviado</button>';
   if (x) return `<button type="button" class="pf-pen" data-penreto="${q.id}">⚽ ${x.s === "in" ? "Ver su reto" : "Tanda en curso"}</button>`;
-  if (A.outN >= AM_MAX_OUT) return '<button type="button" class="pf-pen dis" disabled>Retos pendientes: ' + AM_MAX_OUT + "</button>";
+  if (A.slots >= AM_MAX) return '<button type="button" class="pf-pen dis" disabled>Máx. ' + AM_MAX + " a la vez</button>";
   return `<button type="button" class="pf-pen" data-penreto="${q.id}">⚽ Jugar penaltis</button>`;
 }
 function amReto(id) {   // botón del perfil: envía la solicitud (o lleva a Inicio si ya hay un reto con esa persona)
   const q = pById(id), r = penRetoState(q); if (!r) return;
   const m = meP(), { A, x } = r;
   if (x) { viewId = null; go("jugar"); setTimeout(() => { const t = $("#penAmBox"); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); }, 120); return; }
-  if (A.outN >= AM_MAX_OUT) { toast("Ya tienes " + AM_MAX_OUT + " retos pendientes"); return; }
+  if (A.slots >= AM_MAX) { toast("Ya tienes " + AM_MAX + " amistosos a la vez (en curso o enviados)"); return; }
   const k = "a" + Date.now().toString(36); m.pen = m.pen || {}; m.pen[k] = { o: q.id, f: 1, s: [], k: [] };
   save(); penSnd("tap"); toast("Reto enviado a " + q.name);
   try { renderHistorial(); } catch (e) {} renderAm();
