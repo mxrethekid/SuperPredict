@@ -2488,7 +2488,7 @@ html,body{overscroll-behavior-y:none}
   <h2>¿Qué es Súper Predict?</h2>
   <div class="card ih">
     <div class="ey">👁️</div>
-    <p>Un juego de predicciones de las <b>5 grandes ligas europeas</b>. Cada temporada demuestras lo que sabes de fútbol y compites en una liga de <b>20 jugadores</b> por premios económicos.</p>
+    <p>Un juego de predicciones de las <b>5 grandes ligas europeas</b>. Cada temporada demuestras lo que sabes de fútbol y compites en una liga entre <b>amigos</b> por premios económicos.</p>
     <div class="lgc"><span>LaLiga</span><span>Premier League</span><span>Bundesliga</span><span>Serie A</span><span>Ligue 1</span></div>
   </div>
   <h2 style="margin-top:26px">¿Cómo funciona?</h2>
@@ -2525,33 +2525,7 @@ html,body{overscroll-behavior-y:none}
     <div class="eu uecl" style="--c:var(--uecl)"><span class="m rg">7º–8º</span><span class="t"><b>Conference League</b></span></div>
   </div>
   <h2 style="margin-top:26px">Bote y premios</h2>
-  <div class="card bote">
-    <div class="tr">🏆</div>
-    <b>100,00 €</b>
-    <span class="lb">Bote total de la temporada</span>
-    <div class="ch"><span>75 € por posición</span><span>25 € por Europa</span></div>
-  </div>
-  <div class="card">
-    <div class="ph"><h3>Super Predict League</h3><span class="tt">75,00 €</span></div>
-    <div class="pod">
-      <div class="pd p2"><i>🥈</i><em>2º</em><b>15,50 €</b></div>
-      <div class="pd p1"><i>🥇</i><em>1º</em><b>28,00 €</b><small>Líder absoluto</small></div>
-      <div class="pd p3"><i>🥉</i><em>3º</em><b>10,00 €</b></div>
-    </div>
-    <ul class="rk">
-      <li><span class="n">4º</span><span class="br"><i style="width:75%"></i></span><span class="e">7,50 €</span></li>
-      <li><span class="n">5º</span><span class="br"><i style="width:50%"></i></span><span class="e">5,00 €</span></li>
-      <li><span class="n">6º</span><span class="br"><i style="width:40%"></i></span><span class="e">4,00 €</span></li>
-      <li><span class="n">7º</span><span class="br"><i style="width:30%"></i></span><span class="e">3,00 €</span></li>
-      <li><span class="n">8º</span><span class="br"><i style="width:20%"></i></span><span class="e">2,00 €</span></li>
-    </ul>
-  </div>
-  <div class="card">
-    <div class="ph"><h3>Competiciones europeas</h3><span class="tt">25,00 €</span></div>
-    <div class="eu ucl pz" style="--c:var(--ucl);margin-top:0"><span class="m">🥇</span><span class="t"><b>Champions League</b><small>Ganador</small></span><span class="e">12,50 €</span></div>
-    <div class="eu uel pz" style="--c:var(--uel)"><span class="m">🥈</span><span class="t"><b>Europa League</b><small>Ganador</small></span><span class="e">7,50 €</span></div>
-    <div class="eu uecl pz" style="--c:var(--uecl)"><span class="m">🥉</span><span class="t"><b>Conference League</b><small>Ganador</small></span><span class="e">5,00 €</span></div>
-  </div>
+  <div class="prm-info"></div>
 
   <h2 style="margin-top:26px">Sobres y álbum</h2>
   <div class="card ih">
@@ -3497,12 +3471,12 @@ function mountCups() {
 }
 let euroSel = null;   // competición cuyo cuadro se está viendo en la pestaña Clasificación (null = ninguna)
 let ligaOpen = false;   // fin de temporada: la tabla de la liga va plegada tras un botón
-const EU_PREMIO = { champions: 12.5, europa: 7.5, conference: 5 };
+
 function premiosTemporada() {
   const L = standings(), res = {}, pos = {};
   const add = (id, o) => { const r = res[id] || (res[id] = { id, it: [], tot: 0 }); r.it.push(o); r.tot += o.v; };
-  L.forEach((q, i) => { pos[q.id] = i; if (i < PREMIOS_LIGA.length) add(q.id, { k: "spl", n: "Posición en Liga", r: (i + 1) + "º", v: PREMIOS_LIGA[i] }); });
-  Object.keys(CUP_ID).forEach(c => { const fin = eMatch(c, "final"); if (!fin || !fin.result) return; const w = eWinner(fin); if (w) add(w, { k: CUP_ID[c], n: COMPS[c].nombre, r: "Ganador", v: EU_PREMIO[c] }); });
+  L.forEach((q, i) => { pos[q.id] = i; if (i < premLiga().length) add(q.id, { k: "spl", n: "Posición en Liga", r: (i + 1) + "º", v: premLiga()[i] }); });
+  Object.keys(CUP_ID).forEach(c => { const fin = eMatch(c, "final"); if (!fin || !fin.result) return; const w = eWinner(fin); if (w) add(w, { k: CUP_ID[c], n: COMPS[c].nombre, r: "Ganador", v: premEu()[c] }); });
   return Object.values(res).sort((a, b) => b.tot - a.tot || (pos[a.id] ?? 99) - (pos[b.id] ?? 99));
 }
 const euroDone = () => Object.keys(CUP_ID).every(c => { const f = eMatch(c, "final"); return !!(f && f.result && eWinner(f)); });   // las tres finales europeas ya tienen campeón
@@ -4155,6 +4129,7 @@ function renderCuenta() {
         if (arch) return fail("Ese usuario pertenece a un jugador archivado. Si eres tú, pide al administrador que te reactive.");
         if (/\p{Extended_Pictographic}|\p{Regional_Indicator}|[\u{1F3FB}-\u{1F3FF}\u200D\uFE0F\u20E3]/u.test(name)) return fail("El usuario no puede llevar emojis.");   // solo en registros nuevos: quien ya tenga uno puede seguir entrando
         if (Array.from(name).length > 10) return fail("El usuario puede tener 10 caracteres como máximo.");
+        if (goCfg()) return fail("Las inscripciones están cerradas: la temporada ya ha empezado.");
         if (S.players.length >= MAX_PLAYERS) return fail("La liga está completa (20 jugadores).");
       }
       const nm = found ? found.name : name, ph = await hashPin(nm, pin), pe = await encPin(pin);
@@ -5422,7 +5397,7 @@ function renderEquipo() {
     if (pend && p === pend) {   // registro a medias: se guarda ahora, con el escudo elegido
       if (!(await pull(true))) { toast("No hay conexión con el servidor. Inténtalo de nuevo."); return; }
       const dup = S.players.find(x => x.name.toLowerCase() === pend.name.toLowerCase());
-      if ((dup && dup.pin) || (!dup && S.players.length >= MAX_PLAYERS)) { setMe(""); go("cuenta"); toast("No se pudo completar el registro. Inténtalo de nuevo."); return; }
+      if ((dup && dup.pin) || (!dup && (S.players.length >= MAX_PLAYERS || goCfg()))) { setMe(""); go("cuenta"); toast("No se pudo completar el registro. Inténtalo de nuevo."); return; }
       if (S.players.some(x => x.team === pick)) { pick = ""; renderEquipo(); return; }
       const real = dup || { id: uid(), name: pend.name };
       if (!dup) S.players.push(real);
@@ -6789,7 +6764,7 @@ async function nuevaTemporada() {
   try { bkDescargar(`super-predict-temporada-${n}.json`, S); } catch (e) {}   // y otra copia en este dispositivo
   if (played) standings().forEach((q, i) => { const pl = S.players.find(x => x.id === q.id); if (pl) pl.hist = [...(Array.isArray(pl.hist) ? pl.hist : []), { t: n, pos: i + 1, pt: q.pt }]; });
   S.players.forEach(p => { if (p.paid) p.paid = false; delete p.vis; });
-  S.matches = []; { const mk = S.preds[MKEY]; S.preds = mk ? { [MKEY]: mk } : {}; }   // nueva temporada: sin partidos ni predicciones (el aviso de mantenimiento se conserva)
+  S.matches = []; { const mk = S.preds[MKEY]; if (mk) delete mk.go; S.preds = mk ? { [MKEY]: mk } : {}; }   // nueva temporada: sin partidos ni predicciones (el aviso de mantenimiento se conserva)
   save();
   AD.view = null; AD.round = null; AD.open = false; AD.res = null; AD.det = null; tv = null; hv = null;
   AD.msg = `Temporada ${n + 1} creada. Clasificación a cero y sin jornadas.`; AD.cls = "ok";
@@ -6857,7 +6832,7 @@ function adJornada(el) {
     ${sched.length ? `<h3 class="ads">🟡 Programadas (futuras)</h3>${secSch}` : ""}
     ${fin.length ? `<button type="button" class="ads ads-tg" id="togFin" aria-expanded="${AD.fin}" aria-controls="finBox"><span>📁 Jornadas finalizadas (${fin.length})</span><span aria-hidden="true">${AD.fin ? "▴" : "▾"}</span></button><div id="finBox"${AD.fin ? "" : " hidden"}>${secFin}</div>` : ""}
     ${rs.length ? "" : `<p class="muted" style="text-align:center;margin-top:18px">Aún no hay jornadas. Crea la primera con el botón de arriba.</p>`}
-    ${votAdminHtml()}${bdoAdminHtml()}<div class="card" style="margin-top:22px"><h3>Temporada ${temporada()}</h3>
+    ${goAdminHtml()}${votAdminHtml()}${bdoAdminHtml()}<div class="card" style="margin-top:22px"><h3>Temporada ${temporada()}</h3>
       <p class="muted">Cuando acabe la temporada, empieza una nueva: jornadas y clasificación a cero, y se conservan participantes y trofeos.</p>
       <button class="btn del" id="newSeason" style="width:100%">${simOn() ? "Quitar simulación (nueva temporada)" : "Nueva temporada"}</button>
       <label for="seasonN">Número de temporada actual</label>
@@ -6874,6 +6849,7 @@ function adJornada(el) {
 
   $("#newSeason").onclick = nuevaTemporada;
   cdAdminBind();
+  goAdminBind();
   finAdminBind();
   if ($("#votTst")) $("#votTst").onclick = votPrueba;
   if ($("#bdoTst")) $("#bdoTst").onclick = () => { BDO_TEST = BDO_TEST ? null : { v: null }; const b = document.getElementById("bdoBox"); if (b && !BDO_TEST) b.remove(); AD.msg = BDO_TEST ? "Prueba del Balón de Oro activada: ve a Inicio. Solo la ves tú." : "Prueba quitada."; AD.cls = "ok"; render(); };
@@ -7870,7 +7846,7 @@ function penOfKey(p, k) {   // duelo guardado de un jugador en una semana (null 
 // (método del círculo): 19 semanas, cada una con un rival distinto, y al terminar se han enfrentado todos contra todos.
 // Solo hay duelo en las semanas con partido de liga (la jornada cuyo primer partido cae esa semana) y el rival lo marca el número de jornada:
 // jornadas 1-19 = 19 rivales distintos, y la jornada 20 no tiene rival nuevo: repite el duelo de la jornada 1.
-const penFull = () => S.players.length >= MAX_PLAYERS;
+const penFull = () => !!goCfg() || S.players.length >= MAX_PLAYERS;
 function penRoundOf(w) {   // jornada del duelo de la semana w: la jornada de liga cuyo primer partido cae en esa semana (la más baja si hay varias); null si no hay partido esa semana
   const first = {};
   leagueMs().forEach(m => { const t = Date.parse(m.kickoff); if (!Number.isFinite(t) || !(+m.round >= 1)) return; if (!(m.round in first) || t < first[m.round]) first[m.round] = t; });
@@ -8812,7 +8788,54 @@ let h2hOpen = null;   // id del rival con el que se está comparando
 function h2hBtnHtml(a, b) { return `<button type="button" class="btn ghost" id="h2hBtn" style="width:100%;margin:14px 0">${h2hOpen === b.id ? "Ocultar cara a cara" : "Cara a cara"}</button>`; }
 
 // ===== Resumen de temporada (wrapped): sale al cerrarse la jornada final de la liga =====
-const PREMIOS_LIGA = [28, 15.5, 10, 7.5, 5, 4, 3, 2];
+// ===== Premios según participantes + botón «Comenzar» =====
+// go = { t, n }: lo fija el admin (S.preds[MKEY].go). Cierra inscripciones, fija n jugadores (bote = n × cuota) y arranca los duelos de penaltis.
+const goCfg = () => { const m = S.preds[MKEY], g = m && m.go; return g && g.t > 0 ? g : null; };
+const premN = () => { const g = goCfg(); return Math.max(8, g ? g.n : S.players.filter(p => p.regAt).length); };
+function premCalc() {   // reparto 75 % liga / 25 % Europa, redondeado a 0,50 €, los 8 primeros siempre cobran y todos distintos
+  const n = premN(), bote = n * (parseFloat(CONFIG.cuota) || 0), W = [28, 15.5, 10, 7.5, 5, 4, 3, 2], r5 = x => Math.round(x * 2) / 2, liga = bote * .75, eu = bote * .25;
+  const L = W.map(w => Math.max(.5, r5(liga * w / 75)));
+  for (let i = 6; i >= 0; i--) if (L[i] <= L[i + 1]) L[i] = L[i + 1] + .5;
+  L[0] += r5(liga) - L.reduce((a, b) => a + b, 0);
+  const E = [.5, .3, .2].map(w => Math.max(.5, r5(eu * w)));
+  E[0] += r5(eu) - E.reduce((a, b) => a + b, 0);
+  return { n, bote, liga: L, ligaT: r5(liga), eu: { champions: E[0], europa: E[1], conference: E[2] }, euT: r5(eu) };
+}
+const premLiga = () => premCalc().liga, premEu = () => premCalc().eu;
+function premInfoHtml() {
+  const P = premCalc(), e = eur, L = P.liga, X = P.eu;
+  return `<div class="card bote"><div class="tr">🏆</div><b>${e(P.bote)}</b><span class="lb">Bote total de la temporada</span><div class="ch"><span>${e(P.ligaT)} por posición</span><span>${e(P.euT)} por Europa</span></div></div>
+  <div class="card"><div class="ph"><h3>Super Predict League</h3><span class="tt">${e(P.ligaT)}</span></div><div class="pod"><div class="pd p2"><i>🥈</i><em>2º</em><b>${e(L[1])}</b></div><div class="pd p1"><i>🥇</i><em>1º</em><b>${e(L[0])}</b><small>Líder absoluto</small></div><div class="pd p3"><i>🥉</i><em>3º</em><b>${e(L[2])}</b></div></div>
+  <ul class="rk">${[3, 4, 5, 6, 7].map(i => `<li><span class="n">${i + 1}º</span><span class="br"><i style="width:${Math.round(L[i] / L[3] * 75)}%"></i></span><span class="e">${e(L[i])}</span></li>`).join("")}</ul></div>
+  <div class="card"><div class="ph"><h3>Competiciones europeas</h3><span class="tt">${e(P.euT)}</span></div>
+  <div class="eu ucl pz" style="--c:var(--ucl);margin-top:0"><span class="m">🥇</span><span class="t"><b>Champions League</b><small>Ganador</small></span><span class="e">${e(X.champions)}</span></div>
+  <div class="eu uel pz" style="--c:var(--uel)"><span class="m">🥈</span><span class="t"><b>Europa League</b><small>Ganador</small></span><span class="e">${e(X.europa)}</span></div>
+  <div class="eu uecl pz" style="--c:var(--uecl)"><span class="m">🥉</span><span class="t"><b>Conference League</b><small>Ganador</small></span><span class="e">${e(X.conference)}</span></div></div>`;
+}
+function premInfo() { const h = premInfoHtml(); document.querySelectorAll(".prm-info").forEach(el => { if (el._h !== h) { el._h = h; el.innerHTML = h; } }); }
+function goAdminHtml() {
+  const g = goCfg(), reg = S.players.filter(p => p.regAt).length, P = premCalc();
+  const st = g ? `<b>Temporada en marcha</b> desde el ${esc(cdDate(g.t))} con ${g.n} jugadores. Inscripciones cerradas y duelos de penaltis activos. Bote: ${eur(P.bote)}.` : `Inscripciones abiertas: ${reg} jugador${reg === 1 ? "" : "es"}. Bote previsto: ${eur(P.bote)} (${P.n} × ${esc(CONFIG.cuota)}).`;
+  return `<div class="card" style="margin-top:22px${g ? ";border-color:#2fd37a" : ""}"><h3>🚀 Comenzar temporada</h3><p class="muted">Cierra las inscripciones (nadie nuevo puede registrarse), fija el número de jugadores para calcular el bote y los premios, y arranca los duelos de penaltis semanales.</p><p class="muted">${st}</p>${g ? '<button class="btn del" id="goOff" style="width:100%">Reabrir inscripciones</button>' : '<button class="btn" id="goOn" style="width:100%">Comenzar</button>'}</div>`;
+}
+function goAdminBind() {
+  const fail = t => { AD.msg = t; AD.cls = "err"; renderAdmin(); };
+  if ($("#goOn")) $("#goOn").onclick = async () => {
+    const n = S.players.length, sin = S.players.filter(p => !p.regAt);
+    if (sin.length) return fail("Hay jugadores sin terminar el registro: " + sin.map(p => p.name).join(", ") + ". Espera a que entren o elimínalos.");
+    if (n < 8) return fail("Hacen falta al menos 8 jugadores (ahora hay " + n + ").");
+    if (n % 2) return fail("Hace falta un número par de jugadores para los duelos (ahora hay " + n + ").");
+    if (!(await ask(`¿Comenzar con ${n} jugadores? Bote de ${eur(n * (parseFloat(CONFIG.cuota) || 0))}. Se cierran las inscripciones y empiezan los duelos de penaltis.`, "Comenzar"))) return;
+    (S.preds[MKEY] = S.preds[MKEY] || {}).go = { t: Date.now(), n };
+    save(); AD.msg = `Temporada comenzada con ${n} jugadores. Inscripciones cerradas.`; AD.cls = "ok"; render();
+  };
+  if ($("#goOff")) $("#goOff").onclick = async () => {
+    if (!(await ask("¿Reabrir las inscripciones? Los duelos ya sorteados se conservan, pero si entra gente nueva el calendario de penaltis no se rehace.", "Reabrir"))) return;
+    const m = S.preds[MKEY]; if (m) { delete m.go; if (!Object.keys(m).length) delete S.preds[MKEY]; }
+    save(); AD.msg = "Inscripciones reabiertas."; AD.cls = "ok"; render();
+  };
+}
+
 const eur = v => v.toFixed(2).replace(".", ",") + " €";
 function runStories(title, stages, done) {
   const reduce = reduceMotion, ov = document.createElement("div"); ov.className = "rv-ov rr-ov" + (reduce ? " rd" : "");
@@ -8862,7 +8885,7 @@ function openWrapped(p, done) {
   const cup = (() => { try { return trofeoSvg(TROFEOS.find(t => t.id === "spl"), true); } catch (e) { return ""; } })();
   const sg = v => v > 0 ? "+" + v : "" + v, mt = o => `Jornada ${o.r}<br>${esc(o.m.home)} ${o.m.result.h} - ${o.m.result.a} ${esc(o.m.away)}`;
   const jr = (lab, ico, ac, o) => ({ ac, d: 4800, html: `<div class="rv-ico">${ico}</div><div class="rv-lab">${lab}</div><div class="rv-big">${sg(o.tot)}<small>${Math.abs(o.tot) === 1 ? "punto" : "puntos"}</small></div><div class="rv-sub">${mt(o)}</div>` });
-  const prize = PREMIOS_LIGA[ix];
+  const prize = premLiga()[ix];
   // --- Primera diapositiva: campeón (copa) · clasificado a Europa (con el fondo de la competición) · puesto sin competición ---
   const ZV = { champions: { z: "z-ucl", t: "ucl", ac: "#9a6cff" }, europa: { z: "z-uel", t: "uel", ac: "#ff9d2e" }, conference: { z: "z-uecl", t: "uecl", ac: "#34d56b" } };
   const zk = ix < 4 ? "champions" : ix < 6 ? "europa" : ix < 8 ? "conference" : null;
@@ -9162,7 +9185,7 @@ async function adAvisos(el) {
   } catch (e) {}
 }
 
-function render() { applyMaint(); renderEquipo(); if (pend) return; autoTrofeos(); renderCuenta(); renderJugar(); renderEuroPlay(); renderTabla(); renderEuro(); renderHistorial(); renderEuroHist(); renderSobres(); checkRound(); checkCoins(); renderLogros(); renderAvisos(); renderAdmin(); }
+function render() { applyMaint(); try { premInfo(); } catch (e) { console.error(e); } renderEquipo(); if (pend) return; autoTrofeos(); renderCuenta(); renderJugar(); renderEuroPlay(); renderTabla(); renderEuro(); renderHistorial(); renderEuroHist(); renderSobres(); checkRound(); checkCoins(); renderLogros(); renderAvisos(); renderAdmin(); }
 setMe(me);
 go(meP() ? "jugar" : "cuenta");
 // Sin zoom en móvil: iOS Safari ignora user-scalable=no, así que se bloquean también los gestos de pellizco (el doble toque ya lo evita touch-action)
